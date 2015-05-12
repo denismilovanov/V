@@ -1,4 +1,6 @@
 /lumen.log
 /vendor
 .env
+.env.test
+.env.production
 /photos

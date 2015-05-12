@@ -1,0 +1,93 @@
+/* 
+	start context styles 
+	media and other
+*/
+
+/* Large desktop */
+
+@media (max-width: 1180px) {
+
+	.big.to-right{
+		float: right;
+	}
+
+}
+
+
+@media (max-width: 1150px) {
+	
+	.target .item {
+		height: 540px;
+		padding: 25px 40px;
+	}
+
+	.target .item h2 {
+		font-size: 34px;
+	}
+
+	.target .item p {
+		font-size: 16px;
+		line-height: 22px;
+	}
+
+}
+
+
+@media (max-width: 1070px) {
+	
+	.big{
+		text-align: center;
+		width: 100%;
+		padding-top: 0!important;
+		padding-bottom: 40px!important;
+	}
+}
+
+
+
+
+@media (max-width: 900px) {
+	
+	.target .item {
+		width: 100%;
+		height: 540px;
+		padding: 25px 40px;
+	}
+
+	.target .item h2 {
+		font-size: 34px;
+	}
+
+	.target .item p {
+		font-size: 16px;
+		line-height: 22px;
+	}
+
+
+	.fitches{
+		h2{
+			text-align: center;
+			width: 100%;
+			padding-top: 0;
+			padding-bottom: 40px;
+		}
+		img{
+			margin: 0 auto!important;
+			display: block;
+			float: none;
+			width: 90%;
+		}
+	}
+}
+
+@media (max-width: 770px) {
+
+	footer{
+		a,p{
+			display: block;
+			width: 100%;
+			text-align: center;
+			margin: 15px 0;
+		}
+	}
+}

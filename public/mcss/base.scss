@@ -1,0 +1,100 @@
+/* start the base fraimwork styles. Can include base construction - forms/buttins/navigation and other */
+
+/* main fraimwork start here */
+.inbox{
+	box-sizing: border-box;
+}
+.to-left{ float: left }
+.to-right{ float: right }
+.inline{
+    display: inline-block;
+    *display: inline;
+    vertical-align: top;
+    zoom: 1; 
+}
+.clear{
+	content: " ";
+    display: block;
+    height: 0;
+    clear: both;
+    overflow: hidden;
+    visibility: hidden;
+}
+.clearfix:after{ @extend .clear; }
+
+/* basic typography */
+@font-face {
+    font-family: Arsenal;
+    src: url(fonts/Arsenal.otf);
+}
+body{
+    font-family: Arsenal, sans-serif;
+}
+h1{
+    
+}
+h2{
+    
+}
+h3{
+
+}
+h4{
+
+}
+h5{
+
+}
+h6{
+
+}
+p,li{
+    
+}
+strong, b{
+    font-weight: 800;
+}
+a{
+
+	&:hover{
+       
+	}
+}
+ul{
+    li{
+        
+    }
+}
+
+/* form style input and other */
+
+form{
+    input[type='text']{
+       
+        &:focus{
+           
+        }
+    }
+    input::-webkit-input-placeholder{
+       
+    }
+    input::-moz-placeholde{
+        
+    }
+}
+
+/* btn styles */
+.btn{
+    display: inline-block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    line-height: 45px;
+    text-align: center;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    outline: none;
+    border: 0;
+}
+
