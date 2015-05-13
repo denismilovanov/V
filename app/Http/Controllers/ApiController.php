@@ -70,14 +70,11 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
-        $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url])[0];
+        $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url);
 
-        $sql = "SELECT public.get_access_key(?, ?, ?, ?);";
-        $key = \DB::select($sql, [$user->user_id, $device_token, $device_type, $soft_version_int])[0]->get_access_key;
+        $key = Users::getAccessKey($user->user_id, $device_token, $device_type, $soft_version_int);
 
-        $sql = "SELECT * FROM public.get_latest_soft_version(?) AS t(version integer, description text);";
-        $soft = \DB::select($sql, [$device_type])[0];
+        $soft = Users::getLatestSoftVersion($device_type);
 
         $data['status'] = self::SUCCESS;
         $data['key'] = $key;
@@ -158,14 +155,18 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $latitude = \Request::get('latitude');
-        $longitude = \Request::get('longitude');
+        $latitude = floatval(\Request::get('latitude'));
+        $longitude = floatval(\Request::get('longitude'));
 
-        $result = Checkins::checkin(
-            self::$user->id,
-            floatval($longitude),
-            floatval($latitude)
-        );
+        if (! $latitude or ! $longitude or abs($latitude) > 90 or abs($longitude) > 90) {
+            $result = false;
+        } else {
+            $result = Checkins::checkin(
+                self::$user->id,
+                floatval($longitude),
+                floatval($latitude)
+            );
+        }
 
         return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
@@ -216,10 +217,8 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $data = [];
-
         $data['status'] = self::SUCCESS;
-        $data['users'] = array();
+        $data['users'] = Users::searchAround(self::$user->id);
 
         return response()->json($data);
     }
@@ -328,36 +327,15 @@ class ApiController extends BaseController {
 
         $user_id = \Request::get('user_id');
 
-        $profile = \DB::select("
-            SELECT * FROM public.get_user_profile(?, ?);
-        ", [$user_id, self::$user->id]);
+        $profile = Users::getProfile($user_id, self::$user->id);
 
-        if (! isset($profile[0])) {
+        if (! $profile) {
             return response()->json([
                 'status' => APIController::ERROR,
             ]);
         }
 
-        $profile = $profile[0];
-
-        $photos_url = env('PHOTOS_URL');
-
-        $photos_raw = \DB::select("
-            SELECT * FROM public.get_user_photos(?);
-        ", [$user_id]);
-
-        $photos = array();
-
-        foreach ($photos_raw as $photo) {
-            if ($photo->source_id == 0) {
-                $photo->url = $photos_url . $photo->url;
-            }
-            $photos []= array(
-                'id' => $photo->id,
-                'url' => $photo->url,
-                'rank' => $photo->rank,
-            );
-        }
+        $photos = UsersPhotos::getUserPhotos($user_id);
 
         return response()->json([
             'status' => self::SUCCESS,

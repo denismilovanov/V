@@ -1,12 +1,27 @@
 <?php namespace App\Models;
 
 use App\Models\PushQueue;
+use App\Models\UsersMatches;
 
 class Users
 {
-    /*
-     *
-     */
+    public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url) {
+        $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
+        $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url])[0];
+        return $user;
+    }
+
+    public static function getAccessKey($user_id, $device_token, $device_type, $soft_version_int) {
+        $sql = "SELECT public.get_access_key(?, ?, ?, ?);";
+        $key = \DB::select($sql, [$user_id, $device_token, $device_type, $soft_version_int])[0]->get_access_key;
+        return $key;
+    }
+
+    public static function getLatestSoftVersion($device_type) {
+        $sql = "SELECT * FROM public.get_latest_soft_version(?) AS t(version integer, description text);";
+        $soft = \DB::select($sql, [$device_type])[0];
+        return $soft;
+    }
 
     public static function syncGroupsVK($user_id, $groups) {
         if(function_exists('pinba_timer_start')){
@@ -137,6 +152,38 @@ class Users
         ", [$user_id, $key])) > 0;
     }
 
+    public static function getMySettings($user_id) {
+        $user_settings = \DB::select("
+            SELECT *
+                FROM public.users_settings
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        return $user_settings ? $user_settings[0] : null;
+    }
+
+    public static function getMyCheckin($user_id) {
+        $user_checkin = \DB::select("
+            SELECT latitude, longitude
+                FROM public.checkins
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        return $user_checkin ? $user_checkin[0] : null;
+    }
+
+    public static function getProfile($user_id, $viewer_id) {
+        $profile = \DB::select("
+            SELECT * FROM public.get_user_profile(?, ?);
+        ", [$user_id, $viewer_id]);
+
+        if (! $profile or ! isset($profile[0])) {
+            return null;
+        }
+
+        return $profile[0];
+    }
+
     public static function findById($user_id) {
         $user = \DB::select("
             SELECT *
@@ -144,7 +191,11 @@ class Users
                 WHERE id = ?;
         ", [$user_id]);
 
-        return $user ? $user[0] : null;
+        if (! $user or ! isset($user[0])) {
+            return null;
+        }
+
+        return $user[0];
     }
 
     public static function findByIds($users_ids) {
@@ -165,5 +216,30 @@ class Users
         }
 
         return $result;
+    }
+
+    public static function getMaxId() {
+        return \DB::select("SELECT max(id) AS max FROM public.users;")[0]->max;
+    }
+
+    public static function searchAround($me_id) {
+        //\Queue::connection('rabbitmq')->push('job', '{id:' . mt_rand() . '}', 'matches');
+
+        $users = UsersMatches::getMatches($me_id);
+
+        $users_ids = [];
+
+        foreach ($users as $user) {
+            $users_ids []= $user->user_id;
+        }
+
+        $users_all = self::findByIds($users_ids);
+
+        foreach ($users as $user) {
+            $user->name = $users_all[$user->user_id]->name;
+            $user->avatar_url = $users_all[$user->user_id]->avatar_url;
+        }
+
+        return $users;
     }
 }

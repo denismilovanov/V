@@ -3,6 +3,8 @@
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
 
+use App\Console\Commands\PushLikesCommand;
+
 class Kernel extends ConsoleKernel
 {
 
@@ -13,6 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
+        'App\Console\Commands\PushLikesCommand',
+        'App\Console\Commands\MaintainMatchesCommand',
     ];
 
     /**

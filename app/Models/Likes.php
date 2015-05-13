@@ -30,6 +30,8 @@ class Likes {
             }
         }
 
+        UsersMatches::deleteMatch($from_user_id, $to_user_id);
+
         return [
             'mutual' => $mutual,
         ];

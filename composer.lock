@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f4bffe4283258a89be31f0c0d008f3cc",
+    "hash": "16fed05cf1f854e7de4f198042d63a33",
     "packages": [
         {
             "name": "danielstjules/stringy",
@@ -128,6 +128,83 @@
                 "string"
             ],
             "time": "2014-12-20 21:24:13"
+        },
+        {
+            "name": "duccio/apns-php",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/immobiliare/ApnsPHP.git",
+                "reference": "44220af919b34f405e33c8ccca4fc1f60f178713"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/immobiliare/ApnsPHP/zipball/44220af919b34f405e33c8ccca4fc1f60f178713",
+                "reference": "44220af919b34f405e33c8ccca4fc1f60f178713",
+                "shasum": ""
+            },
+            "require": {
+                "lib-openssl": "*",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "ApnsPHP/Autoload.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Apple Push Notification & Feedback Provider",
+            "homepage": "https://github.com/immobiliare/ApnsPHP",
+            "keywords": [
+                "apns",
+                "apple",
+                "notification",
+                "push"
+            ],
+            "time": "2015-05-13 10:34:55"
+        },
+        {
+            "name": "fintech-fab/laravel-queue-rabbitmq",
+            "version": "5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fintech-fab/laravel-queue-rabbitmq.git",
+                "reference": "5f919fbb1b62f905737c7a439a3c34fd65d18580"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fintech-fab/laravel-queue-rabbitmq/zipball/5f919fbb1b62f905737c7a439a3c34fd65d18580",
+                "reference": "5f919fbb1b62f905737c7a439a3c34fd65d18580",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/queue": "5.0.*",
+                "illuminate/support": "5.0.*",
+                "php": ">=5.4.0",
+                "videlalvaro/php-amqplib": "2.5.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "FintechFab\\LaravelQueueRabbitMQ": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "FINTECH_FAB",
+                    "email": "dev@fintech-fab.ru"
+                }
+            ],
+            "description": "RabbitMQ driver for Laravel Queue",
+            "time": "2015-05-07 09:25:45"
         },
         {
             "name": "illuminate/auth",
@@ -2230,6 +2307,60 @@
             "time": "2015-05-01 14:14:24"
         },
         {
+            "name": "videlalvaro/php-amqplib",
+            "version": "v2.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/videlalvaro/php-amqplib.git",
+                "reference": "7989ddce7c4aa6038483d8999b12d3b1f7c81ff9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/7989ddce7c4aa6038483d8999b12d3b1f7c81ff9",
+                "reference": "7989ddce7c4aa6038483d8999b12d3b1f7c81ff9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
+            },
+            "suggest": {
+                "ext-sockets": "Use AMQPSocketConnection"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "PhpAmqpLib": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1"
+            ],
+            "authors": [
+                {
+                    "name": "Alvaro Videla"
+                }
+            ],
+            "description": "This library is a pure PHP implementation of the AMQP protocol. It's been tested against RabbitMQ.",
+            "homepage": "https://github.com/videlalvaro/php-amqplib/",
+            "keywords": [
+                "message",
+                "queue",
+                "rabbitmq"
+            ],
+            "time": "2015-02-18 18:16:04"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v1.1.0",
             "source": {
@@ -3242,7 +3373,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "duccio/apns-php": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

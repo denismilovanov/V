@@ -28,6 +28,13 @@ $app = require __DIR__.'/bootstrap/app.php';
 |
 */
 
+define('APP_ENV', env('APP_ENV'));
+
+mb_internal_encoding("UTF-8");
+
+$logger = app('log');
+$logger->pushHandler(new Monolog\Handler\ErrorLogHandler());
+
 $kernel = $app->make(
     'Illuminate\Contracts\Console\Kernel'
 );

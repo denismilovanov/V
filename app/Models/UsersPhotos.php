@@ -69,18 +69,27 @@ class UsersPhotos {
         return $relativeUrl;
     }
 
-    /*
-     * Получение списка
-     */
+    public static function getUserPhotos($user_id) {
+        $photos_url = env('PHOTOS_URL');
 
-    public static function getAllByUserId($user_id)
-    {
-        return \DB::select("
-            SELECT url
-                FROM public.users_photos
-                WHERE user_id = ?
-                ORDER BY created_at
+        $photos_raw = \DB::select("
+            SELECT * FROM public.get_user_photos(?);
         ", [$user_id]);
+
+        $photos = array();
+
+        foreach ($photos_raw as $photo) {
+            if ($photo->source_id == 0) {
+                $photo->url = $photos_url . $photo->url;
+            }
+            $photos []= array(
+                'id' => $photo->id,
+                'url' => $photo->url,
+                'rank' => $photo->rank,
+            );
+        }
+
+        return $photos;
     }
 
 }
