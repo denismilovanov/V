@@ -11,4 +11,14 @@ class Abuses {
         ", [$from_user_id, $to_user_id]);
     }
 
+    public static function abuse($from_user_id, $to_user_id, $text) {
+        if (! Users::findById($to_user_id)) {
+            return false;
+        }
+
+        return \DB::select("
+            SELECT public.add_abuse(?, ?, ?);
+        ", [$from_user_id, $to_user_id, $text])[0]->add_abuse;
+    }
+
 }

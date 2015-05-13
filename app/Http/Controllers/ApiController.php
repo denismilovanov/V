@@ -6,11 +6,18 @@ use App\Models\UsersGroupsVk;
 use App\Models\UsersFiendsVk;
 use App\Models\UsersPhotos;
 use App\Models\Checkins;
+use App\Models\Likes;
+use App\Models\Messages;
+use App\Models\Abuses;
+use App\Models\Helper;
+
 
 class ApiController extends BaseController {
     const ERROR = 0;
     const SUCCESS = 1;
     const ERROR_KEY = 2;
+    const ERROR_DISLIKE = 7;
+
     private static $key = null;
     private static $user = null;
 
@@ -34,26 +41,11 @@ class ApiController extends BaseController {
 
         $user = \DB::select($sql, [$key]);
         if ($user) {
-          self::$user = $user[0];
-          return true;
+            self::$user = $user[0];
+            return true;
         }
 
         return false;
-    }
-
-    public static function softVersionFromStringToInt($string) {
-        $soft_version = explode(".", $string);
-        if (! isset($soft_version[0], $soft_version[1], $soft_version[2])) {
-            return false;
-        }
-        return $soft_version = $soft_version[0] . sprintf('%02d', $soft_version[1]) . sprintf('%02d', $soft_version[2]);
-    }
-
-    public static function softVersionFromIntToString($int) {
-        $minor2 = substr($int, -2, 2);
-        $minor1 = substr($int, -4, 2);
-        $major = substr($int, 0, -4);
-        return (int) $major . '.' . (int)$minor1 . '.' . (int)$minor2;
     }
 
     public function authorizeVK() {
@@ -71,7 +63,7 @@ class ApiController extends BaseController {
 
         $data = [];
 
-        $soft_version_int = self::softVersionFromStringToInt($soft_version);
+        $soft_version_int = Helper::softVersionFromStringToInt($soft_version);
 
         if (! $soft_version_int) {
             $data['status'] = self::ERROR;
@@ -92,7 +84,7 @@ class ApiController extends BaseController {
         $data['user_id'] = $user->user_id;
         $data['is_new'] = $user->is_new;
 
-        $data['latest_soft_version'] = self::softVersionFromIntToString($soft->version);
+        $data['latest_soft_version'] = Helper::softVersionFromIntToString($soft->version);
         $data['latest_soft_description'] = $soft->description;
 
         return response()->json($data);
@@ -241,11 +233,11 @@ class ApiController extends BaseController {
         $user_id = \Request::get('user_id');
         $is_like = \Request::get('is_like');
 
-        $result = Users::like(self::$user->id, $user_id, $is_like);
+        $result = Likes::like(self::$user->id, $user_id, $is_like);
 
         return response()->json([
-            'status' => self::SUCCESS,
-            'mutual' => $result['mutual'],
+            'status' => $result ? self::SUCCESS : self::ERROR,
+            'mutual' => $result ? $result['mutual'] : 0,
         ]);
     }
 
@@ -258,7 +250,7 @@ class ApiController extends BaseController {
         $user_id = \Request::get('user_id');
         $text = \Request::get('text');
 
-        $abuse_id = Users::abuse(self::$user->id, $user_id, $text);
+        $abuse_id = Abuses::abuse(self::$user->id, $user_id, $text);
 
         return response()->json([
             'status' => $abuse_id ? self::SUCCESS : self::ERROR,
@@ -275,7 +267,7 @@ class ApiController extends BaseController {
         $user_id = \Request::get('user_id');
         $reason = intval(\Request::get('reason'));
 
-        $result = Users::blockUser(self::$user->id, $user_id, $reason);
+        $result = Likes::blockUser(self::$user->id, $user_id, $reason);
 
         return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
@@ -320,7 +312,7 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $messages = Users::getMessages(self::$user->id);
+        $messages = Messages::getMessages(self::$user->id);
 
         return response()->json([
             'status' => self::SUCCESS,
@@ -379,6 +371,48 @@ class ApiController extends BaseController {
             'weight' => $profile->weight,
             'is_deleted' => $profile->is_deleted,
             'photos' => $photos,
+        ]);
+    }
+
+    public function sendMessageToUser() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $user_id = \Request::get('user_id');
+        $text = \Request::get('text');
+
+        if (! Likes::isMutual(self::$user->id, $user_id)) {
+            return response()->json([
+                'status' => self::ERROR_DISLIKE,
+            ]);
+        }
+
+        $message_id = Messages::addMessage(self::$user->id, $user_id, $text);
+
+        return response()->json([
+            'status' => $message_id ? self::SUCCESS : self::ERROR,
+            'message_id' => $message_id,
+        ]);
+    }
+
+    public function getMessagesWithUser() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $user_id = \Request::get('user_id');
+        $offset = \Request::get('offset', 0);
+        $older_than = \Request::get('older_than');
+        $later_than = \Request::get('later_than');
+
+        $messages = Messages::getAllBetweenUsers(self::$user->id, $user_id, $offset, $older_than, $later_than);
+
+        return response()->json([
+            'status' => self::SUCCESS,
+            'messages' => $messages,
         ]);
     }
 }

@@ -1,0 +1,131 @@
+<?php namespace App\Models;
+
+class Messages {
+
+    public static function deleteAllBetween($from_user_id, $to_user_id) {
+        return \DB::select("
+            DELETE FROM public.messages_new
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+            DELETE FROM public.messages_new
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+            DELETE FROM public.messages_dialogs
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+            DELETE FROM public.messages_dialogs
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+        ", [$from_user_id, $to_user_id, $to_user_id, $from_user_id,
+            $from_user_id, $to_user_id, $to_user_id, $from_user_id]);
+    }
+
+    public static function addMessage($from_user_id, $to_user_id, $text) {
+        if (! Users::findById($to_user_id)) {
+            return false;
+        }
+
+        $message_id = \DB::select(
+            "SELECT public.add_message(?, ?, ?, 't');
+        ", [$from_user_id, $to_user_id, $text])[0]->add_message;
+
+        // вставляем парное сообщение
+        // потенциально это может уйти на другую базу, которая обслуживает второго пользователя
+        $message_id_pair = \DB::select(
+            "SELECT public.add_message(?, ?, ?, 'f');
+        ", [$to_user_id, $from_user_id, $text])[0]->add_message;
+
+        return $message_id;
+    }
+
+    public static function getAllBetweenUsers($me_id, $buddy_id, $offset, $older_than, $later_than) {
+        $sql = "
+            SELECT  buddy_id AS id,
+                    extract(epoch from date_trunc('second', created_at)),
+                    message,
+                    CASE WHEN i THEN 2 ELSE 1 END AS direction
+                FROM public.messages_new
+                WHERE   me_id = :me_id AND
+                        buddy_id = :buddy_id";
+
+        $data = [
+            'me_id' => $me_id,
+            'buddy_id' => $buddy_id,
+            'offset' => $offset,
+        ];
+
+        if (! is_null($older_than)) {
+            $sql .= ' AND id < :older_than ';
+            $data['older_than'] = $older_than;
+        }
+
+        if (! is_null($later_than)) {
+            $sql .= ' AND id > :later_than ';
+            $data['later_than'] = $later_than;
+        }
+
+        $sql .= "
+            ORDER BY id DESC
+            LIMIT 50
+            OFFSET :offset
+        ";
+
+        $messages = \DB::select($sql, $data);
+
+        // после того как сообщения выданы в устройство считаем их старыми
+        \DB::select("
+            UPDATE public.messages_new
+                SET is_new = 'f'
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+            UPDATE public.messages_dialogs
+                SET is_new = 'f'
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+        ", [$me_id, $buddy_id, $me_id, $buddy_id]);
+
+        return $messages;
+    }
+
+    public static function getMessages($user_id, $limit = 100, $offset = 0) {
+        $chats = \DB::select("
+            SELECT
+                -- с кем
+                d.buddy_id AS id,
+                -- extract(epoch from GREATEST(messages_last.updated_at, messages_last2.updated_at, likes.liked_at))
+                d.created_at,
+                d.last_message,
+                d.is_new
+
+                FROM public.messages_dialogs AS d
+                WHERE d.me_id = ?
+                ORDER BY d.updated_at DESC
+                LIMIT ? OFFSET ?
+        ", [$user_id, $limit, $offset]);
+
+        // собираем айди
+        $buddies_ids = [];
+
+        foreach ($chats as $chat) {
+            $buddies_ids []= $chat->id;
+        }
+
+        // получаем всех сразу
+        $buddies = Users::findByIds($buddies_ids);
+
+        // подтягиваем в список чатов недостающее - имя и аватар
+        foreach ($chats as $chat) {
+            $buddy = $buddies[$chat->id];
+
+            if (! $buddy) {
+                continue;
+            }
+
+            $chat->name = $buddy->name;
+            $chat->avatar_url = $buddy->avatar_url;
+        }
+
+        return $chats;
+    }
+
+}
