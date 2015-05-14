@@ -21,6 +21,8 @@ $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function
     $app->post('syncFriendsVK', ['uses' => 'ApiController@syncFriendsVK']);
 
     $app->post('uploadPhoto', ['uses' => 'ApiController@uploadPhoto']);
+    $app->get('removePhoto', ['uses' => 'ApiController@removePhoto']);
+
     $app->get('checkIn', ['uses' => 'ApiController@checkIn']);
     $app->get('getUserProfile', ['uses' => 'ApiController@getUserProfile']);
 

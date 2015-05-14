@@ -136,7 +136,7 @@ class ApiController extends BaseController {
         $result = false;
 
         if (isset($_POST['photo'], $_POST['extension'])) {
-            $result = UsersPhotos::addPhoto(
+            $photo_id = UsersPhotos::uploadPhoto(
                 self::$user->id,
                 $_POST['photo'],
                 $_POST['extension']
@@ -144,9 +144,27 @@ class ApiController extends BaseController {
         }
 
         return response()->json([
+            'status' => $photo_id ? self::SUCCESS : self::ERROR,
+            'photo_id' => $photo_id,
+        ]);
+    }
+
+    public function removePhoto() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $photo_id = \Request::get('photo_id');
+
+        $result = UsersPhotos::removePhoto(
+            self::$user->id,
+            $photo_id
+        );
+
+        return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
-
     }
 
     public function checkin() {

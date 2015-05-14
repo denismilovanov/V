@@ -25,11 +25,27 @@ class UploadPhotoTest extends TestCase {
         ));
 
         $this->assertEquals($result['status'], 1);
+        $this->assertTrue(($photo_id = $result['photo_id']) > 0);
 
         // выкидываем
 
         unlink($image);
 
+        //
+
+        $result = Bootstrap::getFromApi('removePhoto', array(
+            'key' => $access['key'],
+            'photo_id' => $photo_id * -1,
+        ));
+
+        $this->assertEquals($result['status'], 0);
+
+        $result = Bootstrap::getFromApi('removePhoto', array(
+            'key' => $access['key'],
+            'photo_id' => $photo_id,
+        ));
+
+        $this->assertEquals($result['status'], 1);
     }
 
 }

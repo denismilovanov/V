@@ -4,7 +4,7 @@ use App\Models\ErrorCollector;
 
 class UsersPhotos {
 
-    public static function addPhoto($user_id, $content, $extension) {
+    public static function uploadPhoto($user_id, $content, $extension) {
         $content = base64_decode($content);
 
         $i = imagecreatefromstring($content);
@@ -62,11 +62,26 @@ class UsersPhotos {
 
         // сохраняем картинку в базу
 
-        $query = \DB::select("
+        return \DB::select("
             SELECT public.add_user_photo(?, 0, ?, ?, ?);
-        ", [$user_id, $relativeUrl, $hash, $extension]);
+        ", [$user_id, $relativeUrl, $hash, $extension])[0]->add_user_photo;
+    }
 
-        return $relativeUrl;
+    public static function removePhoto($user_id, $photo_id) {
+        $photo = \DB::select("
+            DELETE FROM public.users_photos
+                WHERE id = ? AND
+                        user_id = ?
+                RETURNING *;
+        ", [$photo_id, $user_id]);
+
+        if (! $photo or ! isset($photo[0])) {
+            return false;
+        }
+
+        \Queue::push('remove_photos', $photo, 'remove_photos');
+
+        return true;
     }
 
     public static function getUserPhotos($user_id) {

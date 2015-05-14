@@ -39,7 +39,6 @@ class Bootstrap {
     public static function postFromApi($method, $params) {
         $url = env('URL') . env('API_RELATIVE_URL') . '/' . $method;
         $result = self::post($url, $params);
-        echo $result;
         $result = self::stripNonJSON($result);
         return json_decode($result, 'assoc');
     }
