@@ -57,7 +57,7 @@ class MessagesTest extends TestCase {
             'key' => $male_key,
             'user_id' => $test_female_id,
             'later_than' => 0,
-            'older_than' => (1 << 31) - 1,
+            //'older_than' => (1 << 31) - 1,
         ));
         $this->assertEquals($result['status'], 1);
         $this->assertTrue(sizeof($result['messages']) == 1);
