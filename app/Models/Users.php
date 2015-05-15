@@ -1,6 +1,5 @@
 <?php namespace App\Models;
 
-use App\Models\PushQueue;
 use App\Models\UsersMatches;
 
 class Users
@@ -235,6 +234,15 @@ class Users
         }
 
         return $result;
+    }
+
+    public static function getDevices($user_id) {
+        return \DB::select("
+            SELECT *
+                FROM public.users_devices
+                WHERE user_id = ?
+                ORDER BY updated_at DESC; -- свежие наверх
+        ", [$user_id]);
     }
 
     public static function getMaxId() {

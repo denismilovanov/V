@@ -21,3 +21,11 @@ ALTER TABLE public.users_devices
     FOREIGN KEY (soft_version, device_type)
     REFERENCES public.soft_versions (id, device_type) DEFERRABLE INITIALLY DEFERRED;
 
+-- констрейнт на длину токена
+ALTER TABLE public.users_devices
+    ADD CONSTRAINT token_length CHECK (
+        CASE WHEN device_type = 1 THEN length(device_token) = 64
+             WHEN device_type = 2 THEN length(device_token) = 162
+             ELSE TRUE
+        END
+    );
