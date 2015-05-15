@@ -25,8 +25,12 @@ class Likes {
 
             if (sizeof($mutual_row)) {
                 $mutual = 1;
+
                 // второму посылаем пуш через очередь
-                PushQueue::enqueuePush('MATCH', $to_user_id, $from_user_id);
+                \Queue::push('matches', [
+                    'to_user_id' => $to_user_id,
+                    'from_user_id' => $from_user_id,
+                ], 'matches');
             }
         }
 
