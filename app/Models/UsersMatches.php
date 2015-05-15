@@ -1,7 +1,5 @@
 <?php namespace App\Models;
 
-use App\Models\PushQueue;
-
 class UsersMatches
 {
     public static function deleteMatch($user_id, $match_user_id) {
@@ -12,7 +10,11 @@ class UsersMatches
         ", [$user_id, $match_user_id]);
     }
 
-    public static function fillCandidatesInUsersMatches($user_id) {
+    public static function jobFillMatches($user_id) {
+        \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches');
+    }
+
+    public static function fillMatchesInUsersMatches($user_id) {
         $settings = Users::getMySettings($user_id);
         $checkin = Users::getMyCheckin($user_id);
 
@@ -26,6 +28,7 @@ class UsersMatches
         $sex = implode(", ", $sex);
 
         \DB::select("
+            SET synchronous_commit TO off;
             DELETE FROM public.users_matches
                 WHERE user_id = :user_id;
         ", [
@@ -36,12 +39,20 @@ class UsersMatches
         $users_max_id = Users::getMaxId();
 
         for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
-            $shard = $user_id % 2;
-            $u = \DB::select("
-                INSERT INTO public.users_matches$shard
+            \DB::select("
+                SET synchronous_commit TO off;
+                INSERT INTO public.users_matches
                     SELECT  :user_id,
                             ui.user_id AS match_user_id,
                             st_distance(geography, geography(ST_MakePoint(:longitude, :latitude)))::integer AS distance,
+
+                            -- порядок для подсчета весов
+                            icount(friends_vk_ids) +
+                            icount(groups_vk_ids) +
+                            0
+                            AS processing_order,
+
+                            -- вес посчитаем потом
                             NULL AS weight
 
                         FROM public.users_index AS ui
@@ -64,41 +75,72 @@ class UsersMatches
                 'longitude' => $checkin->longitude,
             ]);
         }
+
+        // \Queue::push('update_weights', ['user_id' => $user_id], 'update_weights');
+        // первую пачку весов обновим сразу, без очереди
+        self::updateWeights($user_id);
+
+        return true;
     }
 
     public static function updateWeights($user_id) {
+        $search_weights_params = Users::getMySearchWeightParams($user_id);
+
+        $friends_vk_ids = $search_weights_params->friends_vk_ids;
+        $groups_vk_ids = $search_weights_params->groups_vk_ids;
+
         $users_ids = \DB::select("
-            WITH ids AS (
+            SET synchronous_commit TO off;
+            WITH lock AS (
+                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+            ),
+            ids AS (
                 SELECT match_user_id
                     FROM public.users_matches
-                    WHERE   user_id = ? AND
+                    WHERE   user_id = :user_id AND
                             weight IS NULL
-                    ORDER BY distance DESC
-                    LIMIT 100
+                    ORDER BY processing_order DESC
+                    LIMIT 500
+            ),
+            upd AS (
+                UPDATE public.users_matches AS m
+
+                    SET weight = icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) +
+                                 icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
+
+                    FROM public.users_index AS i
+                    WHERE   m.user_id = :user_id AND
+                            m.match_user_id IN (SELECT match_user_id FROM ids) AND
+                            i.user_id = m.match_user_id
             )
             SELECT string_agg(match_user_id::varchar, ',') AS users_ids
                 FROM ids;
-        ", [$user_id])[0]->users_ids;
+        ", [
+            'user_id' => $user_id,
+        ])[0]->users_ids;
 
         if ($users_ids) {
+            /*\DB::select("
+                SET synchronous_commit TO off;
+                UPDATE public.users_matches AS m
 
+                    SET weight = icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) +
+                                 icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
 
+                    FROM public.users_index AS i
+                    WHERE   m.user_id = ? AND
+                            m.match_user_id IN ($users_ids) AND
+                            i.user_id = m.match_user_id;
+            ", [$user_id]);*/
 
-            \DB::select("
-                UPDATE public.users_matches
-                    SET weight = 1. / match_user_id
-                    WHERE   user_id = ? AND
-                            match_user_id IN ($users_ids);
-            ", [$user_id]);
+            \Queue::push('update_weights', ['user_id' => $user_id], 'update_weights');
         }
+
+        return true;
     }
 
     public static function getMatches($me_id) {
-        self::fillCandidatesInUsersMatches($me_id);
-
-        self::updateWeights($me_id);
-
-        return \DB::select("
+        $users = \DB::select("
             SELECT match_user_id AS user_id, weight, (distance / 1000.)::integer AS distance
                 FROM public.users_matches
                 WHERE   user_id = ? AND
@@ -106,5 +148,11 @@ class UsersMatches
                 ORDER BY weight DESC
                 LIMIT 50;
         ", [$me_id]);
+
+        if (! sizeof($users)) {
+            //
+        }
+
+        return $users;
     }
 }
