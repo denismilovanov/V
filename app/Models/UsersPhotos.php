@@ -84,6 +84,24 @@ class UsersPhotos {
         return true;
     }
 
+    public static function correctAvatar($avatar_url, $user_id, $sex) {
+        $photos_server_url = env('PHOTOS_URL');
+
+        if ($avatar_url) {
+            if (strpos($avatar_url, 'http') !== 0) {
+                $avatar_url = $photos_server_url . $avatar_url;
+            }
+        } else if (Users::isTestUser($user_id)) {
+            if ($sex == 1) {
+                $avatar_url = $photos_server_url . '/test/female1.jpg';
+            } else if ($sex == 2) {
+                $avatar_url = $photos_server_url . '/test/male1.jpg';
+            }
+        }
+
+        return $avatar_url;
+    }
+
     public static function getUserPhotos($user_id) {
         $photos_url = env('PHOTOS_URL');
 

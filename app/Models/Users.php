@@ -172,6 +172,17 @@ class Users
         return $user_checkin ? $user_checkin[0] : null;
     }
 
+    public static function getMySearchWeightParams($user_id) {
+        $user_weight_params = \DB::select("
+            SELECT  array_to_string(groups_vk_ids, ',') AS groups_vk_ids,
+                    array_to_string(friends_vk_ids, ',') AS friends_vk_ids
+                FROM public.users_index
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        return $user_weight_params ? $user_weight_params[0] : null;
+    }
+
     public static function getProfile($user_id, $viewer_id) {
         $profile = \DB::select("
             SELECT * FROM public.get_user_profile(?, ?);
@@ -182,6 +193,10 @@ class Users
         }
 
         return $profile[0];
+    }
+
+    public static function isTestUser($user_id) {
+        return $user_id >= 100000 and $user_id < 300000;
     }
 
     public static function findById($user_id) {
@@ -195,7 +210,10 @@ class Users
             return null;
         }
 
-        return $user[0];
+        $user = $user[0];
+        $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
+
+        return $user;
     }
 
     public static function findByIds($users_ids) {
@@ -212,6 +230,7 @@ class Users
         $result = [];
 
         foreach ($users as $user) {
+            $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
             $result[$user->id] = $user;
         }
 
@@ -223,8 +242,6 @@ class Users
     }
 
     public static function searchAround($me_id) {
-        //\Queue::connection('rabbitmq')->push('job', '{id:' . mt_rand() . '}', 'matches');
-
         $users = UsersMatches::getMatches($me_id);
 
         $users_ids = [];
