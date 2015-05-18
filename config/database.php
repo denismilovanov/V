@@ -7,6 +7,7 @@ return [
         'vmeste' => [
             'driver'   => 'pgsql',
             'host'     => env('DB_VMESTE_HOST', ''),
+            'port'     => env('DB_VMESTE_PORT', '5432'),
             'database' => env('DB_VMESTE_DATABASE', ''),
             'username' => env('DB_VMESTE_USERNAME', ''),
             'password' => env('DB_VMESTE_PASSWORD', ''),
@@ -20,6 +21,7 @@ return [
         'logs' => [
             'driver'   => 'pgsql',
             'host'     => env('DB_LOGS_HOST', ''),
+            'port'     => env('DB_LOGS_PORT', '5432'),
             'database' => env('DB_LOGS_DATABASE', ''),
             'username' => env('DB_LOGS_USERNAME', ''),
             'password' => env('DB_LOGS_PASSWORD', ''),
