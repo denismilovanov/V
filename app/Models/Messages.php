@@ -40,7 +40,7 @@ class Messages {
 
     public static function getAllBetweenUsers($me_id, $buddy_id, $offset, $older_than, $later_than) {
         $sql = "
-            SELECT  buddy_id AS id,
+            SELECT  id,
                     extract(epoch from date_trunc('second', created_at)),
                     message,
                     CASE WHEN i THEN 2 ELSE 1 END AS direction
