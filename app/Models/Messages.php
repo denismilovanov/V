@@ -1,5 +1,7 @@
 <?php namespace App\Models;
 
+use \App\Http\Controllers\ApiController;
+
 class Messages {
 
     public static function deleteAllBetween($from_user_id, $to_user_id) {
@@ -22,7 +24,10 @@ class Messages {
 
     public static function addMessage($from_user_id, $to_user_id, $text) {
         if (! Users::findById($to_user_id)) {
-            return false;
+            return [
+                'message_id' => '',
+                'added_at' => '',
+            ];
         }
 
         $message_id = \DB::select(
@@ -35,13 +40,23 @@ class Messages {
             "SELECT public.add_message(?, ?, ?, 'f');
         ", [$to_user_id, $from_user_id, $text])[0]->add_message;
 
-        return $message_id;
+        //
+        $added_at = \DB::select("
+            SELECT public.format_date(created_at, ?) AS added_at
+                FROM public.messages_new
+                WHERE id = ?;
+        ", [ApiController::$user->time_zone, $message_id])[0]->added_at;
+
+        return [
+            'message_id' => $message_id,
+            'added_at' => $added_at,
+        ];
     }
 
     public static function getAllBetweenUsers($me_id, $buddy_id, $offset, $older_than, $later_than) {
         $sql = "
             SELECT  id,
-                    extract(epoch from date_trunc('second', created_at)),
+                    public.format_date(created_at, :time_zone) AS added_at,
                     message,
                     CASE WHEN i THEN 2 ELSE 1 END AS direction
                 FROM public.messages_new
@@ -52,6 +67,7 @@ class Messages {
             'me_id' => $me_id,
             'buddy_id' => $buddy_id,
             'offset' => $offset,
+            'time_zone' => ApiController::$user->time_zone
         ];
 
         if (! is_null($older_than)) {
@@ -92,8 +108,8 @@ class Messages {
             SELECT
                 -- с кем
                 d.buddy_id AS id,
-                -- extract(epoch from GREATEST(messages_last.updated_at, messages_last2.updated_at, likes.liked_at))
-                d.created_at,
+                --
+                public.format_date(d.created_at, ?) AS created_at,
                 d.last_message,
                 d.is_new
 
@@ -101,7 +117,7 @@ class Messages {
                 WHERE d.me_id = ?
                 ORDER BY d.updated_at DESC
                 LIMIT ? OFFSET ?
-        ", [$user_id, $limit, $offset]);
+        ", [ApiController::$user->time_zone, $user_id, $limit, $offset]);
 
         // собираем айди
         $buddies_ids = [];

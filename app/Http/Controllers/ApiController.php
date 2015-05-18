@@ -19,7 +19,7 @@ class ApiController extends BaseController {
     const ERROR_DISLIKE = 7;
 
     private static $key = null;
-    private static $user = null;
+    public static $user = null;
 
     public function __construct() {
     }
@@ -31,7 +31,8 @@ class ApiController extends BaseController {
                         uivk.token,
                         u.avatar_url,
                         uivk.vk_id,
-                        date_part('year', age(u.bdate)) as age
+                        date_part('year', age(u.bdate)) as age,
+                        u.time_zone
                   FROM users_devices AS ud
                   INNER JOIN users AS u
                         on u.id = ud.user_id
@@ -386,11 +387,12 @@ class ApiController extends BaseController {
             ]);
         }
 
-        $message_id = Messages::addMessage(self::$user->id, $user_id, $text);
+        $result = Messages::addMessage(self::$user->id, $user_id, $text);
 
         return response()->json([
-            'status' => $message_id ? self::SUCCESS : self::ERROR,
-            'message_id' => $message_id,
+            'status' => $result['message_id'] ? self::SUCCESS : self::ERROR,
+            'message_id' => $result['message_id'],
+            'added_at' => $result['added_at'],
         ]);
     }
 
