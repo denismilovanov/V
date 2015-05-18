@@ -44,4 +44,9 @@ $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function
     $app->get('removeProfile', ['uses' => 'ApiController@removeProfile']);
 });
 
+$app->group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers'], function($app) {
+    $app->get('login', ['uses' => 'AdminController@login']);
+    $app->get('logout', ['uses' => 'AdminController@logout']);
+});
+
 $app->get('', ['uses' => '\App\Http\Controllers\SiteController@index']);
