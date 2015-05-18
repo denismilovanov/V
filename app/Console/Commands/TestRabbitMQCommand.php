@@ -24,6 +24,14 @@ class TestRabbitMQCommand extends \Illuminate\Console\Command
                 \Queue::push('test', ['num' => $i], 'test');
                 usleep(10000);
             }
+        } else if ($type == 'priority') {
+            \Queue::push('test_priority', ['i_am' => 'low_priority'], 'test_priority', ['priority' => 0]);
+            \Queue::push('test_priority', ['i_am' => 'high_priority'], 'test_priority', ['priority' => 10]);
+
+            \Queue::subscribe('test_priority', 'tag', function (RabbitMQJob $job) {
+                \Log::info($job->getRawBody());
+                $job->delete();
+            });
         }
     }
 }
