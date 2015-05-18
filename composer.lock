@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "16fed05cf1f854e7de4f198042d63a33",
+    "hash": "e81696fc6d02baa9decc009a320a8333",
     "packages": [
         {
             "name": "danielstjules/stringy",
@@ -135,12 +135,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/immobiliare/ApnsPHP.git",
-                "reference": "44220af919b34f405e33c8ccca4fc1f60f178713"
+                "reference": "8efa27df25787a4e48e648a0467985ac7c75d47c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/immobiliare/ApnsPHP/zipball/44220af919b34f405e33c8ccca4fc1f60f178713",
-                "reference": "44220af919b34f405e33c8ccca4fc1f60f178713",
+                "url": "https://api.github.com/repos/immobiliare/ApnsPHP/zipball/8efa27df25787a4e48e648a0467985ac7c75d47c",
+                "reference": "8efa27df25787a4e48e648a0467985ac7c75d47c",
                 "shasum": ""
             },
             "require": {
@@ -165,20 +165,20 @@
                 "notification",
                 "push"
             ],
-            "time": "2015-05-13 10:34:55"
+            "time": "2015-05-13 11:37:13"
         },
         {
             "name": "fintech-fab/laravel-queue-rabbitmq",
-            "version": "5.0",
+            "version": "dev-fork",
             "source": {
                 "type": "git",
-                "url": "https://github.com/fintech-fab/laravel-queue-rabbitmq.git",
-                "reference": "5f919fbb1b62f905737c7a439a3c34fd65d18580"
+                "url": "https://github.com/denismilovanov/laravel-queue-rabbitmq.git",
+                "reference": "0f8e8b2b14d65d744b8c26c10855d6294f190e50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fintech-fab/laravel-queue-rabbitmq/zipball/5f919fbb1b62f905737c7a439a3c34fd65d18580",
-                "reference": "5f919fbb1b62f905737c7a439a3c34fd65d18580",
+                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/0f8e8b2b14d65d744b8c26c10855d6294f190e50",
+                "reference": "0f8e8b2b14d65d744b8c26c10855d6294f190e50",
                 "shasum": ""
             },
             "require": {
@@ -193,7 +193,6 @@
                     "FintechFab\\LaravelQueueRabbitMQ": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
@@ -204,7 +203,10 @@
                 }
             ],
             "description": "RabbitMQ driver for Laravel Queue",
-            "time": "2015-05-07 09:25:45"
+            "support": {
+                "source": "https://github.com/denismilovanov/laravel-queue-rabbitmq/tree/fork"
+            },
+            "time": "2015-05-18 09:25:25"
         },
         {
             "name": "illuminate/auth",
@@ -3374,7 +3376,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "duccio/apns-php": 20
+        "duccio/apns-php": 20,
+        "fintech-fab/laravel-queue-rabbitmq": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
