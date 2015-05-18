@@ -54,9 +54,6 @@ update users_index  set
     where user_id between 100000 and 299999;
 
 
-
-
-
 SELECT public.checkin(
     id,
     59.7 + 0.4 * random(),

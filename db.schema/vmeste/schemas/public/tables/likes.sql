@@ -5,7 +5,7 @@ CREATE TABLE likes (
     id integer NOT NULL PRIMARY KEY DEFAULT nextval('likes_id_seq'::regclass),
     user1_id integer NOT NULL,
     user2_id integer NOT NULL,
-    liked_at timestamp(6) without time zone,
+    liked_at timestamp with time zone DEFAULT now(),
     is_liked boolean,
     is_send boolean,
     is_blocked boolean,

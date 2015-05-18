@@ -8,7 +8,7 @@ CREATE TABLE public.messages_new (
     message text NOT NULL,
     i boolean NOT NULL, -- я написал или мне написали?
     is_new boolean NOT NULL DEFAULT TRUE,
-    created_at timestamp without time zone DEFAULT now()
+    created_at timestamp with time zone DEFAULT now()
 );
 
 CREATE INDEX messages_new_pair_idx
