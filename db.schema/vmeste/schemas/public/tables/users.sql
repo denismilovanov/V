@@ -23,3 +23,6 @@ CREATE INDEX users_idx_sex
 
 ALTER TABLE public.users
     ADD COLUMN avatar_url varchar(255) NOT NULL DEFAULT '';
+
+ALTER TABLE public.users
+    ADD COLUMN time_zone integer NOT NULL DEFAULT +3;

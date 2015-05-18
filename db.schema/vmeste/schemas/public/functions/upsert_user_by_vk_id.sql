@@ -7,7 +7,8 @@ CREATE OR REPLACE FUNCTION public.upsert_user_by_vk_id(
     s_name varchar,
     d_bdate date,
     s_about varchar,
-    s_avatar_url varchar
+    s_avatar_url varchar,
+    i_time_zone integer
 )
     RETURNS record AS
 $BODY$
@@ -26,7 +27,8 @@ BEGIN
         UPDATE public.users
             SET about = s_about,
                 name = s_name,
-                sex = i_sex
+                sex = i_sex,
+                time_zone = i_time_zone
             WHERE id = r_user.user_id;
 
     ELSE
@@ -40,7 +42,8 @@ BEGIN
             d_bdate,
             s_about,
             s_vk_id,
-            s_avatar_url
+            s_avatar_url,
+            i_time_zone
         );
 
         r_user.user_id := i_id;

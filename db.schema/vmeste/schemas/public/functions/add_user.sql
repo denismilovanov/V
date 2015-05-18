@@ -5,7 +5,8 @@ CREATE OR REPLACE FUNCTION public.add_user(
     d_bdate date,
     s_about varchar,
     s_vk_id varchar,
-    s_avatar_url varchar
+    s_avatar_url varchar,
+    i_time_zone integer
 )
 RETURNS integer AS
 $BODY$
@@ -39,9 +40,9 @@ BEGIN
     RAISE NOTICE 'public.add_user: %', s_name;
 
     INSERT INTO users
-        (id, updated_at, sex, name, bdate, about)
+        (id, updated_at, sex, name, bdate, about, time_zone)
         VALUES (
-            i_id, now(), i_sex, s_name, d_bdate, s_about
+            i_id, now(), i_sex, s_name, d_bdate, s_about, i_time_zone
         );
 
     INSERT INTO users_settings

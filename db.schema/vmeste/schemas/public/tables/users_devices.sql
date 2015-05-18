@@ -24,8 +24,8 @@ ALTER TABLE public.users_devices
 -- констрейнт на длину токена
 ALTER TABLE public.users_devices
     ADD CONSTRAINT token_length CHECK (
-        CASE WHEN device_type = 1 THEN length(device_token) = 64
-             WHEN device_type = 2 THEN length(device_token) = 162
+        CASE WHEN device_type = 1 AND device_token IS NOT NULL THEN length(device_token) = 64
+             WHEN device_type = 2 AND device_token IS NOT NULL THEN length(device_token) = 162
              ELSE TRUE
         END
     );

@@ -13,7 +13,11 @@ DECLARE
     s_key varchar;
 BEGIN
 
-    s_key := substring(md5(s_device_token) || md5(now()::varchar) from 1 for 40);
+    IF s_device_token = '' THEN
+        s_device_token := NULL;
+    END IF;
+
+    s_key := substring(md5(random()::varchar) || md5(now()::varchar) from 1 for 40);
 
     UPDATE public.users_devices
         SET key = s_key,

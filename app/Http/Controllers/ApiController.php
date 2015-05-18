@@ -60,6 +60,7 @@ class ApiController extends BaseController {
         $bdate = \Request::get('bdate');
         $about = \Request::get('about');
         $avatar_url = \Request::get('avatar_url');
+        $timezone = \Request::get('timezone', 0);
 
         $data = [];
 
@@ -70,7 +71,7 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url);
+        $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $timezone, $timezone);
 
         $key = Users::getAccessKey($user->user_id, $device_token, $device_type, $soft_version_int);
 

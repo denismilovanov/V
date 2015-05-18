@@ -4,9 +4,9 @@ use App\Models\UsersMatches;
 
 class Users
 {
-    public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url) {
-        $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
-        $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url])[0];
+    public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone) {
+        $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
+        $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone])[0];
         return $user;
     }
 
