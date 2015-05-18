@@ -142,7 +142,7 @@ class Bootstrap {
             'about' => 'about',
             'avatar_url' => '',
             'device_type' => 1,
-            'device_token' => 'TOKEN',
+            'device_token' => '3' . sprintf("%063d", $access['vk_id']),
             'api_version' => '2.0',
             'soft_version' => '2.0.0',
         ));
@@ -206,14 +206,16 @@ class Bootstrap {
     public static function gerMaleFemalePair() {
         $test_female_id = 100000;
         $test_male_id = 200000;
+        $token_male = '2' . sprintf("%063d", $test_male_id);
+        $token_female = '1' . sprintf("%063d", $test_female_id);
 
         $male_key = \DB::select("
-            SELECT public.get_access_key(?, 'TOKEN_MALE', 1, '20000')
-        ", [$test_male_id])[0]->get_access_key;
+            SELECT public.get_access_key(?, ?, 1, '20000')
+        ", [$test_male_id, $token_male])[0]->get_access_key;
 
         $female_key = \DB::select("
-            SELECT public.get_access_key(?, 'TOKEN_FEMALE', 1, '20000')
-        ", [$test_female_id])[0]->get_access_key;
+            SELECT public.get_access_key(?, ?, 1, '20000')
+        ", [$test_female_id, $token_female])[0]->get_access_key;
 
         return array(
             'test_female_id' => $test_female_id,

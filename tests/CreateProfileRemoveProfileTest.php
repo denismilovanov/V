@@ -19,7 +19,7 @@ class CreateProfileRemoveProfileTest extends TestCase {
             'about' => 'about',
             'avatar_url' => '',
             'device_type' => 1,
-            'device_token' => 'TOKEN',
+            'device_token' => '3' . sprintf("%063d", - $vk_id),
             'api_version' => '2.0',
             'soft_version' => '2.0.0',
         ));

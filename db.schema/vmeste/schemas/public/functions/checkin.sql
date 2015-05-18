@@ -7,12 +7,10 @@ RETURNS void AS
 $BODY$
 DECLARE
     g_geo geometry;
-    g_geometry geometry(Point, 4326);
     g_geography geography;
 BEGIN
 
     g_geo := ST_GeomFromText('POINT(' || dp_longitude || ' ' || dp_latitude || ')');
-    g_geometry := ST_GeomFromText('POINT(' || dp_longitude || ' ' || dp_latitude || ')', 4326);
     g_geography := ST_GeogFromText('POINT(' || dp_longitude || ' ' || dp_latitude || ')');
 
     -- обновляем чекин
@@ -37,7 +35,7 @@ BEGIN
     -- обновляем поисковый индекс
     UPDATE users_index
         SET geography = g_geography,
-            geometry = g_geometry
+            last_activity_at = now()
         WHERE user_id = i_user_id;
 
 END

@@ -215,16 +215,33 @@ class Users
         return $user;
     }
 
-    public static function findByIds($users_ids) {
+    public static function findByIds($users_ids, $area = '') {
         if (! $users_ids) {
             return [];
         }
 
-        $users = \DB::select("
-            SELECT *
-                FROM public.users
-                WHERE id IN (" . implode(', ', $users_ids) . ")
-        ");
+        if (! $area) {
+            $users = \DB::select("
+                SELECT *
+                    FROM public.users
+                    WHERE id IN (" . implode(', ', $users_ids) . ")
+            ");
+        } else if ($area == 'searchAround') {
+            $users = \DB::select("
+                SELECT  u.*,
+                        i.last_activity_at,
+                        uivk.vk_id,
+                        icount(i.groups_vk_ids) AS groups_count,
+                        icount(i.friends_vk_ids) AS friends_count,
+                        0 AS photos_count
+                    FROM public.users AS u
+                    INNER JOIN public.users_index AS i
+                        ON i.user_id = u.id
+                    INNER JOIN public.users_info_vk AS uivk
+                        ON uivk.user_id = u.id
+                    WHERE u.id IN (" . implode(', ', $users_ids) . ")
+            ");
+        }
 
         $result = [];
 
@@ -258,10 +275,15 @@ class Users
             $users_ids []= $user->user_id;
         }
 
-        $users_all = self::findByIds($users_ids);
+        $users_all = self::findByIds($users_ids, 'searchAround');
 
         foreach ($users as $user) {
             $user->name = $users_all[$user->user_id]->name;
+            $user->last_activity_at = $users_all[$user->user_id]->last_activity_at;
+            $user->vk_id = $users_all[$user->user_id]->vk_id;
+            $user->groups_count = $users_all[$user->user_id]->groups_count;
+            $user->friends_count = $users_all[$user->user_id]->friends_count;
+            $user->photos_count = $users_all[$user->user_id]->photos_count;
             $user->avatar_url = $users_all[$user->user_id]->avatar_url;
         }
 

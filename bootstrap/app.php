@@ -77,6 +77,7 @@ $app->singleton(
 | totally optional, so you are not required to uncomment this line.
 |
 */
+
 $app->register('FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider');
 
 /*

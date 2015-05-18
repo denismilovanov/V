@@ -9,25 +9,11 @@ CREATE TABLE public.users_index (
     groups_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
     likes_count integer NOT NULL DEFAULT 0,
     novelty_weight integer NOT NULL DEFAULT 0,
-    age integer NOT NULL
+    age integer NOT NULL,
+    last_activity_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
-CREATE INDEX users_index_1
+CREATE INDEX users_index_geography
     ON users_index
     USING gist (geography);
 
-CREATE INDEX users_index_5
-    ON users_index
-    USING gist (geography, age)
-    WHERE sex IN (1);
-
-CREATE INDEX users_index_6
-    ON users_index
-    USING gist (geometry);
-
-CREATE INDEX users_index_7
-    ON users_index
-    USING gist (user_id, geometry);
-
-ALTER TABLE public.users_index
-    ADD COLUMN geometry geometry(Point, 4326) NULL;

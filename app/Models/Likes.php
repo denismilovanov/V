@@ -3,7 +3,7 @@
 class Likes {
 
     public static function like($from_user_id, $to_user_id, $is_like) {
-        if (! Users::findById($to_user_id)) {
+        if (! Users::findById($to_user_id) or $from_user_id == $to_user_id) {
             return false;
         }
 

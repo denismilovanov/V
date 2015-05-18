@@ -3,6 +3,7 @@ create database logs_test lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' templa
 create database vmeste_test lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
 
 
+
 create database matches lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 
 CREATE SERVER main_server FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host 'localhost', dbname 'vmeste', port '5432');
