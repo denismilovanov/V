@@ -22,10 +22,23 @@ return [
                 'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             ],
 
+            'queues_params'   => [
+                'fill_matches' => [
+                    'arguments' => [
+                        'x-max-priority' => ['s', 255], // https://www.rabbitmq.com/priority.html
+                    ],
+                ],
+                'test_priority' => [
+                    'arguments' => [
+                        'x-max-priority' => ['s', 255], // https://www.rabbitmq.com/priority.html
+                    ],
+                ],
+            ],
+
             'exchange_params' => [
-                'type'        => env('RABBITMQ_EXCHANGE_TYPE', 'direct'), // more info at http://www.rabbitmq.com/tutorials/amqp-concepts.html
+                'type'        => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
                 'passive'     => env('RABBITMQ_EXCHANGE_PASSIVE', false),
-                'durable'     => env('RABBITMQ_EXCHANGE_DURABLE', true), // the exchange will survive server restarts
+                'durable'     => env('RABBITMQ_EXCHANGE_DURABLE', true),
                 'auto_delete' => env('RABBITMQ_EXCHANGE_AUTODELETE', false),
             ],
         ],
