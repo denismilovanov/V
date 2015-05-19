@@ -164,7 +164,7 @@ class ApiController extends BaseController {
         $latitude = floatval(\Request::get('latitude'));
         $longitude = floatval(\Request::get('longitude'));
 
-        if (! $latitude or ! $longitude or abs($latitude) > 90 or abs($longitude) > 90) {
+        if (! $latitude or ! $longitude or abs($latitude) > 90 or abs($longitude) > 180) {
             $result = false;
         } else {
             $result = Checkins::checkin(
