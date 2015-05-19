@@ -18,7 +18,6 @@ class ApiController extends BaseController {
     const ERROR_KEY = 2;
     const ERROR_DISLIKE = 7;
 
-    private static $key = null;
     public static $user = null;
 
     public function __construct() {
@@ -26,30 +25,8 @@ class ApiController extends BaseController {
 
     public function beforeAction() {
         $key = \Request::get('key');
-
-        $sql = "SELECT u.id, u.sex, u.name, u.about,
-                        uivk.token,
-                        u.avatar_url,
-                        uivk.vk_id,
-                        date_part('year', age(u.bdate)) as age,
-                        u.time_zone,
-                        ui.geography
-                  FROM users_devices AS ud
-                  INNER JOIN users AS u
-                        on u.id = ud.user_id
-                  INNER JOIN users_info_vk AS uivk
-                        on uivk.user_id = ud.user_id
-                  INNER JOIN users_index AS ui
-                        on ui.user_id = ud.user_id
-                  where ud.key = ?";
-
-        $user = \DB::select($sql, [$key]);
-        if ($user) {
-            self::$user = $user[0];
-            return true;
-        }
-
-        return false;
+        self::$user = Users::findByKey($key);
+        return self::$user !== null;
     }
 
     public function authorizeVK() {

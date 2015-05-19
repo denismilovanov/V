@@ -187,6 +187,35 @@ class Users
         return $user_id >= 100000 and $user_id < 300000;
     }
 
+    public static function findByKey($key) {
+        $user = \DB::select("
+            SELECT  u.id, u.sex,
+                    u.name,
+                    u.about,
+                    u.avatar_url,
+                    uivk.vk_id,
+                    date_part('year', age(u.bdate)) as age,
+                    u.time_zone,
+                    ui.geography
+                FROM users_devices AS ud
+                INNER JOIN users AS u
+                    ON u.id = ud.user_id
+                INNER JOIN users_info_vk AS uivk
+                    ON uivk.user_id = ud.user_id
+                INNER JOIN users_index AS ui
+                    ON ui.user_id = ud.user_id
+                WHERE ud.key = ?;
+        ", [$key]);
+
+        if ($user) {
+            $user = $user[0];
+            $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
+            return $user;
+        }
+
+        return null;
+    }
+
     public static function findById($user_id, $area = 'getUserProfile') {
         if (! $area) {
             $user = \DB::select("
