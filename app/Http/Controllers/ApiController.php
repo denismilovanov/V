@@ -32,12 +32,15 @@ class ApiController extends BaseController {
                         u.avatar_url,
                         uivk.vk_id,
                         date_part('year', age(u.bdate)) as age,
-                        u.time_zone
+                        u.time_zone,
+                        ui.geography
                   FROM users_devices AS ud
                   INNER JOIN users AS u
                         on u.id = ud.user_id
                   INNER JOIN users_info_vk AS uivk
                         on uivk.user_id = ud.user_id
+                  INNER JOIN users_index AS ui
+                        on ui.user_id = ud.user_id
                   where ud.key = ?";
 
         $user = \DB::select($sql, [$key]);
@@ -347,7 +350,7 @@ class ApiController extends BaseController {
 
         $user_id = \Request::get('user_id');
 
-        $profile = Users::getProfile($user_id, self::$user->id);
+        $profile = Users::findById($user_id, 'getUserProfile');
 
         if (! $profile) {
             return response()->json([

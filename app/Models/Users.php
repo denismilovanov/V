@@ -1,5 +1,6 @@
 <?php namespace App\Models;
 
+use \App\Http\Controllers\ApiController;
 use App\Models\UsersMatches;
 
 class Users
@@ -182,28 +183,35 @@ class Users
         return $user_weight_params ? $user_weight_params[0] : null;
     }
 
-    public static function getProfile($user_id, $viewer_id) {
-        $profile = \DB::select("
-            SELECT * FROM public.get_user_profile(?, ?);
-        ", [$user_id, $viewer_id]);
-
-        if (! $profile or ! isset($profile[0])) {
-            return null;
-        }
-
-        return $profile[0];
-    }
-
     public static function isTestUser($user_id) {
         return $user_id >= 100000 and $user_id < 300000;
     }
 
-    public static function findById($user_id) {
-        $user = \DB::select("
-            SELECT *
-                FROM public.users
-                WHERE id = ?;
-        ", [$user_id]);
+    public static function findById($user_id, $area = 'getUserProfile') {
+        if (! $area) {
+            $user = \DB::select("
+                SELECT *
+                    FROM public.users
+                    WHERE id = ?;
+            ", [$user_id]);
+        } else if ($area == 'getUserProfile') {
+            $user = \DB::select("
+                SELECT  u.*,
+                        extract('year' from age(u.bdate)) AS age,
+                        public.format_date(i.last_activity_at, ?) AS last_activity,
+                        uivk.vk_id,
+                        icount(i.groups_vk_ids) AS groups_count,
+                        icount(i.friends_vk_ids) AS friends_count,
+                        ST_Distance(i.geography, ?)::integer AS distance,
+                        0 AS weight
+                    FROM public.users AS u
+                    INNER JOIN public.users_index AS i
+                        ON i.user_id = u.id
+                    INNER JOIN public.users_info_vk AS uivk
+                        ON uivk.user_id = u.id
+                    WHERE u.id = ?;
+            ", [ApiController::$user->time_zone, ApiController::$user->geography, $user_id]);
+        }
 
         if (! $user or ! isset($user[0])) {
             return null;
@@ -229,7 +237,7 @@ class Users
         } else if ($area == 'searchAround') {
             $users = \DB::select("
                 SELECT  u.*,
-                        i.last_activity_at,
+                        public.format_date(i.last_activity_at, ?) AS last_activity_at,
                         uivk.vk_id,
                         icount(i.groups_vk_ids) AS groups_count,
                         icount(i.friends_vk_ids) AS friends_count,
@@ -240,7 +248,7 @@ class Users
                     INNER JOIN public.users_info_vk AS uivk
                         ON uivk.user_id = u.id
                     WHERE u.id IN (" . implode(', ', $users_ids) . ")
-            ");
+            ", [ApiController::$user->time_zone]);
         }
 
         $result = [];
