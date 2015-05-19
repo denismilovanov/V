@@ -25,8 +25,7 @@ BEGIN
     IF FOUND THEN
 
         UPDATE public.users
-            SET about = s_about,
-                name = s_name,
+            SET name = s_name,
                 sex = i_sex,
                 time_zone = i_time_zone
             WHERE id = r_user.user_id;

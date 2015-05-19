@@ -28,6 +28,7 @@ $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function
 
     $app->get('getMySettings', ['uses' => 'ApiController@getMySettings']);
     $app->get('setMySettings', ['uses' => 'ApiController@setMySettings']);
+    $app->get('setAbout', ['uses' => 'ApiController@setAbout']);
 
     $app->get('searchAround', ['uses' => 'ApiController@searchAround']);
 

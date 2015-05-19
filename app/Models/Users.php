@@ -128,6 +128,16 @@ class Users
         return true;
     }
 
+    public static function setAbout($user_id, $about) {
+        \DB::select("
+            UPDATE public.users
+                SET about = ?
+                WHERE id = ?;
+        ", [$about, $user_id]);
+
+        return true;
+    }
+
     public static function setDeviceToken($user_id, $key, $device_token, $device_type) {
         if (! $device_token or ! $device_type) {
             return false;
