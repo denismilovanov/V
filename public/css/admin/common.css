@@ -1,0 +1,60 @@
+body {
+    padding: 20px;
+    background-color: rgba(211, 211, 211, 0.26);
+}
+
+::-webkit-scrollbar {
+    width: 3em;
+    height: 2em;
+}
+
+::-webkit-scrollbar-button {
+    background: #ccc;
+}
+
+::-webkit-scrollbar-track-piece {
+    background: #eee;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ddd;
+}​
+
+.pointer {
+    cursor: pointer;
+}
+
+.navbar-brand {
+    font-size: 22px;
+}
+
+.container {
+    margin-left: 0px;
+}
+
+table {
+    table-layout: fixed;
+}
+
+.pre {
+    font-family: Courier;
+    white-space: pre;
+}
+
+#message-wrapper {
+    z-index: 100000;
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    font-size: 18px;
+    display: none;
+}
+
+#message {
+    z-index: 100001;
+    position: relative;
+    margin-left: -300px;
+    width: 600px;
+    padding: 20px;
+    overflow: hidden;
+}

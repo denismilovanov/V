@@ -14,40 +14,59 @@
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SiteController;
 
-$app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function($app) {
-    $app->get('authorizeVK', ['uses' => 'ApiController@authorizeVK']);
+if (! isset($_SERVER['SERVER_NAME'])) {
+    $_SERVER['SERVER_NAME'] = '';
+}
 
-    $app->post('syncGroupsVK', ['uses' => 'ApiController@syncGroupsVK']);
-    $app->post('syncFriendsVK', ['uses' => 'ApiController@syncFriendsVK']);
+if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
 
-    $app->post('uploadPhoto', ['uses' => 'ApiController@uploadPhoto']);
-    $app->get('removePhoto', ['uses' => 'ApiController@removePhoto']);
+    $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function($app) {
+        $app->get('authorizeVK', ['uses' => 'ApiController@authorizeVK']);
 
-    $app->get('checkIn', ['uses' => 'ApiController@checkIn']);
-    $app->get('getUserProfile', ['uses' => 'ApiController@getUserProfile']);
+        $app->post('syncGroupsVK', ['uses' => 'ApiController@syncGroupsVK']);
+        $app->post('syncFriendsVK', ['uses' => 'ApiController@syncFriendsVK']);
 
-    $app->get('getMySettings', ['uses' => 'ApiController@getMySettings']);
-    $app->get('setMySettings', ['uses' => 'ApiController@setMySettings']);
-    $app->get('setAbout', ['uses' => 'ApiController@setAbout']);
+        $app->post('uploadPhoto', ['uses' => 'ApiController@uploadPhoto']);
+        $app->get('removePhoto', ['uses' => 'ApiController@removePhoto']);
 
-    $app->get('searchAround', ['uses' => 'ApiController@searchAround']);
+        $app->get('checkIn', ['uses' => 'ApiController@checkIn']);
+        $app->get('getUserProfile', ['uses' => 'ApiController@getUserProfile']);
 
-    $app->get('like', ['uses' => 'ApiController@like']);
-    $app->get('blockUser', ['uses' => 'ApiController@blockUser']);
-    $app->get('abuse', ['uses' => 'ApiController@abuse']);
+        $app->get('getMySettings', ['uses' => 'ApiController@getMySettings']);
+        $app->get('setMySettings', ['uses' => 'ApiController@setMySettings']);
+        $app->get('setAbout', ['uses' => 'ApiController@setAbout']);
 
-    $app->get('getMyMessages', ['uses' => 'ApiController@getMyMessages']);
-    $app->get('sendMessageToUser', ['uses' => 'ApiController@sendMessageToUser']);
-    $app->get('getMessagesWithUser', ['uses' => 'ApiController@getMessagesWithUser']);
+        $app->get('searchAround', ['uses' => 'ApiController@searchAround']);
 
-    $app->get('setDeviceToken', ['uses' => 'ApiController@setDeviceToken']);
-    $app->get('logout', ['uses' => 'ApiController@logout']);
-    $app->get('removeProfile', ['uses' => 'ApiController@removeProfile']);
-});
+        $app->get('like', ['uses' => 'ApiController@like']);
+        $app->get('blockUser', ['uses' => 'ApiController@blockUser']);
+        $app->get('abuse', ['uses' => 'ApiController@abuse']);
 
-$app->group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers'], function($app) {
-    $app->get('login', ['uses' => 'AdminController@login']);
-    $app->get('logout', ['uses' => 'AdminController@logout']);
-});
+        $app->get('getMyMessages', ['uses' => 'ApiController@getMyMessages']);
+        $app->get('sendMessageToUser', ['uses' => 'ApiController@sendMessageToUser']);
+        $app->get('getMessagesWithUser', ['uses' => 'ApiController@getMessagesWithUser']);
 
-$app->get('', ['uses' => '\App\Http\Controllers\SiteController@index']);
+        $app->get('setDeviceToken', ['uses' => 'ApiController@setDeviceToken']);
+        $app->get('logout', ['uses' => 'ApiController@logout']);
+        $app->get('removeProfile', ['uses' => 'ApiController@removeProfile']);
+    });
+
+    $app->get('', ['uses' => '\App\Http\Controllers\SiteController@index']);
+
+} else if ($_SERVER['SERVER_NAME'] == env('ADMIN_DOMAIN')) {
+
+    $app->group(['namespace' => 'App\Http\Controllers'], function($app) {
+        $app->get('', ['uses' => 'AdminController@index']);
+        $app->get('login', ['uses' => 'AdminController@login']);
+        $app->post('login', ['uses' => 'AdminController@login']);
+        $app->get('logout', ['uses' => 'AdminController@logout']);
+
+        $app->get('tests/sendRequest', ['uses' => 'AdminController@sendRequest']);
+    });
+
+}
+
+
+
+
+
