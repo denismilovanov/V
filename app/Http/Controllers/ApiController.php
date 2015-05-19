@@ -10,6 +10,7 @@ use App\Models\Likes;
 use App\Models\Messages;
 use App\Models\Abuses;
 use App\Models\Helper;
+use App\Models\VK;
 
 
 class ApiController extends BaseController {
@@ -48,6 +49,11 @@ class ApiController extends BaseController {
         $soft_version_int = Helper::softVersionFromStringToInt($soft_version);
 
         if (! $soft_version_int) {
+            $data['status'] = self::ERROR;
+            return response()->json($data);
+        }
+
+        if (! VK::checkVKAccessToken($access_token, $vk_id)) {
             $data['status'] = self::ERROR;
             return response()->json($data);
         }
