@@ -172,14 +172,14 @@ class Users
         return $user_settings ? $user_settings[0] : null;
     }
 
-    public static function getMyCheckin($user_id) {
-        $user_checkin = \DB::select("
-            SELECT latitude, longitude
-                FROM public.checkins
+    public static function getMyGeography($user_id) {
+        $user_geography = \DB::select("
+            SELECT geography
+                FROM public.users_index
                 WHERE user_id = ?;
         ", [$user_id]);
 
-        return $user_checkin ? $user_checkin[0] : null;
+        return $user_geography ? $user_geography[0]->geography : null;
     }
 
     public static function getMySearchWeightParams($user_id) {

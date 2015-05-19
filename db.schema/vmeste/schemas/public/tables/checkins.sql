@@ -1,17 +1,12 @@
 -------------------------------------------------------------
--- чекины
+-- все чекины - последовательный лог
 
 CREATE TABLE public.checkins (
-    user_id integer NOT NULL PRIMARY KEY REFERENCES public.users (id),
-    latitude double precision,
-    longitude double precision,
-    created_at timestamp without time zone,
-    geo geometry(Point)
+    id bigserial NOT NULL PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES public.users (id),
+    latitude double precision NOT NULL,
+    longitude double precision NOT NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    geography geography NOT NULL
 );
 
-CREATE INDEX checkins_gix
-    ON public.checkins
-    USING gist(geo);
-
-ALTER TABLE public.checkins
-    ALTER COLUMN created_at TYPE timestamp with time zone;

@@ -30,7 +30,7 @@ class UsersMatches
 
     public static function fillMatchesInUsersMatches($user_id) {
         $settings = Users::getMySettings($user_id);
-        $checkin = Users::getMyCheckin($user_id);
+        $geography = Users::getMyGeography($user_id);
 
         $sex = [];
         if ($settings->is_show_male) {
@@ -74,7 +74,7 @@ class UsersMatches
                                 icount(groups_vk_ids),
                                 icount(friends_vk_ids),
                                 :radius * 1000,
-                                st_distance(geography, geography(ST_MakePoint(:longitude, :latitude)))::integer
+                                st_distance(geography, (:geography)::geography)::integer
                             ) AS processing_level
 
                         FROM public.users_index AS ui
@@ -84,7 +84,7 @@ class UsersMatches
                                 l.user2_id = ui.user_id
 
                         WHERE   user_id BETWEEN $i * $limit AND ($i + 1) * $limit - 1 AND
-                                ST_DWithin(geography, geography(ST_MakePoint(:longitude, :latitude)), :radius * 1000) AND
+                                ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
                                 age BETWEEN :age_from AND :age_to AND
                                 sex IN ($sex) AND
                                 l.user1_id IS NULL
@@ -106,8 +106,7 @@ class UsersMatches
                 'age_from' => $settings->age_from,
                 'age_to' => $settings->age_to,
                 'radius' => $settings->radius,
-                'latitude' => $checkin->latitude,
-                'longitude' => $checkin->longitude,
+                'geography' => $geography,
             ]);
         }
 
