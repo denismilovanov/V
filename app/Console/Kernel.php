@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         //
         'App\Console\Commands\PushMatchesCommand',
+        'App\Console\Commands\PushMessagesCommand',
         'App\Console\Commands\UpdateWeightsCommand',
         'App\Console\Commands\FillMatchesCommand',
         'App\Console\Commands\TestRabbitMQCommand',

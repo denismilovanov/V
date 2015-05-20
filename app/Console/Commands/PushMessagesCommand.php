@@ -8,14 +8,14 @@ use \App\Models\Users;
 use \App\Models\ErrorCollector;
 
 
-class PushMatchesCommand extends \Illuminate\Console\Command {
-    public $name = 'push_matches';
+class PushMessagesCommand extends \Illuminate\Console\Command {
+    public $name = 'push_messages';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
-        $tag = 'push_matches' . mt_rand();
+        $tag = 'push_messages' . mt_rand();
         $jobs = 0;
 
-        \Queue::subscribe('push_matches', $tag, function (RabbitMQJob $job) use (& $jobs, $tag) {
+        \Queue::subscribe('push_messages', $tag, function (RabbitMQJob $job) use (& $jobs, $tag) {
             $json = $job->getRawBody();
             \Log::info($json);
 
@@ -23,7 +23,7 @@ class PushMatchesCommand extends \Illuminate\Console\Command {
 
             \Log::info('Начали ' . $jobs);
 
-            if ($result = Pusher::push($data, 'MATCH')) {
+            if ($result = Pusher::push($data, 'MESSAGE')) {
                 \Log::info('Завершили задание');
                 $job->delete();
             } else {

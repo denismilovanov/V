@@ -31,10 +31,10 @@ class Likes {
                 $mutual = 1;
 
                 // второму посылаем пуш через очередь
-                \Queue::push('matches', [
+                \Queue::push('push_matches', [
                     'to_user_id' => $to_user_id,
                     'from_user_id' => $from_user_id,
-                ], 'matches');
+                ], 'push_matches');
             }
         }
 
