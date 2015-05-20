@@ -61,12 +61,15 @@ class Pusher
                     }
 
                     $message = new \ApnsPHP_Message($device->device_token);
+
                     $message->setText($text);
                     $message->setExpiry(30);
                     $message->setBadge(5);
                     $message->setSound();
-                    //$message->setCustomProperty('acme1', 'bar');
-                    //$message->setCustomProperty('acme2', 42);
+
+                    $message->setCustomProperty('userID', $from_user->id);
+                    $message->setCustomProperty('name', $from_user->name);
+                    $message->setCustomProperty('avatar_url', $from_user->avatar_url);
 
                     $pusher = Pusher::getApplePusher();
 
