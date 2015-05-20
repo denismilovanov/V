@@ -38,6 +38,8 @@ after 'deploy:finalize_update', 'deploy:make_nginx_static_files'
 after 'deploy:setup', 'deploy:setup_runtime'
 after "deploy:restart", "deploy:cleanup"
 after "deploy:make_runtime_link", "deploy:phpunit"
+before "deploy:cleanup", "deploy:restart_crons"
+
 
 namespace :deploy do
     task :restart do
@@ -61,6 +63,9 @@ namespace :deploy do
     end
     task :phpunit do
         # run "cd #{latest_release} && phpunit"
+    end
+    task :restart_crons do
+        run "cd #{latest_release} && php artisan stop_all"
     end
     task :make_nginx_static_files do
         #run "cat -s #{latest_release}/protected/views/site/index.php | sed '/^[\t\s]*$/d' > #{shared_path}/system/_static_.html"
