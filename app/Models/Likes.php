@@ -72,6 +72,8 @@ class Likes {
             return false;
         }
 
+        Messages::blockDialog($from_user_id, $to_user_id);
+
         return sizeof(\DB::select("
             UPDATE public.likes
                 SET is_blocked = 't'

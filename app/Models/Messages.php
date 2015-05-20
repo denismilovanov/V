@@ -141,7 +141,8 @@ class Messages {
                 d.is_new
 
                 FROM public.messages_dialogs AS d
-                WHERE d.me_id = ?
+                WHERE   d.me_id = ? AND
+                        NOT d.is_buddy_blocked
                 ORDER BY d.updated_at DESC
                 LIMIT ? OFFSET ?
         ", [ApiController::$user->time_zone, $user_id, $limit, $offset]);
@@ -169,6 +170,15 @@ class Messages {
         }
 
         return $chats;
+    }
+
+    public static function blockDialog($me_id, $buddy_id) {
+        \DB::select("
+            UPDATE public.messages_dialogs
+                SET is_buddy_blocked = 't'
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+        ", [$me_id, $buddy_id]);
     }
 
 }
