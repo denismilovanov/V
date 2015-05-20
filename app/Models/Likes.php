@@ -67,6 +67,16 @@ class Likes {
         ", [$from_user_id, $to_user_id, $to_user_id, $from_user_id])[0]->c == 2;
     }
 
+    public static function isBlocked($from_user_id, $to_user_id) {
+        return \DB::select("
+            SELECT COUNT(*) AS c
+                FROM public.likes
+                WHERE   user1_id = ? AND
+                        user2_id = ? AND
+                        NOT is_blocked;
+        ", [$from_user_id, $to_user_id])[0]->c != 1;
+    }
+
     public static function blockUser($from_user_id, $to_user_id) {
         if (! Users::findById($to_user_id)) {
             return false;

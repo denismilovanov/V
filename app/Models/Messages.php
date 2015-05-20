@@ -34,11 +34,29 @@ class Messages {
             "SELECT public.add_message(?, ?, ?, 't');
         ", [$from_user_id, $to_user_id, $text])[0]->add_message;
 
-        // вставляем парное сообщение
-        // потенциально это может уйти на другую базу, которая обслуживает второго пользователя
-        $message_id_pair = \DB::select(
-            "SELECT public.add_message(?, ?, ?, 'f');
-        ", [$to_user_id, $from_user_id, $text])[0]->add_message;
+        // вставляем парное сообщение только если получатель не заблокировал отправителя
+        if (! Likes::isBlocked($to_user_id, $from_user_id)) {
+            // потенциально это может уйти на другую базу, которая обслуживает второго пользователя
+            $message_id_pair = \DB::select(
+                "SELECT public.add_message(?, ?, ?, 'f');
+            ", [$to_user_id, $from_user_id, $text])[0]->add_message;
+
+            // отправляем пуш второму
+            \Queue::push('push_messages', [
+                'from_user_id' => $from_user_id,
+                'to_user_id' => $to_user_id,
+                'message' => $text,
+            ], 'push_messages');
+
+            // эхо-юзеры
+            if (in_array($to_user_id, [100000, 200000])) {
+                \Queue::push('echo', [
+                    'from_user_id' => $from_user_id,
+                    'to_user_id' => $to_user_id,
+                    'message' => $text,
+                ], 'echo');
+            }
+        }
 
         //
         $added_at = \DB::select("
@@ -46,22 +64,6 @@ class Messages {
                 FROM public.messages_new
                 WHERE id = ?;
         ", [ApiController::$user->time_zone, $message_id])[0]->added_at;
-
-        // отправляем пуш второму
-        \Queue::push('push_messages', [
-            'from_user_id' => $from_user_id,
-            'to_user_id' => $to_user_id,
-            'message' => $text,
-        ], 'push_messages');
-
-        // эхо-юзеры
-        if (in_array($to_user_id, [100000, 200000])) {
-            \Queue::push('echo', [
-                'from_user_id' => $from_user_id,
-                'to_user_id' => $to_user_id,
-                'message' => $text,
-            ], 'echo');
-        }
 
         return [
             'message_id' => $message_id,
