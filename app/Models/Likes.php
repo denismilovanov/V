@@ -30,6 +30,8 @@ class Likes {
             if (sizeof($mutual_row)) {
                 $mutual = 1;
 
+                Messages::createDialog($from_user_id, $to_user_id);
+
                 // второму посылаем пуш через очередь
                 \Queue::push('push_matches', [
                     'to_user_id' => $to_user_id,

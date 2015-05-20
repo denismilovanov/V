@@ -71,6 +71,32 @@ class Messages {
         ];
     }
 
+    public static function createDialog($from_user_id, $to_user_id) {
+        \DB::select("
+            INSERT INTO public.messages_dialogs
+                (me_id, buddy_id, last_message, last_message_i, is_new)
+                VALUES (
+                    ?,
+                    ?,
+                    '',
+                    't',
+                    'f'
+                );
+        ", [$from_user_id, $to_user_id]);
+
+        \DB::select("
+            INSERT INTO public.messages_dialogs
+                (me_id, buddy_id, last_message, last_message_i, is_new)
+                VALUES (
+                    ?,
+                    ?,
+                    '',
+                    't',
+                    'f'
+                );
+        ", [$to_user_id, $from_user_id]);
+    }
+
     public static function echoMessage($data) {
         $to_user_id = $data['from_user_id'];
         $from_user_id = $data['to_user_id'];

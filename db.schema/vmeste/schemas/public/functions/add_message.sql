@@ -29,18 +29,6 @@ BEGIN
         WHERE   me_id = i_me_id AND
                 buddy_id = i_buddy_id;
 
-    IF NOT FOUND THEN
-        INSERT INTO public.messages_dialogs
-            (me_id, buddy_id, last_message, last_message_i, is_new)
-            VALUES (
-                i_me_id,
-                i_buddy_id,
-                t_text,
-                b_i,
-                NOT b_i -- если не я написал, то сообщение новое
-            );
-    END IF;
-
     RETURN i_id;
 
 END
