@@ -4,12 +4,14 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Messages;
 
-class EchoMessagesCommand extends \Illuminate\Console\Command
+class EchoMessagesCommand extends \App\Console\SingleCommand
 {
     public $name = 'echo_messages';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
+        parent::run($input, $output);
+
         $tag = 'echo_messages' . mt_rand();
         $jobs = 0;
 

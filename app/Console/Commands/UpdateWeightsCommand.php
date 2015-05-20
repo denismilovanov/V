@@ -4,12 +4,14 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\UsersMatches;
 
-class UpdateWeightsCommand extends \Illuminate\Console\Command
+class UpdateWeightsCommand extends \App\Console\SingleCommand
 {
     public $name = 'update_weights';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
+        parent::run($input, $output);
+
         $jobs = 0;
         $tag = 'update_weights_' . mt_rand();
 

@@ -8,10 +8,13 @@ use \App\Models\Users;
 use \App\Models\ErrorCollector;
 
 
-class PushMatchesCommand extends \Illuminate\Console\Command {
+class PushMatchesCommand extends \App\Console\SingleCommand
+{
     public $name = 'push_matches';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
+        parent::run($input, $output);
+
         $tag = 'push_matches' . mt_rand();
         $jobs = 0;
 

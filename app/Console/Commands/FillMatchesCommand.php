@@ -4,12 +4,14 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\UsersMatches;
 
-class FillMatchesCommand extends \Illuminate\Console\Command
+class FillMatchesCommand extends \App\Console\SingleCommand
 {
     public $name = 'fill_matches';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
+        parent::run($input, $output);
+
         $tag = 'fill_matches_' . mt_rand();
         $jobs = 0;
 

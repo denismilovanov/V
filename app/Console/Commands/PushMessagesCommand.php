@@ -8,10 +8,13 @@ use \App\Models\Users;
 use \App\Models\ErrorCollector;
 
 
-class PushMessagesCommand extends \Illuminate\Console\Command {
+class PushMessagesCommand extends \App\Console\SingleCommand
+{
     public $name = 'push_messages';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
+        parent::run($input, $output);
+
         $tag = 'push_messages' . mt_rand();
         $jobs = 0;
 
