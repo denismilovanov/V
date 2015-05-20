@@ -53,7 +53,7 @@ class Messages {
         ];
     }
 
-    public static function getAllBetweenUsers($me_id, $buddy_id, $offset, $older_than, $later_than) {
+    public static function getAllBetweenUsers($me_id, $buddy_id, $older_than, $later_than) {
         $sql = "
             SELECT  id,
                     public.format_date(created_at, :time_zone) AS added_at,
@@ -66,7 +66,6 @@ class Messages {
         $data = [
             'me_id' => $me_id,
             'buddy_id' => $buddy_id,
-            'offset' => $offset,
             'time_zone' => ApiController::$user->time_zone
         ];
 
@@ -82,8 +81,7 @@ class Messages {
 
         $sql .= "
             ORDER BY id DESC
-            LIMIT 50
-            OFFSET :offset
+            LIMIT 50;
         ";
 
         $messages = \DB::select($sql, $data);

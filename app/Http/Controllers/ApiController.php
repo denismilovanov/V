@@ -405,11 +405,10 @@ class ApiController extends BaseController {
         }
 
         $user_id = \Request::get('user_id');
-        $offset = \Request::get('offset', 0);
         $older_than = \Request::get('older_than');
         $later_than = \Request::get('later_than');
 
-        $messages = Messages::getAllBetweenUsers(self::$user->id, $user_id, $offset, $older_than, $later_than);
+        $messages = Messages::getAllBetweenUsers(self::$user->id, $user_id, $older_than, $later_than);
 
         return response()->json([
             'status' => self::SUCCESS,
