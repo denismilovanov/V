@@ -33,7 +33,8 @@ define('APP_ENV', env('APP_ENV'));
 mb_internal_encoding("UTF-8");
 
 $logger = app('log');
-$logger->pushHandler(new Monolog\Handler\ErrorLogHandler());
+$logger->popHandler(); // выкидываем запись в файл
+$logger->pushHandler(new Monolog\Handler\ErrorLogHandler()); // включаем запись в консоль
 
 $kernel = $app->make(
     'Illuminate\Contracts\Console\Kernel'
