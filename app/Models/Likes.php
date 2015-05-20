@@ -7,9 +7,13 @@ class Likes {
             return false;
         }
 
-        \DB::select("
+        $is_new = \DB::select("
             SELECT public.upsert_like(?, ?, ?);
-        ", [$from_user_id, $to_user_id, $is_like]);
+        ", [$from_user_id, $to_user_id, $is_like])[0]->upsert_like;
+
+        if (! $is_new) {
+            return false;
+        }
 
         $mutual = 0;
 

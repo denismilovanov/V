@@ -62,6 +62,7 @@ if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
         $app->get('logout', ['uses' => 'AdminController@logout']);
 
         $app->get('tests/sendRequest', ['uses' => 'AdminController@sendRequest']);
+        $app->post('tests/sendRequest', ['uses' => 'AdminController@sendRequest']);
     });
 
 }

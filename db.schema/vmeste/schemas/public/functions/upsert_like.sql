@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION public.upsert_like(
     i_to_user_id integer,
     i_is_liked integer
 )
-RETURNS void AS
+RETURNS integer AS
 $BODY$
 DECLARE
 
@@ -25,8 +25,11 @@ BEGIN
                 'f',
                 'f'
             );
+
+        RETURN 1;
     END IF;
 
+    RETURN 0;
 
 END
 $BODY$

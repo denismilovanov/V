@@ -1,17 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
-use App\Models\Users;
-use App\Models\UsersGroupsVk;
-use App\Models\UsersFiendsVk;
-use App\Models\UsersPhotos;
-use App\Models\Checkins;
-use App\Models\Likes;
-use App\Models\Messages;
-use App\Models\Abuses;
-use App\Models\Helper;
-use App\Models\VK;
-
+use App\Models\Api;
 
 class AdminController extends BaseController {
     public function __construct() {
@@ -51,7 +41,22 @@ class AdminController extends BaseController {
     }
 
     public function sendRequest() {
+        $result = '';
+
+        $result = [
+            'response' => '',
+            'url' => '',
+        ];
+
+        if (\Request::isMethod('POST')) {
+            $user_id = \Request::get('user_id', 0);
+            $method = \Request::get('method');
+
+            $result = Api::callApiMethod($user_id, $method, \Request::all());
+        }
+
         return view('admin.tests.sendRequest', [
+            'result' => $result,
         ]);
     }
 }

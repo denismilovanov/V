@@ -23,6 +23,26 @@ class Users
         return $soft;
     }
 
+    public static function getExistingAccessKey($user_id) {
+        if (! self::findById($user_id)) {
+            return '';
+        }
+
+        $key = \DB::select("
+            SELECT key
+                FROM public.users_devices
+                WHERE user_id = ?
+                ORDER BY updated_at DESC
+                LIMIT 1;
+        ", [$user_id]);
+
+        if (isset($key[0])) {
+            return $key[0]->key;
+        }
+
+        return self::getAccessKey($user_id, str_repeat('0', 64), 1, 20000);
+    }
+
     public static function syncGroupsVK($user_id, $groups) {
         if(function_exists('pinba_timer_start')){
             $timer = pinba_timer_start(array('query' => 'authVK', 'resource' => 'DB_updateGroups'));
@@ -226,7 +246,7 @@ class Users
         return null;
     }
 
-    public static function findById($user_id, $area = 'getUserProfile') {
+    public static function findById($user_id, $area = '') {
         if (! $area) {
             $user = \DB::select("
                 SELECT *
