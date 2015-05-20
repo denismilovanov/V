@@ -3,6 +3,8 @@
 require_once 'bootstrap.php';
 
 use \App\Models\Likes;
+use \App\Models\Messages;
+
 
 class BlockUserTest extends TestCase {
 
@@ -18,6 +20,7 @@ class BlockUserTest extends TestCase {
         // удаляем лайки между ними
 
         Likes::deleteAllBetween($test_male_id, $test_female_id);
+        Messages::deleteAllBetween($test_male_id, $test_female_id);
 
         // male likes female
 
