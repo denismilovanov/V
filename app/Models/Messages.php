@@ -47,8 +47,8 @@ class Messages {
                 WHERE id = ?;
         ", [ApiController::$user->time_zone, $message_id])[0]->added_at;
 
-        // эхо-юзер
-        if ($to_user_id == 200000) {
+        // эхо-юзеры
+        if (in_array($to_user_id, [100000, 200000])) {
             \Queue::push('echo', [
                 'from_user_id' => $from_user_id,
                 'to_user_id' => $to_user_id,
