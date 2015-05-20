@@ -55,6 +55,11 @@ class Pusher
 
                     \Log::info($type . ': ' . $text . ' -> iOS ' . $device->device_token);
 
+                    if (Users::isTestUser($to_user->id)) {
+                        \Log::info('Предназначено тестовому пользователю, пропускаем');
+                        return true;
+                    }
+
                     $message = new \ApnsPHP_Message($device->device_token);
                     $message->setText($text);
                     $message->setExpiry(30);
