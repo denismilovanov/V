@@ -17,7 +17,7 @@ class Likes {
 
         $mutual = 0;
 
-        if ($is_like === "1") {
+        if ($is_like === 1) {
 
             $mutual_row = \DB::select("
                 SELECT *
@@ -67,19 +67,18 @@ class Likes {
         ", [$from_user_id, $to_user_id, $to_user_id, $from_user_id])[0]->c == 2;
     }
 
-    public static function blockUser($from_user_id, $to_user_id, $reason) {
+    public static function blockUser($from_user_id, $to_user_id) {
         if (! Users::findById($to_user_id)) {
             return false;
         }
 
         return sizeof(\DB::select("
             UPDATE public.likes
-                SET is_blocked = 't',
-                    reason = ?
+                SET is_blocked = 't'
                 WHERE   user1_id = ? AND
                         user2_id = ?
                 RETURNING *;
-        ", [$reason, $from_user_id, $to_user_id])) > 0;
+        ", [$from_user_id, $to_user_id])) > 0;
     }
 
 }

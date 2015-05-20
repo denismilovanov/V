@@ -44,7 +44,6 @@ class BlockUserTest extends TestCase {
         $result = Bootstrap::getFromApi('blockUser', array(
             'key' => $female_key,
             'user_id' => $test_male_id,
-            'reason' => 1,
         ));
         $this->assertEquals($result['status'], 1);
 

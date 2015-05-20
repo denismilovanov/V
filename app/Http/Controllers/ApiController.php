@@ -32,17 +32,17 @@ class ApiController extends BaseController {
 
     public function authorizeVK() {
         $access_token = \Request::get('access_token');
-        $vk_id = \Request::get('vk_id');
-        $device_type = \Request::get('device_type');
+        $vk_id = intval(\Request::get('vk_id'));
+        $device_type = intval(\Request::get('device_type'));
         $device_token = \Request::get('device_token');
         $api_version = \Request::get('api_version');
         $soft_version = \Request::get('soft_version');
         $name = \Request::get('name');
-        $sex = \Request::get('sex');
+        $sex = intval(\Request::get('sex'));
         $bdate = \Request::get('bdate');
-        $about = \Request::get('about');
-        $avatar_url = \Request::get('avatar_url');
-        $timezone = \Request::get('timezone', 0);
+        $about = strip_tags(\Request::get('about'));
+        $avatar_url = strip_tags(\Request::get('avatar_url'));
+        $timezone = intval(\Request::get('timezone', 0));
 
         $data = [];
 
@@ -143,7 +143,7 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $photo_id = \Request::get('photo_id');
+        $photo_id = intval(\Request::get('photo_id'));
 
         $result = UsersPhotos::removePhoto(
             self::$user->id,
@@ -198,19 +198,23 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $sex = \Request::get('sex');
-        $radius = \Request::get('radius');;
-        $age_from = \Request::get('age_from');
-        $age_to = \Request::get('age_to');
+        $sex = intval(\Request::get('sex'));
+        $radius = intval(\Request::get('radius'));
+        $age_from = intval(\Request::get('age_from'));
+        $age_to = intval(\Request::get('age_to'));
         $is_show_male = \Request::get('is_show_male');
         $is_show_female = \Request::get('is_show_female');
         $is_notification = \Request::get('is_notification');
         $is_notification_likes = \Request::get('is_notification_likes');
         $is_notification_messages = \Request::get('is_notification_messages');
 
-        $result = Users::setSettings(self::$user->id, $sex, $radius, $age_from, $age_to, $is_show_male,
-                                     $is_show_female, $is_notification,
-                                     $is_notification_likes, $is_notification_messages);
+        if (($sex != 1 and $sex != 2) or $age_from < 18 or $age_to > 80) {
+            $result = false;
+        } else {
+            $result = Users::setSettings(self::$user->id, $sex, $radius, $age_from, $age_to, $is_show_male,
+                                         $is_show_female, $is_notification,
+                                         $is_notification_likes, $is_notification_messages);
+        }
 
         return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
@@ -251,8 +255,12 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user_id = \Request::get('user_id');
-        $is_like = \Request::get('is_like');
+        $user_id = intval(\Request::get('user_id'));
+        $is_like = intval(\Request::get('is_like'));
+
+        if ($is_like) {
+            $is_like = 1;
+        }
 
         $result = Likes::like(self::$user->id, $user_id, $is_like);
 
@@ -268,8 +276,8 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user_id = \Request::get('user_id');
-        $text = \Request::get('text');
+        $user_id = intval(\Request::get('user_id'));
+        $text = strip_tags(\Request::get('text'));
 
         $abuse_id = Abuses::abuse(self::$user->id, $user_id, $text);
 
@@ -285,10 +293,9 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user_id = \Request::get('user_id');
-        $reason = intval(\Request::get('reason'));
+        $user_id = intval(\Request::get('user_id'));
 
-        $result = Likes::blockUser(self::$user->id, $user_id, $reason);
+        $result = Likes::blockUser(self::$user->id, $user_id);
 
         return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
@@ -347,7 +354,7 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user_id = \Request::get('user_id');
+        $user_id = intval(\Request::get('user_id'));
 
         $profile = Users::findById($user_id, 'getUserProfile');
 
@@ -380,8 +387,8 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user_id = \Request::get('user_id');
-        $text = \Request::get('text');
+        $user_id = intval(\Request::get('user_id'));
+        $text = strip_tags(\Request::get('text'));
 
         if (! Likes::isMutual(self::$user->id, $user_id)) {
             return response()->json([
@@ -404,9 +411,9 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
-        $user_id = \Request::get('user_id');
-        $older_than = \Request::get('older_than');
-        $later_than = \Request::get('later_than');
+        $user_id = intval(\Request::get('user_id'));
+        $older_than = \Request::get('older_than') !== null ? intval(\Request::get('older_than')) : null;
+        $later_than = \Request::get('later_than') !== null ? intval(\Request::get('later_than')) : null;
 
         $messages = Messages::getAllBetweenUsers(self::$user->id, $user_id, $older_than, $later_than);
 
