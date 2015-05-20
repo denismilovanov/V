@@ -47,9 +47,31 @@ class Messages {
                 WHERE id = ?;
         ", [ApiController::$user->time_zone, $message_id])[0]->added_at;
 
+        // эхо-юзер
+        if ($to_user_id == 200000) {
+            \Queue::push('echo', [
+                'from_user_id' => $from_user_id,
+                'to_user_id' => $to_user_id,
+                'message' => $text,
+            ], 'echo');
+        }
+
         return [
             'message_id' => $message_id,
             'added_at' => $added_at,
+        ];
+    }
+
+    public static function echoMessage($data) {
+        $to_user_id = $data['from_user_id'];
+        $from_user_id = $data['to_user_id'];
+        $message = 'ECHO: ' . $data['message'];
+
+        ApiController::$user = Users::findById($from_user_id);
+
+        return [
+            'echo' => $message,
+            'message_id' => self::addMessage($from_user_id, $to_user_id, $message)['message_id'],
         ];
     }
 
