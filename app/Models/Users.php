@@ -400,6 +400,7 @@ class Users
         $users_all = self::findByIds($users_ids, 'searchAround');
 
         foreach ($users as $user) {
+            $user->id = $users_all[$user->user_id]->id;
             $user->name = $users_all[$user->user_id]->name;
             $user->last_activity_at = $users_all[$user->user_id]->last_activity_at;
             $user->distance = $users_all[$user->user_id]->distance;
@@ -409,6 +410,7 @@ class Users
             $user->friends_vk_count = $users_all[$user->user_id]->friends_vk_count;
             $user->photos_count = $users_all[$user->user_id]->photos_count;
             $user->avatar_url = $users_all[$user->user_id]->avatar_url;
+            unset($user->user_id);
         }
 
         return $users;
