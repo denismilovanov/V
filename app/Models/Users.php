@@ -318,6 +318,11 @@ class Users
         $user = $user[0];
         $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
 
+        // идентификаторы тестовых пользователей отрицательные
+        if (isset($user->vk_id) and $user->vk_id < 0) {
+            $user->vk_id = $user->sex == 1 ? 308890 : 1;
+        }
+
         return $user;
     }
 
@@ -366,7 +371,7 @@ class Users
 
             // идентификаторы тестовых пользователей отрицательные
             if (isset($user->vk_id) and $user->vk_id < 0) {
-                $user->vk_id = $user->sex == 1 ? 1 : 1;
+                $user->vk_id = $user->sex == 1 ? 308890 : 1;
             }
 
             $result[$user->id] = $user;
