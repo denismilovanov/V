@@ -4,6 +4,9 @@ class UsersMatches
 {
     public static function deleteMatch($user_id, $match_user_id) {
         \DB::select("
+            WITH lock AS (
+                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+            )
             UPDATE public.users_processing_levels
                 SET users_ids = users_ids - intset(:match_user_id)
                 WHERE user_id = :user_id;
@@ -15,6 +18,9 @@ class UsersMatches
         ]);
 
         \DB::select("
+            WITH lock AS (
+                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+            )
             UPDATE public.users_matching_levels
                 SET users_ids = users_ids - intset(:match_user_id)
                 WHERE user_id = :user_id;
@@ -44,6 +50,8 @@ class UsersMatches
         \DB::select("
             SET synchronous_commit TO off;
 
+            SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
+
             DELETE FROM public.users_processing_levels
                 WHERE user_id = :user_id;
             INSERT INTO public.users_processing_levels
@@ -65,6 +73,8 @@ class UsersMatches
         for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
             \DB::select("
                 SET synchronous_commit TO off;
+
+                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
 
                 WITH all_users AS (
                     SELECT  ui.user_id AS match_user_id,
