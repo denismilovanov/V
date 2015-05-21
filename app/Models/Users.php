@@ -47,7 +47,9 @@ class Users
                 LIMIT 1;
         ", [$user_id]);
 
-        if (isset($key[0])) {
+        // может не быть записи, либо ключ может быть сброшен в NULL
+        if (isset($key[0]) and $key[0]->key) {
+            // если это не так, то выдаем
             return $key[0]->key;
         }
 
