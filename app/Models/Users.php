@@ -343,6 +343,12 @@ class Users
 
         foreach ($users as $user) {
             $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
+
+            // идентификаторы тестовых пользователей отрицательные
+            if (isset($user->vk_id) and $user->vk_id < 0) {
+                $user->vk_id = $user->sex == 1 ? 1 : 1;
+            }
+
             $result[$user->id] = $user;
         }
 
