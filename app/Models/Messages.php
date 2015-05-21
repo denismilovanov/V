@@ -55,11 +55,11 @@ class Messages {
 
             // эхо-юзеры
             if (in_array($to_user_id, [100000, 200000])) {
-                \Queue::push('echo', [
+                \Queue::push('echo_messages', [
                     'from_user_id' => $from_user_id,
                     'to_user_id' => $to_user_id,
                     'message' => $text,
-                ], 'echo');
+                ], 'echo_messages');
             }
         }
 

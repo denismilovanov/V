@@ -23,7 +23,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdateWeightsCommand',
         'App\Console\Commands\FillMatchesCommand',
         'App\Console\Commands\TestRabbitMQCommand',
+        //
         'App\Console\Commands\EchoMessagesCommand',
+        'App\Console\Commands\EchoLikesCommand',
     ];
 
     /**

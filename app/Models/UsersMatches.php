@@ -103,8 +103,8 @@ class UsersMatches
 
             ", [
                 'user_id' => $user_id,
-                'age_from' => $settings->age_from,
-                'age_to' => $settings->age_to,
+                'age_from' => $settings->age_from ? : 18,
+                'age_to' => $settings->age_to ? : 80,
                 'radius' => $settings->radius,
                 'geography' => $geography,
             ]);
