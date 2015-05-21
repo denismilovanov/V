@@ -9,6 +9,11 @@ class RemovePidsCommand extends \App\Console\SingleCommand {
         sort($pids);
 
         foreach ($pids as $pid_file) {
+            // см. коммент ниже
+            if (! file_exists($pid_file)) {
+                continue;
+            }
+
             $pid = file_get_contents($pid_file);
 
             $result = exec('ps --pid ' . $pid);
