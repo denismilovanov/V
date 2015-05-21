@@ -29,3 +29,6 @@ ALTER TABLE public.users_devices
              ELSE TRUE
         END
     );
+
+ALTER TABLE public.users_devices
+    ALTER COLUMN key DROP NOT NULL;

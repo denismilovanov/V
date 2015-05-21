@@ -17,7 +17,7 @@ BEGIN
         s_device_token := NULL;
     END IF;
 
-    s_key := substring(md5(random()::varchar) || md5(now()::varchar) from 1 for 40);
+    s_key := substring(md5(random()::varchar) || md5(now()::varchar) || md5(random()::varchar) from 1 for 40);
 
     UPDATE public.users_devices
         SET key = s_key,
@@ -25,7 +25,7 @@ BEGIN
             soft_version = i_soft_version,
             updated_at = now()
         WHERE   user_id = i_user_id AND
-                device_token = s_device_token;
+                device_token IS NOT DISTINCT FROM s_device_token;
 
 
     IF NOT FOUND THEN

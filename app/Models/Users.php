@@ -411,4 +411,15 @@ class Users
 
         return $users;
     }
+
+    public static function removeOldKeys() {
+        return \DB::select("
+            UPDATE public.users_devices
+                SET key = NULL,
+                    updated_at = now()
+                WHERE   updated_at < now() - interval '1 day' AND
+                        key IS NOT NULL
+                RETURNING user_id;
+        ");
+    }
 }

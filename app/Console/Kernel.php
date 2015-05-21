@@ -30,6 +30,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\EchoLikesCommand',
         //
         'App\Console\Commands\SendErrorsCommand',
+        'App\Console\Commands\MaintenanceCommand',
     ];
 
     /**
