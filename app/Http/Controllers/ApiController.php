@@ -396,6 +396,12 @@ class ApiController extends BaseController {
             ]);
         }
 
+        if (trim($text) === '') {
+            return response()->json([
+                'status' => self::ERROR,
+            ]);
+        }
+
         $result = Messages::addMessage(self::$user->id, $user_id, $text);
 
         return response()->json([
