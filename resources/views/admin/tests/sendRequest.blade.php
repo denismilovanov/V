@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <form action="?" method="post">
             <label>user_id</label>
             <input type="text" class="form-control" name="user_id" value="{{ \Request::get('user_id') }}" />
@@ -46,9 +46,9 @@
 
         </form>
     </div>
-    <div class="col-md-6" style="word-break: break-all;">
+    <div class="col-md-8" style="word-break: break-all;">
         <label>Результат</label>
-        <pre style="height: 400px;">{{ $result['response'] }}</pre>
+        <pre style="height: 500px;">{{ $result['response'] }}</pre>
         <br />
         <a target="_blank" href="{{ $result['url'] }}">{{ $result['url'] }}</a>
     </div>

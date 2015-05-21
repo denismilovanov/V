@@ -4,6 +4,17 @@ class Api
 {
     public static function getMethods() {
         return [
+            'checkIn' => [
+                'fields' => [
+                    'latitude', 'longitude',
+                ],
+                'method' => 'get',
+            ],
+            'searchAround' => [
+                'fields' => [
+                ],
+                'method' => 'get',
+            ],
             'like' => [
                 'fields' => [
                     'user_id', 'is_like',
@@ -16,6 +27,7 @@ class Api
                 ],
                 'method' => 'get',
             ],
+
         ];
     }
 
@@ -26,7 +38,7 @@ class Api
 
         $call_method = self::getMethods()[$method]['method'];
 
-        $params = $params[$method];
+        $params = isset($params[$method]) ? $params[$method] : [];
 
         $response = $client->$call_method(env('URL') . env('API_RELATIVE_URL') . '/' . $method, [
             'query' => $params + [
@@ -38,6 +50,8 @@ class Api
 
         if ($response->getStatusCode() == 200) {
             $response = (string) $response->getBody();
+            $response = json_decode($response);
+            $response = json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         } else {
             $response = $response->getStatusCode();
         }
