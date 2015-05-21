@@ -16,6 +16,12 @@ class Api
                 ],
                 'method' => 'get',
             ],
+            'getUserProfile' => [
+                'fields' => [
+                    'user_id',
+                ],
+                'method' => 'get',
+            ],
             'like' => [
                 'fields' => [
                     'user_id', 'is_like',
