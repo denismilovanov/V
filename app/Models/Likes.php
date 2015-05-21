@@ -32,11 +32,16 @@ class Likes {
 
                 Messages::createDialog($from_user_id, $to_user_id);
 
-                // второму посылаем пуш через очередь
-                \Queue::push('push_matches', [
-                    'to_user_id' => $to_user_id,
-                    'from_user_id' => $from_user_id,
-                ], 'push_matches');
+                // надо ли послать пуш второму?
+                $to_user_settings = Users::getMySettings($to_user_id);
+
+                if ($to_user_settings->is_notification and $to_user_settings->is_notification_likes) {
+                    // второму посылаем пуш через очередь
+                    \Queue::push('push_matches', [
+                        'to_user_id' => $to_user_id,
+                        'from_user_id' => $from_user_id,
+                    ], 'push_matches');
+                }
             }
         }
 

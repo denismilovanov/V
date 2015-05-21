@@ -41,12 +41,17 @@ class Messages {
                 "SELECT public.add_message(?, ?, ?, 'f');
             ", [$to_user_id, $from_user_id, $text])[0]->add_message;
 
-            // отправляем пуш второму
-            \Queue::push('push_messages', [
-                'from_user_id' => $from_user_id,
-                'to_user_id' => $to_user_id,
-                'message' => $text,
-            ], 'push_messages');
+            // надо ли послать пуш второму?
+            $to_user_settings = Users::getMySettings($to_user_id);
+
+            if ($to_user_settings->is_notification and $to_user_settings->is_notification_messages) {
+                // отправляем пуш второму
+                \Queue::push('push_messages', [
+                    'from_user_id' => $from_user_id,
+                    'to_user_id' => $to_user_id,
+                    'message' => $text,
+                ], 'push_messages');
+            }
 
             // эхо-юзеры
             if (in_array($to_user_id, [100000, 200000])) {
