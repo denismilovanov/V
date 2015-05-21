@@ -197,7 +197,7 @@ class UsersMatches
         return true;
     }
 
-    private static function getMatchesAtLevel($me_id, $level_id) {
+    private static function getMatchesAtLevel($me_id, $level_id, $limit) {
         return \DB::select("
             WITH u AS (
                 SELECT unnest(users_ids) AS user_id
@@ -207,12 +207,12 @@ class UsersMatches
             )
             SELECT u.user_id
                 FROM u
-                LIMIT 50
+                LIMIT ?
                 -- ORDER BY u.user_id
-        ", [$me_id, $level_id]);
+        ", [$me_id, $level_id, $limit]);
     }
 
-    public static function getMatches($me_id) {
+    public static function getMatches($me_id, $limit) {
         $levels_ids = \DB::select("
             SELECT level_id
                 FROM public.users_matching_levels
@@ -226,7 +226,7 @@ class UsersMatches
 
         foreach ($levels_ids as $level_id) {
             $level_id = $level_id->level_id;
-            $result = self::getMatchesAtLevel($me_id, $level_id);
+            $result = self::getMatchesAtLevel($me_id, $level_id, $limit);
             break;
         }
 

@@ -12,6 +12,7 @@ class Api
             ],
             'searchAround' => [
                 'fields' => [
+                    'limit',
                 ],
                 'method' => 'get',
             ],

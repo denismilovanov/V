@@ -351,8 +351,8 @@ class Users
         return \DB::select("SELECT max(id) AS max FROM public.users;")[0]->max;
     }
 
-    public static function searchAround($me_id) {
-        $users = UsersMatches::getMatches($me_id);
+    public static function searchAround($me_id, $limit) {
+        $users = UsersMatches::getMatches($me_id, $limit);
 
         $users_ids = [];
 

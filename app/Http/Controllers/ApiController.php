@@ -243,8 +243,10 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
+        $limit = intval(\Request::get('limit', 50));
+
         $data['status'] = self::SUCCESS;
-        $data['users'] = Users::searchAround(self::$user->id);
+        $data['users'] = Users::searchAround(self::$user->id, $limit);
 
         return response()->json($data);
     }
