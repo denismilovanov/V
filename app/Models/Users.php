@@ -136,6 +136,12 @@ class Users
                                          $is_show_female, $is_notification,
                                          $is_notification_likes, $is_notification_messages) {
 
+        $old_settings = self::getSettings($user_id);
+
+        if (! $old_settings) {
+            return false;
+        }
+
         \DB::select("
             UPDATE public.users_settings
                 SET sex = ?, radius = ?, age_from = ?, age_to = ?,
@@ -155,6 +161,18 @@ class Users
                 $sex,
                 $user_id
             ]);
+
+        // надо пересчитать подходящих?
+        if ($old_settings['sex'] != $sex or
+            $old_settings['radius'] != $radius or
+            $old_settings['age_from'] != $age_from or
+            $old_settings['age_to'] != $age_to or
+            $old_settings['is_show_female'] != $is_show_female or
+            $old_settings['is_show_male'] != $is_show_male
+        ) {
+            // надо (делаем это после апдейта базы, кот. был выше)
+            UsersMatches::jobFillMatches($user_id);
+        }
 
         return true;
     }
