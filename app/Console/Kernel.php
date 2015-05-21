@@ -54,7 +54,7 @@ class SingleCommand extends \Illuminate\Console\Command
         }
 
         if (file_exists($pid)) {
-            \Log::info('Процесс уже запущен: ' . $pid . ' - ' . file_get_contents($pid));
+            // \Log::info('Процесс уже запущен: ' . $pid . ' - ' . file_get_contents($pid));
             exit(1);
         }
 
