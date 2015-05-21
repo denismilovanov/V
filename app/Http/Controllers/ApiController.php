@@ -27,6 +27,11 @@ class ApiController extends BaseController {
     public function beforeAction() {
         $key = \Request::get('key');
         self::$user = Users::findByKey($key);
+
+        if (self::$user !== null) {
+            Users::updateLastActivity(self::$user->id);
+        }
+
         return self::$user !== null;
     }
 

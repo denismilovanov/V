@@ -23,6 +23,17 @@ class Users
         return $soft;
     }
 
+    public static function updateLastActivity($user_id) {
+        // не имеет смысл делать это на каждый запрос
+        if (mt_rand() / mt_getrandmax() <= 0.20) {
+            \DB::select("
+                UPDATE public.users_index
+                    SET last_activity_at = now()
+                    WHERE user_id = ?;
+            ", [$user_id]);
+        }
+    }
+
     public static function getExistingAccessKey($user_id) {
         if (! self::findById($user_id)) {
             return '';
