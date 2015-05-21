@@ -6,6 +6,12 @@ class ErrorCollector {
         $query = \DB::connection('logs')->select("
             SELECT logs.add_error(?, ?, ?);
         ", [$type, $header, $message]);
+
+        \Queue::push('send_errors', [
+            'type' => $type,
+            'header' => $header,
+            'message' => $message,
+        ], 'send_errors');
     }
 
 }

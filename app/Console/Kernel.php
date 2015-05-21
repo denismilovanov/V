@@ -20,12 +20,16 @@ class Kernel extends ConsoleKernel
         //
         'App\Console\Commands\PushMatchesCommand',
         'App\Console\Commands\PushMessagesCommand',
+        //
         'App\Console\Commands\UpdateWeightsCommand',
         'App\Console\Commands\FillMatchesCommand',
+        //
         'App\Console\Commands\TestRabbitMQCommand',
         //
         'App\Console\Commands\EchoMessagesCommand',
         'App\Console\Commands\EchoLikesCommand',
+        //
+        'App\Console\Commands\SendErrorsCommand',
     ];
 
     /**
