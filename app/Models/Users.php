@@ -254,6 +254,11 @@ class Users
                     WHERE id = ?;
             ", [$user_id]);
         } else if ($area == 'getUserProfile') {
+            $search_weights_params = Users::getMySearchWeightParams(ApiController::$user->id);
+
+            $friends_vk_ids = $search_weights_params->friends_vk_ids;
+            $groups_vk_ids = $search_weights_params->groups_vk_ids;
+
             $user = \DB::select("
                 SELECT  u.*,
                         extract('year' from age(u.bdate)) AS age,
@@ -261,8 +266,11 @@ class Users
                         uivk.vk_id,
                         icount(i.groups_vk_ids) AS groups_count,
                         icount(i.friends_vk_ids) AS friends_count,
-                        ST_Distance(i.geography, ?)::integer AS distance,
-                        0 AS weight
+                        round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
+                        public.get_weight_level(
+                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
+                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
+                        ) AS weight_level
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
@@ -294,20 +302,30 @@ class Users
                     WHERE id IN (" . implode(', ', $users_ids) . ")
             ");
         } else if ($area == 'searchAround') {
+            $search_weights_params = Users::getMySearchWeightParams(ApiController::$user->id);
+
+            $friends_vk_ids = $search_weights_params->friends_vk_ids;
+            $groups_vk_ids = $search_weights_params->groups_vk_ids;
+
             $users = \DB::select("
                 SELECT  u.*,
                         public.format_date(i.last_activity_at, ?) AS last_activity_at,
                         uivk.vk_id,
-                        icount(i.groups_vk_ids) AS groups_count,
-                        icount(i.friends_vk_ids) AS friends_count,
-                        0 AS photos_count
+                        icount(i.groups_vk_ids) AS groups_vk_count,
+                        icount(i.friends_vk_ids) AS friends_vk_count,
+                        0 AS photos_count,
+                        round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
+                        public.get_weight_level(
+                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
+                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
+                        ) AS weight_level
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
                     INNER JOIN public.users_info_vk AS uivk
                         ON uivk.user_id = u.id
                     WHERE u.id IN (" . implode(', ', $users_ids) . ")
-            ", [ApiController::$user->time_zone]);
+            ", [ApiController::$user->time_zone, ApiController::$user->geography]);
         }
 
         $result = [];
@@ -347,9 +365,11 @@ class Users
         foreach ($users as $user) {
             $user->name = $users_all[$user->user_id]->name;
             $user->last_activity_at = $users_all[$user->user_id]->last_activity_at;
+            $user->distance = $users_all[$user->user_id]->distance;
+            $user->weight_level = $users_all[$user->user_id]->weight_level;
             $user->vk_id = $users_all[$user->user_id]->vk_id;
-            $user->groups_count = $users_all[$user->user_id]->groups_count;
-            $user->friends_count = $users_all[$user->user_id]->friends_count;
+            $user->groups_vk_count = $users_all[$user->user_id]->groups_vk_count;
+            $user->friends_vk_count = $users_all[$user->user_id]->friends_vk_count;
             $user->photos_count = $users_all[$user->user_id]->photos_count;
             $user->avatar_url = $users_all[$user->user_id]->avatar_url;
         }

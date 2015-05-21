@@ -375,7 +375,7 @@ class ApiController extends BaseController {
             'about' => $profile->about,
             'last_activity' => $profile->last_activity,
             'distance' => $profile->distance,
-            'weight' => $profile->weight,
+            'weight_level' => $profile->weight_level,
             'is_deleted' => $profile->is_deleted,
             'photos' => $photos,
         ]);
