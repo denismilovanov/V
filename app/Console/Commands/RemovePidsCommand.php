@@ -15,8 +15,15 @@ class RemovePidsCommand extends \App\Console\SingleCommand {
             $does_not_work = strpos($result, $pid) === false;
 
             if ($does_not_work) {
-                unlink($pid_file);
                 \Log::info('Удаляем: ' . $pid_file . ' -> ' . $pid);
+
+                // вот так вот... glob говорит, что файл есть, а file_exists
+                // говорит, что его нет
+                // значит, файл утащили в промежутке между ними
+                // ни файла, ни процесса... красота :)
+                if (file_exists($pid_file)) {
+                    unlink($pid_file);
+                }
             }
 
         }
