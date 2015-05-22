@@ -2,7 +2,7 @@
 
 class UsersMatches
 {
-    public static function deleteMatch($user_id, $match_user_id) {
+    public static function deleteMatch($user_id, $match_user_id, $weight_level) {
         \DB::select("
             WITH lock AS (
                 SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
@@ -17,17 +17,40 @@ class UsersMatches
             'match_user_id' => $match_user_id,
         ]);
 
-        \DB::select("
-            WITH lock AS (
-                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
-            )
-            UPDATE public.users_matching_levels
-                SET users_ids = users_ids - intset(:match_user_id)
-                WHERE user_id = :user_id;
-        ", [
-            'user_id' => $user_id,
-            'match_user_id' => $match_user_id,
-        ]);
+        $deleted_matching_levels = [];
+
+        if ($weight_level !== null) {
+            $deleted_matching_levels = \DB::select("
+                WITH lock AS (
+                    SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+                )
+                UPDATE public.users_matching_levels
+                    SET users_ids = users_ids - intset(:match_user_id)
+                    WHERE user_id = :user_id AND
+                          level_id = :level_id AND
+                          users_ids @> intset(:match_user_id)
+                    RETURNING level_id
+            ", [
+                'user_id' => $user_id,
+                'match_user_id' => $match_user_id,
+                'level_id' => intval($weight_level) ,
+            ]);
+        }
+
+        if (! sizeof($deleted_matching_levels)) {
+            // не нашли на указанном уровне, удаляем отовсюду
+            \DB::select("
+                WITH lock AS (
+                    SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+                )
+                UPDATE public.users_matching_levels
+                    SET users_ids = users_ids - intset(:match_user_id)
+                    WHERE user_id = :user_id;
+            ", [
+                'user_id' => $user_id,
+                'match_user_id' => $match_user_id,
+            ]);
+        }
     }
 
     public static function jobFillMatches($user_id) {

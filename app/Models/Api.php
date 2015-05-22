@@ -24,7 +24,7 @@ class Api
             ],
             'like' => [
                 'fields' => [
-                    'user_id', 'is_like',
+                    'user_id', 'is_like', 'weight_level',
                 ],
                 'method' => 'get',
             ],

@@ -4,7 +4,7 @@ use \App\Http\Controllers\ApiController;
 
 class Likes {
 
-    public static function like($from_user_id, $to_user_id, $is_like) {
+    public static function like($from_user_id, $to_user_id, $is_like, $weight_level) {
         if (! Users::findById($to_user_id) or $from_user_id == $to_user_id) {
             return false;
         }
@@ -59,7 +59,7 @@ class Likes {
             }
         }
 
-        UsersMatches::deleteMatch($from_user_id, $to_user_id);
+        UsersMatches::deleteMatch($from_user_id, $to_user_id, $weight_level);
 
         return [
             'mutual' => $mutual,

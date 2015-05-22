@@ -264,12 +264,13 @@ class ApiController extends BaseController {
 
         $user_id = intval(\Request::get('user_id'));
         $is_like = intval(\Request::get('is_like'));
+        $weight_level = \Request::get('weight_level');
 
         if ($is_like) {
             $is_like = 1;
         }
 
-        $result = Likes::like(self::$user->id, $user_id, $is_like);
+        $result = Likes::like(self::$user->id, $user_id, $is_like, $weight_level);
 
         return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
