@@ -23,7 +23,7 @@ class UpdateWeightsCommand extends \App\Console\SingleCommand
 
             \Log::info('Начали ' . $jobs);
 
-            if (UsersMatches::updateWeights($data['user_id'])) {
+            if (UsersMatches::updateWeights($data['user_id'], $data['count'])) {
                 \Log::info('Завершили');
                 $job->delete();
             }

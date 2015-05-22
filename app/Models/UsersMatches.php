@@ -150,7 +150,7 @@ class UsersMatches
         return true;
     }
 
-    public static function updateWeights($user_id) {
+    public static function updateWeights($user_id, $already_filled = 0) {
         $search_weights_params = Users::getMySearchWeightParams($user_id);
 
         $friends_vk_ids = $search_weights_params->friends_vk_ids;
@@ -219,13 +219,13 @@ class UsersMatches
             $level_id = $result->level_id;
         }
 
-        \Log::info('level_id = ' . $level_id);
-        \Log::info('count = ' . $count);
+        \Log::info('level_id = ' . $level_id . ', count = ' . $count . ', already_filled = ' . $already_filled .
+            ', sum = ' . ($count + $already_filled));
         //\Log::info('users_ids = ' . $users_ids);
 
-        if ($count) {
+        if ($count and $already_filled + $count < env('MAX_MAINTAINED_MATCHES_COUNT', 1000)) {
             // чем выше уровень мы только что посчитали, тем выше должен быть приоритет для подсчета следующего
-            \Queue::push('update_weights', ['user_id' => $user_id], 'update_weights', ['priority' => $level_id]);
+            \Queue::push('update_weights', ['user_id' => $user_id, 'count' => $already_filled + $count], 'update_weights', ['priority' => $level_id]);
         }
 
         return true;

@@ -34,7 +34,7 @@ class ImitateActivityCommand extends \App\Console\SingleCommand
                 $latitude
             );
 
-            usleep(mt_rand() / mt_getrandmax() * 1000000);
+            usleep(mt_rand() / mt_getrandmax() * 100);
 
         }
     }
