@@ -26,6 +26,11 @@ class SetAboutTest extends TestCase {
         ));
         $this->assertEquals($result['status'], 1);
 
+        $result = Bootstrap::getFromApi('getAbout', array(
+            'key' => $male_key,
+        ));
+        $this->assertEquals($result['status'], 1);
+
     }
 
 }

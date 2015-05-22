@@ -242,6 +242,27 @@ class ApiController extends BaseController {
         ]);
     }
 
+    public function getAbout() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $about = '';
+
+        $user = Users::findById(self::$user->id);
+        if ($user) {
+            $about = $user->about;
+        }
+
+        return response()->json([
+            'status' => $user ? self::SUCCESS : self::ERROR,
+            'about' => $about,
+        ]);
+    }
+
+
+
     public function searchAround() {
         if (! $this->beforeAction()) {
             $data['status'] = self::ERROR_KEY;
