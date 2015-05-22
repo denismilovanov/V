@@ -21,14 +21,14 @@ class FillMatchesCommand extends \App\Console\SingleCommand
 
             $data = json_decode($json, 'assoc')['data'];
 
-            \Log::info('Начали' . $jobs);
+            \Log::info('Начали ' . $jobs);
 
             if (\App\Models\UsersMatches::fillMatchesInUsersMatches($data['user_id'])) {
                 \Log::info('Завершили');
                 $job->delete();
             }
 
-            if (++ $jobs == 100) {
+            if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
             }
         });

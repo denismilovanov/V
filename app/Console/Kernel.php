@@ -31,6 +31,7 @@ class Kernel extends ConsoleKernel
         //
         'App\Console\Commands\SendErrorsCommand',
         'App\Console\Commands\MaintenanceCommand',
+        'App\Console\Commands\ImitateActivityCommand',
     ];
 
     /**

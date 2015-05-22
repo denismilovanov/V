@@ -21,14 +21,14 @@ class UpdateWeightsCommand extends \App\Console\SingleCommand
 
             $data = json_decode($json, 'assoc')['data'];
 
-            \Log::info('Начали' . $jobs);
+            \Log::info('Начали ' . $jobs);
 
             if (UsersMatches::updateWeights($data['user_id'])) {
                 \Log::info('Завершили');
                 $job->delete();
             }
 
-            if (++ $jobs == 1000) {
+            if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
             }
         });

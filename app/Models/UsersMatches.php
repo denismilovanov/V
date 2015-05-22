@@ -224,7 +224,8 @@ class UsersMatches
         //\Log::info('users_ids = ' . $users_ids);
 
         if ($count) {
-            \Queue::push('update_weights', ['user_id' => $user_id], 'update_weights', ['priority' => 255]);
+            // чем выше уровень мы только что посчитали, тем выше должен быть приоритет для подсчета следующего
+            \Queue::push('update_weights', ['user_id' => $user_id], 'update_weights', ['priority' => $level_id]);
         }
 
         return true;

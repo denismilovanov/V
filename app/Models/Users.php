@@ -248,6 +248,10 @@ class Users
         return $user_id >= 100000 and $user_id < 300000;
     }
 
+    public static function getRandomTestUserId() {
+        return 100000 + (int)(200000 * mt_rand() / mt_getrandmax());
+    }
+
     public static function findByKey($key) {
         $user = \DB::select("
             SELECT  u.id, u.sex,
