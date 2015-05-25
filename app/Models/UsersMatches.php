@@ -73,6 +73,8 @@ class UsersMatches
     }
 
     public static function fillMatchesInUsersMatches($user_id) {
+        self::createMatchesTables($user_id);
+
         $settings = Users::getMySettings($user_id);
         $geography = Users::getMyGeography($user_id);
 
