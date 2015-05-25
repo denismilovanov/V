@@ -66,6 +66,20 @@ class Likes {
         ];
     }
 
+    public static function getLikedUsers($user_id, $from, $to) {
+        $result = \DB::select("
+            SELECT string_agg(user2_id::varchar, ',') AS result
+                FROM public.likes
+                WHERE   user1_id = ? AND
+                        user2_id BETWEEN ? AND ?;
+        ", [$user_id, $from, $to]);
+
+        if (! $result) {
+            return '';
+        }
+        return $result[0]->result;
+    }
+
     public static function echoLike($data) {
         if (mt_rand() / mt_getrandmax() <= env('ECHO_LIKE_PROBABILITY', 0.20)) {
             $to_user_id = $data['from_user_id'];

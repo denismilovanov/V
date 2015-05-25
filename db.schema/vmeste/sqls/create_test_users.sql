@@ -62,6 +62,30 @@ SELECT public.checkin(
     FROM users
     WHERE id BETWEEN 100000 and 299999;
 
+update users_index set friends_vk_ids = get_random_vk_friends_ids(user_id % 10) where user_id  between 100000 and 299999;
+
+update users_index set groups_vk_ids = get_random_vk_groups_ids(user_id % 10) where user_id  between 100000 and 299999;
+
+
+CREATE OR REPLACE FUNCTION matches.create_for_user(
+    i_user_id integer
+)
+RETURNS void AS
+$BODY$
+DECLARE
+
+BEGIN
+
+    EXECUTE 'CREATE TABLE IF NOT EXISTS matches.processing_levels_' || i_user_id || ' (LIKE matches.processing_levels INCLUDING ALL)';
+    EXECUTE 'CREATE TABLE IF NOT EXISTS matches.matching_levels_' || i_user_id || ' (LIKE matches.matching_levels INCLUDING ALL);';
+
+END
+$BODY$
+    LANGUAGE plpgsql VOLATILE;
+
+
+
+
 
 
 

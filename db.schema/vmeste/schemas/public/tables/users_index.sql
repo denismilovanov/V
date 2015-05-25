@@ -17,3 +17,12 @@ CREATE INDEX users_index_geography
     ON users_index
     USING gist (geography);
 
+CREATE INDEX users_fetch_sex1
+    ON users_index
+    USING btree(user_id, age)
+    WHERE sex = 1;
+
+CREATE INDEX users_fetch_sex2
+    ON users_index
+    USING btree(user_id, age)
+    WHERE sex = 2;

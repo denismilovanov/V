@@ -2,52 +2,67 @@
 
 class UsersMatches
 {
+    private static function getConnection($user_id) {
+        $num = $user_id % 10;
+        return \DB::connection('matches' . $num);
+    }
+    public static function createMatchesTables($user_id) {
+        self::getConnection($user_id)->select("
+            SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
+            CREATE TABLE IF NOT EXISTS public.processing_levels_$user_id (LIKE public.processing_levels INCLUDING ALL);
+            CREATE TABLE IF NOT EXISTS public.matching_levels_$user_id (LIKE public.matching_levels INCLUDING ALL);
+        ");
+    }
+
+    public static function stopProcessing($user_id) {
+        self::getConnection($user_id)->select("
+            SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
+            DROP TABLE public.processing_levels_$user_id;
+        ");
+    }
+
     public static function deleteMatch($user_id, $match_user_id, $weight_level) {
-        \DB::select("
+        self::createMatchesTables($user_id);
+
+        self::getConnection($user_id)->select("
             WITH lock AS (
                 SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
             )
-            UPDATE public.users_processing_levels
-                SET users_ids = users_ids - intset(:match_user_id)
-                WHERE user_id = :user_id;
+            UPDATE public.processing_levels_$user_id
+                SET users_ids = users_ids - intset(:match_user_id);
                 -- удаляет по всем уровням, хотя значение присутствует только на одном из них
                 -- это самый быстрый вариант
         ", [
-            'user_id' => $user_id,
             'match_user_id' => $match_user_id,
         ]);
 
         $deleted_matching_levels = [];
 
         if ($weight_level !== null) {
-            $deleted_matching_levels = \DB::select("
+            $deleted_matching_levels = self::getConnection($user_id)->select("
                 WITH lock AS (
                     SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
                 )
-                UPDATE public.users_matching_levels
+                UPDATE public.matching_levels_$user_id
                     SET users_ids = users_ids - intset(:match_user_id)
-                    WHERE user_id = :user_id AND
-                          level_id = :level_id AND
+                    WHERE level_id = :level_id AND
                           users_ids @> intset(:match_user_id)
                     RETURNING level_id
             ", [
-                'user_id' => $user_id,
                 'match_user_id' => $match_user_id,
-                'level_id' => intval($weight_level) ,
+                'level_id' => intval($weight_level),
             ]);
         }
 
         if (! sizeof($deleted_matching_levels)) {
             // не нашли на указанном уровне, удаляем отовсюду
-            \DB::select("
+            self::getConnection($user_id)->select("
                 WITH lock AS (
                     SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
                 )
-                UPDATE public.users_matching_levels
-                    SET users_ids = users_ids - intset(:match_user_id)
-                    WHERE user_id = :user_id;
+                UPDATE public.matching_levels
+                    SET users_ids = users_ids - intset(:match_user_id);
             ", [
-                'user_id' => $user_id,
                 'match_user_id' => $match_user_id,
             ]);
         }
@@ -70,22 +85,20 @@ class UsersMatches
         }
         $sex = implode(", ", $sex);
 
-        \DB::select("
+        self::createMatchesTables($user_id);
+
+        self::getConnection($user_id)->select("
             SET synchronous_commit TO off;
 
             SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
 
-            DELETE FROM public.users_processing_levels
-                WHERE user_id = :user_id;
-            INSERT INTO public.users_processing_levels
-                SELECT  :user_id,
-                        generate_series(0, 100) AS level_id;
+            TRUNCATE public.processing_levels_$user_id;
+            INSERT INTO public.processing_levels_$user_id
+                SELECT generate_series(0, 100) AS level_id;
 
-            DELETE FROM public.users_matching_levels
-                WHERE user_id = :user_id;
-            INSERT INTO public.users_matching_levels
-                SELECT  :user_id,
-                        generate_series(0, 100) AS level_id;
+            TRUNCATE public.matching_levels_$user_id;
+            INSERT INTO public.matching_levels_$user_id
+                SELECT generate_series(0, 100) AS level_id;
         ", [
             'user_id' => $user_id,
         ]);
@@ -94,7 +107,14 @@ class UsersMatches
         $users_max_id = Users::getMaxId();
 
         for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
-            \DB::select("
+
+            $liked_users = Likes::getLikedUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
+            if (! $liked_users) {
+                $liked_users = '0';
+            }
+
+            // селект на основании foreign table
+            self::getConnection($user_id)->select("
                 SET synchronous_commit TO off;
 
                 SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
@@ -112,15 +132,11 @@ class UsersMatches
 
                         FROM public.users_index AS ui
 
-                        LEFT JOIN public.likes AS l
-                            ON  l.user1_id = :user_id AND
-                                l.user2_id = ui.user_id
-
                         WHERE   user_id BETWEEN $i * $limit AND ($i + 1) * $limit - 1 AND
+                                user_id NOT IN (" . $liked_users . ") AND
                                 ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
                                 age BETWEEN :age_from AND :age_to AND
-                                sex IN ($sex) AND
-                                l.user1_id IS NULL
+                                sex IN ($sex)
                 ),
                 levels AS (
                     SELECT processing_level, array_agg(match_user_id) AS users_ids
@@ -128,11 +144,10 @@ class UsersMatches
                         GROUP BY processing_level
                 )
 
-                UPDATE public.users_processing_levels AS l
+                UPDATE public.processing_levels_$user_id AS l
                     SET users_ids = l.users_ids + levels.users_ids
                     FROM levels
-                    WHERE   user_id = :user_id AND
-                            level_id = levels.processing_level
+                    WHERE level_id = levels.processing_level;
 
             ", [
                 'user_id' => $user_id,
@@ -151,116 +166,118 @@ class UsersMatches
     }
 
     public static function updateWeights($user_id, $already_filled = 0) {
+        self::createMatchesTables($user_id);
+
         $search_weights_params = Users::getMySearchWeightParams($user_id);
 
         $friends_vk_ids = $search_weights_params->friends_vk_ids;
         $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
-        $result = \DB::select("
+        $result = self::getConnection($user_id)->select("
             SET synchronous_commit TO off;
             WITH lock AS (
                 SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
             ),
-            level AS (
+            level_id AS (
                 SELECT level_id
-                    FROM users_processing_levels
-                    WHERE   user_id = :user_id AND
-                            icount(users_ids) > 0
+                    FROM public.processing_levels_$user_id
+                    WHERE icount(users_ids) > 0
                     ORDER BY level_id DESC
                     LIMIT 1
             ),
-            leveled_users AS (
+            users_ids AS (
                 SELECT subarray(users_ids, 0, 500) AS users_ids
-                    FROM users_processing_levels
-                    WHERE   user_id = :user_id AND
-                            level_id = (SELECT level_id FROM level)
-            ),
-            removed_users_processing_levels AS (
-                UPDATE users_processing_levels AS l
-                    SET users_ids = l.users_ids - leveled_users.users_ids
-                    FROM leveled_users
-                    WHERE   l.user_id = :user_id AND
-                            l.level_id = (SELECT level_id FROM level)
-            ),
-            weights_levels AS (
-                SELECT  i.user_id AS match_user_id,
-                        public.get_weight_level(
-                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
-                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
-                        ) AS weight_level
-                    FROM public.users_index AS i, leveled_users
-                    WHERE i.user_id = ANY(leveled_users.users_ids)
-            ),
-            levels AS (
-                SELECT weight_level, array_agg(match_user_id) AS users_ids
-                    FROM weights_levels
-                    GROUP BY weight_level
-            ),
-            upd AS (
-                UPDATE public.users_matching_levels AS m
-                    SET users_ids = m.users_ids + l.users_ids
-                    FROM levels AS l
-                    WHERE   m.user_id = :user_id AND
-                            m.level_id = l.weight_level
+                    FROM public.processing_levels_$user_id
+                    WHERE level_id = (SELECT level_id FROM level_id)
             )
-            SELECT COALESCE(array_to_string(users_ids, ','), '') AS users_ids, level.level_id, icount(users_ids) AS count
-                FROM leveled_users, level
-        ", [
-            'user_id' => $user_id,
-        ]);
+            UPDATE public.processing_levels_$user_id AS pl
+                SET users_ids = pl.users_ids - ids.users_ids
+                FROM users_ids AS ids, level_id AS l
+                WHERE pl.level_id = l.level_id
+                RETURNING array_to_string(ids.users_ids, ',') AS users_ids, l.level_id
+        ");
 
         $count = 0;
+        $users_ids = '';
         $level_id = 'n/a';
-        //$users_ids = '';
 
-        if (isset($result[0]) and $result = $result[0]) {
-            //$users_ids = $result->users_ids;
-            $count = $result->count;
+        if ($result) {
+            $result = $result[0];
+            $users_ids = $result->users_ids;
             $level_id = $result->level_id;
+            $count = count(explode(",", $users_ids));
+
+            if ($count) {
+                // апдейт на основании foreign table
+                self::getConnection($user_id)->select("
+                    WITH lock AS (
+                        SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+                    ),
+                    weights_levels AS (
+                        SELECT  i.user_id AS match_user_id,
+                            public.get_weight_level(
+                                icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
+                                icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
+                            ) AS weight_level
+                        FROM public.users_index AS i
+                        WHERE i.user_id IN ($users_ids)
+                    ),
+                    levels AS (
+                        SELECT weight_level, array_agg(match_user_id) AS users_ids
+                            FROM weights_levels
+                            GROUP BY weight_level
+                    )
+                    UPDATE public.matching_levels_$user_id AS m
+                        SET users_ids = m.users_ids + l.users_ids
+                        FROM levels AS l
+                        WHERE m.level_id = ?;
+                ", [$level_id]);
+            }
         }
 
         \Log::info('level_id = ' . $level_id . ', count = ' . $count . ', already_filled = ' . $already_filled .
             ', sum = ' . ($count + $already_filled));
-        //\Log::info('users_ids = ' . $users_ids);
 
         if ($count and $already_filled + $count < env('MAX_MAINTAINED_MATCHES_COUNT', 1000)) {
             // чем выше уровень мы только что посчитали, тем выше должен быть приоритет для подсчета следующего
             \Queue::push('update_weights', ['user_id' => $user_id, 'count' => $already_filled + $count], 'update_weights', ['priority' => $level_id]);
+        } else {
+            self::stopProcessing($user_id);
         }
 
         return true;
     }
 
-    private static function getMatchesAtLevel($me_id, $level_id, $limit) {
-        return \DB::select("
+    private static function getMatchesAtLevel($user_id, $level_id, $limit) {
+        return self::getConnection($user_id)->select("
             WITH u AS (
                 SELECT unnest(users_ids) AS user_id
-                    FROM public.users_matching_levels
-                    WHERE   user_id = ? AND
-                            level_id = ?
+                    FROM public.matching_levels_$user_id
+                    WHERE level_id = ?
             )
             SELECT u.user_id
                 FROM u
                 LIMIT ?
                 -- ORDER BY u.user_id
-        ", [$me_id, $level_id, $limit]);
+        ", [$level_id, $limit]);
     }
 
-    public static function getMatches($me_id, $limit) {
-        $levels_ids = \DB::select("
+    public static function getMatches($user_id, $limit) {
+        self::createMatchesTables($user_id);
+
+        $levels_ids = self::getConnection($user_id)->select("
             SELECT level_id
-                FROM public.users_matching_levels
-                WHERE   user_id = ? AND
-                        icount(users_ids) > 0
+                FROM public.matching_levels_$user_id
+                WHERE icount(users_ids) > 0
                 ORDER BY level_id DESC
                 LIMIT 1;
-        ", [$me_id]);
+        ");
 
         $result = [];
 
         foreach ($levels_ids as $level_id) {
             $level_id = $level_id->level_id;
-            $result = self::getMatchesAtLevel($me_id, $level_id, $limit);
+            $result = self::getMatchesAtLevel($user_id, $level_id, $limit);
             break;
         }
 
