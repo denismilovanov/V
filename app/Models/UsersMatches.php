@@ -136,9 +136,10 @@ class UsersMatches
 
                         WHERE   user_id BETWEEN $i * $limit AND ($i + 1) * $limit - 1 AND
                                 user_id NOT IN (" . $liked_users . ") AND
-                                ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
+                                " . ($geography['osm_ids'] ? ("osm_id IN (" . $geography['osm_ids'] . ")") : "osm_id IS NOT DISTINCT osm_id") . " AND
                                 age BETWEEN :age_from AND :age_to AND
-                                sex IN ($sex)
+                                sex IN ($sex) AND
+                                ST_DWithin(geography, (:geography)::geography, :radius * 1000)
                 ),
                 levels AS (
                     SELECT processing_level, array_agg(match_user_id) AS users_ids
@@ -156,7 +157,7 @@ class UsersMatches
                 'age_from' => $settings->age_from ? : 18,
                 'age_to' => $settings->age_to ? : 80,
                 'radius' => $settings->radius,
-                'geography' => $geography,
+                'geography' =>  $geography['geography'],
             ]);
         }
 

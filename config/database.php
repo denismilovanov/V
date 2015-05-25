@@ -18,6 +18,20 @@ return [
                 PDO::ATTR_EMULATE_PREPARES => true,
             ),
         ],
+        'gis' => [
+            'driver'   => 'pgsql',
+            'host'     => env('DB_GIS_HOST', ''),
+            'port'     => env('DB_GIS_PORT', '5432'),
+            'database' => env('DB_GIS_DATABASE', ''),
+            'username' => env('DB_GIS_USERNAME', ''),
+            'password' => env('DB_GIS_PASSWORD', ''),
+            'charset'  => 'utf8',
+            'prefix'   => '',
+            'schema'   => 'public',
+            'options'   => array(
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ),
+        ],
         'matches0' => [
             'driver'   => 'pgsql',
             'host'     => env('DB_MATCHES_HOST', ''),

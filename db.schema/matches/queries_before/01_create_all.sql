@@ -22,3 +22,6 @@ CREATE TABLE IF NOT EXISTS public.processing_levels (
     level_id integer NOT NULL PRIMARY KEY,
     users_ids integer[] NOT NULL DEFAULT array[]::integer[]
 );
+
+ALTER FOREIGN TABLE public.users_index
+    ADD COLUMN osm_id integer NULL;

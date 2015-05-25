@@ -62,6 +62,8 @@ SELECT public.checkin(
     FROM users
     WHERE id BETWEEN 100000 and 299999;
 
+
+
 update users_index set friends_vk_ids = get_random_vk_friends_ids(user_id % 10) where user_id  between 100000 and 299999;
 
 update users_index set groups_vk_ids = get_random_vk_groups_ids(user_id % 10) where user_id  between 100000 and 299999;

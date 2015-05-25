@@ -26,3 +26,10 @@ CREATE INDEX users_fetch_sex2
     ON users_index
     USING btree(user_id, age)
     WHERE sex = 2;
+
+CREATE INDEX users_fetch_all
+    ON users_index
+    USING btree(user_id, osm_id, age, sex);
+
+ALTER TABLE public.users_index
+    ADD COLUMN osm_id integer NULL;

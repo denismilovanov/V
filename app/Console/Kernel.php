@@ -25,6 +25,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\FillMatchesCommand',
         //
         'App\Console\Commands\TestRabbitMQCommand',
+        'App\Console\Commands\CheckinTestUsersCommand',
         //
         'App\Console\Commands\EchoMessagesCommand',
         'App\Console\Commands\EchoLikesCommand',

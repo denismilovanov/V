@@ -1,7 +1,8 @@
 CREATE OR REPLACE FUNCTION public.checkin(
     i_user_id integer,
     dp_latitude double precision,
-    dp_longitude double precision
+    dp_longitude double precision,
+    i_osm_id integer DEFAULT NULL
 )
 RETURNS void AS
 $BODY$
@@ -22,7 +23,8 @@ BEGIN
     -- обновляем поисковый индекс
     UPDATE public.users_index
         SET geography = g_geography,
-            last_activity_at = now()
+            last_activity_at = now(),
+            osm_id = i_osm_id
         WHERE user_id = i_user_id;
 
 END

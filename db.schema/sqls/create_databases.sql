@@ -2,6 +2,9 @@ create role vmeste_test with password '1gH&61_#:lJ' login;
 create database logs_test lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
 create database vmeste_test lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
 
+
+create database gis lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
+
 \c matches0 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches0 vmeste
