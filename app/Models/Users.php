@@ -225,33 +225,24 @@ class Users
 
     public static function getMyGeography($user_id) {
         $user_geography = \DB::select("
-            SELECT geography, osm_id
+            SELECT geography, city_id, region_id
                 FROM public.users_index
                 WHERE user_id = ?;
         ", [$user_id]);
 
-        $geography = $osm_ids = null;
+        $geography = $city_id = $region_id = null;
 
         if ($user_geography) {
             $user_geography = $user_geography[0];
             $geography = $user_geography->geography;
-            $osm_id = $user_geography->osm_id;
-            $osms = [$osm_id];
-            $additionals = [
-                337422 => [176095],
-                176095 => [337422],
-                102269 => [51490],
-                51490 => [102269],
-            ];
-            if (isset($additionals[$osm_id])) {
-                $osms = array_merge($osms, $additionals[$osm_id]);
-            }
-            $osm_ids = implode(', ', $osms);
+            $city_id = $user_geography->city_id;
+            $region_id = $user_geography->region_id;
         }
 
         return [
             'geography' => $geography,
-            'osm_ids' => $osm_ids,
+            'city_id' => $city_id,
+            'region_id' => $region_id,
         ];
     }
 

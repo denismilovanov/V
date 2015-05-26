@@ -22,22 +22,6 @@ class SearchAroundTest extends TestCase {
 
         Likes::deleteAllBetween($test_male_id, $test_female_id);
 
-        // передаем координаты парня и девушки
-
-        $result = Bootstrap::getFromApi('checkIn', array(
-            'latitude' => 59.935787,
-            'longitude' => 30.323009,
-            'key' => $male_key,
-        ));
-        $this->assertEquals($result['status'], 1);
-
-        $result = Bootstrap::getFromApi('checkIn', array(
-            'latitude' => 59.935787,
-            'longitude' => 30.323009,
-            'key' => $female_key,
-        ));
-        $this->assertEquals($result['status'], 1);
-
         // сделаем им одинаковый набор групп
 
         $groups_ids = GroupsVk::getRandomGroupsIds(200);
@@ -81,6 +65,26 @@ class SearchAroundTest extends TestCase {
             'key' => $female_key,
         ));
         $this->assertEquals($result['status'], 1);
+
+        // передаем координаты парня и девушки, это запустит поиск
+
+        $result = Bootstrap::getFromApi('checkIn', array(
+            'latitude' => 59.935787,
+            'longitude' => 30.323009,
+            'key' => $male_key,
+        ));
+        $this->assertEquals($result['status'], 1);
+
+        $result = Bootstrap::getFromApi('checkIn', array(
+            'latitude' => 59.935787,
+            'longitude' => 30.323009,
+            'key' => $female_key,
+        ));
+        $this->assertEquals($result['status'], 1);
+
+        // мобилка подождет нек. время
+
+        sleep(3);
 
         // парень ищет девушек
 

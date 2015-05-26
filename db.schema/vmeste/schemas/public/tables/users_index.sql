@@ -32,4 +32,5 @@ CREATE INDEX users_fetch_all
     USING btree(user_id, osm_id, age, sex);
 
 ALTER TABLE public.users_index
-    ADD COLUMN osm_id integer NULL;
+    ADD COLUMN city_id integer NULL,
+    ADD COLUMN region_id integer NULL;

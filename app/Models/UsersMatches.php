@@ -60,7 +60,7 @@ class UsersMatches
                 WITH lock AS (
                     SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
                 )
-                UPDATE public.matching_levels
+                UPDATE public.matching_levels_$user_id
                     SET users_ids = users_ids - intset(:match_user_id);
             ", [
                 'match_user_id' => $match_user_id,
@@ -136,7 +136,7 @@ class UsersMatches
 
                         WHERE   user_id BETWEEN $i * $limit AND ($i + 1) * $limit - 1 AND
                                 user_id NOT IN (" . $liked_users . ") AND
-                                " . ($geography['osm_ids'] ? ("osm_id IN (" . $geography['osm_ids'] . ")") : "osm_id IS NOT DISTINCT osm_id") . " AND
+                                region_id = :region_id AND
                                 age BETWEEN :age_from AND :age_to AND
                                 sex IN ($sex) AND
                                 ST_DWithin(geography, (:geography)::geography, :radius * 1000)
@@ -158,6 +158,7 @@ class UsersMatches
                 'age_to' => $settings->age_to ? : 80,
                 'radius' => $settings->radius,
                 'geography' =>  $geography['geography'],
+                'region_id' => $geography['region_id'],
             ]);
         }
 
@@ -203,6 +204,7 @@ class UsersMatches
         $count = 0;
         $users_ids = '';
         $level_id = 'n/a';
+        $users_ids = '';
 
         if ($result) {
             $result = $result[0];
@@ -233,13 +235,14 @@ class UsersMatches
                     UPDATE public.matching_levels_$user_id AS m
                         SET users_ids = m.users_ids + l.users_ids
                         FROM levels AS l
-                        WHERE m.level_id = ?;
-                ", [$level_id]);
+                        WHERE m.level_id = l.weight_level;
+                ");
             }
         }
 
         \Log::info('level_id = ' . $level_id . ', count = ' . $count . ', already_filled = ' . $already_filled .
             ', sum = ' . ($count + $already_filled));
+        // \Log::info('users_ids = ' . $users_ids);
 
         if ($count and $already_filled + $count < env('MAX_MAINTAINED_MATCHES_COUNT', 1000)) {
             // чем выше уровень мы только что посчитали, тем выше должен быть приоритет для подсчета следующего

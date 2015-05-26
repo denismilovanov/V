@@ -9,7 +9,9 @@ CREATE FOREIGN TABLE public.users_index (
     groups_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
     likes_count integer NOT NULL DEFAULT 0,
     novelty_weight integer NOT NULL DEFAULT 0,
-    age integer NOT NULL
+    age integer NOT NULL,
+    city_id integer NULL,
+    region_id integer NULL
 )
 SERVER main_server;
 
@@ -23,5 +25,3 @@ CREATE TABLE IF NOT EXISTS public.processing_levels (
     users_ids integer[] NOT NULL DEFAULT array[]::integer[]
 );
 
-ALTER FOREIGN TABLE public.users_index
-    ADD COLUMN osm_id integer NULL;
