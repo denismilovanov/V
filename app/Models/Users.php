@@ -316,8 +316,8 @@ class Users
                         icount(i.friends_vk_ids) AS friends_count,
                         round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
                         public.get_weight_level(
-                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
-                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
+                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
+                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[])
                         ) AS weight_level
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
@@ -369,8 +369,8 @@ class Users
                         0 AS photos_count,
                         round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
                         public.get_weight_level(
-                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
-                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
+                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
+                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[])
                         ) AS weight_level
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i

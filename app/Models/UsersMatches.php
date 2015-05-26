@@ -18,6 +18,7 @@ class UsersMatches
         self::getConnection($user_id)->select("
             SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
             DROP TABLE public.processing_levels_$user_id;
+            CREATE TABLE IF NOT EXISTS public.processing_levels_$user_id (LIKE public.processing_levels INCLUDING ALL);
         ");
     }
 
@@ -220,10 +221,10 @@ class UsersMatches
                     ),
                     weights_levels AS (
                         SELECT  i.user_id AS match_user_id,
-                            public.get_weight_level(
-                                icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]),
-                                icount(i.groups_vk_ids & array[$groups_vk_ids]::int[])
-                            ) AS weight_level
+                                public.get_weight_level(
+                                    icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
+                                    icount(i.friends_vk_ids & array[$friends_vk_ids]::int[])
+                                ) AS weight_level
                         FROM public.users_index AS i
                         WHERE i.user_id IN ($users_ids)
                     ),
