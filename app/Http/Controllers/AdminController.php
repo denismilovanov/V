@@ -4,6 +4,7 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 use App\Models\Api;
 use App\Models\Users;
 use App\Models\Abuses;
+use App\Models\Stats;
 
 
 class AdminController extends BaseController {
@@ -111,6 +112,31 @@ class AdminController extends BaseController {
         }
         return view('admin.users.user', [
             'user' => Users::findById($user_id, 'admin'),
+        ]);
+    }
+
+    public function stats() {
+        if (\Request::isMethod('get')) {
+            $action = \Request::get('action');
+
+            if ($action == 'get_ages_data') {
+                return response()->json(Stats::getAgesData());
+            } else if ($action == 'get_registrations_data') {
+                return response()->json(Stats::getRegistrationsData());
+            } else if ($action == 'get_activity_data') {
+                return response()->json(Stats::getActivityData());
+            } else if ($action == 'who_likes_who_data') {
+                return response()->json(Stats::whoLikesWhoData());
+            } else if ($action == 'gender_data') {
+                return response()->json(Stats::genderData());
+            } else if ($action == 'likes_activity_data') {
+                return response()->json(Stats::getLikesActivityData());
+            }
+
+
+        }
+        return view('admin.stats.all', [
+
         ]);
     }
 }

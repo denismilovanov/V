@@ -69,6 +69,8 @@ if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
         $app->get('users/', ['uses' => 'AdminController@users']);
         $app->get('users/{user_id}', ['uses' => 'AdminController@user']);
         $app->post('users/{user_id}', ['uses' => 'AdminController@user']);
+
+        $app->get('stats/', ['uses' => 'AdminController@stats']);
     });
 
 }
