@@ -10,7 +10,6 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
         <script src="/js/admin/common.js"></script>
-        <script src="/js/admin/Chart.min.js"></script>
         <script src="/js/admin/highcharts.src.js"></script>
     </head>
     <body>

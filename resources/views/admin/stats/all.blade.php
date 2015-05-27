@@ -297,7 +297,10 @@ Request.request('GET', '/stats/', {
             }
         },
         'legend': {
-            'enabled': false
+            'layout': 'vertical',
+            'align': 'right',
+            'verticalAlign': 'middle',
+            'borderWidth': 0
         },
         'tooltip': {
             'pointFormat': 'Лайков: <b>{point.y}<\/b>'
@@ -356,7 +359,10 @@ Request.request('GET', '/stats/', {
             }
         },
         'legend': {
-            'enabled': false
+            'layout': 'vertical',
+            'align': 'right',
+            'verticalAlign': 'middle',
+            'borderWidth': 0
         },
         'tooltip': {
             'pointFormat': 'Пользователей: <b>{point.y}<\/b>'
