@@ -32,6 +32,8 @@ define('APP_ENV', env('APP_ENV'));
 
 mb_internal_encoding("UTF-8");
 
+date_default_timezone_set("Europe/Moscow");
+
 $logger = app('log');
 $logger->popHandler(); // выкидываем запись в файл
 $logger->pushHandler(new Monolog\Handler\ErrorLogHandler()); // включаем запись в консоль
