@@ -29,7 +29,7 @@ class ApiController extends BaseController {
         self::$user = Users::findByKey($key);
 
         if (self::$user !== null) {
-            Users::updateLastActivity(self::$user->id);
+            Users::updateLastActivity(self::$user->id, self::$user->need_to_trigger_activity_event);
         }
 
         return self::$user !== null;

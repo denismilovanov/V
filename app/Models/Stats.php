@@ -130,6 +130,16 @@ class Stats {
                         likes_count = likes_count + 1
                     WHERE date = ?
             ", [$date]);
+        } else if ($data['type'] == 'activity') {
+            $user_sex = Users::findById($data['user_id'])->sex == 1 ? 'female' : 'male';
+
+            $date = date("Y-m-d", strtotime($data['ts']));
+
+            \DB::select("
+                UPDATE stats.daily
+                    SET active_{$user_sex}s_count = active_{$user_sex}s_count + 1
+                    WHERE date = ?
+            ", [$date]);
         }
 
         return true;

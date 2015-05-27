@@ -23,14 +23,23 @@ class Users
         return $soft;
     }
 
-    public static function updateLastActivity($user_id) {
+    public static function updateLastActivity($user_id, $need_to_trigger_activity_event) {
         // не имеет смысл делать это на каждый запрос
-        if (mt_rand() / mt_getrandmax() <= 0.20) {
+        if (mt_rand() / mt_getrandmax() <= 10.20) {
             \DB::select("
                 UPDATE public.users_index
                     SET last_activity_at = now()
                     WHERE user_id = ?;
             ", [$user_id]);
+
+            if ($need_to_trigger_activity_event) {
+                // для заполнения статистики
+                \Queue::push('events_for_stats', [
+                    'ts' => date("Y-m-d H:i:s"),
+                    'type' => 'activity',
+                    'user_id' => $user_id,
+                ], 'events_for_stats');
+            }
         }
     }
 
@@ -274,7 +283,8 @@ class Users
                     uivk.vk_id,
                     date_part('year', age(u.bdate)) as age,
                     u.time_zone,
-                    ui.geography
+                    ui.geography,
+                    date(ui.last_activity_at) != current_date AS need_to_trigger_activity_event
                 FROM users_devices AS ud
                 INNER JOIN users AS u
                     ON u.id = ud.user_id
