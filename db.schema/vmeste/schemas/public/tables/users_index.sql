@@ -29,7 +29,7 @@ CREATE INDEX users_fetch_sex2
 
 CREATE INDEX users_fetch_all
     ON users_index
-    USING btree(user_id, osm_id, age, sex);
+    USING btree(user_id, region_id, age, sex);
 
 ALTER TABLE public.users_index
     ADD COLUMN city_id integer NULL,

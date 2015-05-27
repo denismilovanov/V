@@ -5,6 +5,18 @@ create database vmeste_test lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' temp
 
 create database gis lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 
+create database matches0 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches1 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches2 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches3 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches4 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches5 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches6 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches7 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches8 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+create database matches9 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste_test;
+
+
 \c matches0 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches0 vmeste

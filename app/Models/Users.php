@@ -514,7 +514,10 @@ class Users
         }
 
         foreach ($users as $user) {
-            yield self::findById($user->id, 'admin');
+            $user = self::findById($user->id, 'admin');
+            if ($user) {
+                yield $user;
+            }
         }
     }
 
