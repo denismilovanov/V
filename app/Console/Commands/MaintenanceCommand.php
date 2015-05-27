@@ -3,6 +3,8 @@
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Users;
+use \App\Models\Stats;
+
 
 class MaintenanceCommand extends \App\Console\SingleCommand
 {
@@ -17,6 +19,8 @@ class MaintenanceCommand extends \App\Console\SingleCommand
         foreach ($result as $user) {
             \Log::info('Сбросили key пользователю ' . $user->user_id);
         }
+
+        Stats::createTodayStatsRecord();
 
     }
 

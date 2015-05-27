@@ -135,4 +135,17 @@ class Stats {
         return true;
     }
 
+    public static function createTodayStatsRecord() {
+        \DB::select("
+            INSERT INTO stats.daily
+                SELECT current_date
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                            FROM stats.daily
+                            WHERE date = current_date
+                            LIMIT 1
+                    );
+        ");
+    }
+
 }
