@@ -117,4 +117,22 @@ class Stats {
         return $data[0];
     }
 
+    public static function processEvent($data) {
+        if ($data['type'] == 'like') {
+            $from_user_sex = Users::findById($data['from_user_id'])->sex == 1 ? 'female' : 'male';
+            $to_user_sex = Users::findById($data['to_user_id'])->sex == 1 ? 'female' : 'male';
+
+            $date = date("Y-m-d", strtotime($data['ts']));
+
+            \DB::select("
+                UPDATE stats.daily
+                    SET {$from_user_sex}_likes_{$to_user_sex}_count = {$from_user_sex}_likes_{$to_user_sex}_count + 1,
+                        likes_count = likes_count + 1
+                    WHERE date = ?
+            ", [$date]);
+        }
+
+        return true;
+    }
+
 }

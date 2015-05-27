@@ -17,6 +17,14 @@ class Likes {
             return false;
         }
 
+        // для заполнения статистики
+        \Queue::push('events_for_stats', [
+            'ts' => date("Y-m-d H:i:s"),
+            'type' => 'like',
+            'to_user_id' => $to_user_id,
+            'from_user_id' => $from_user_id,
+        ], 'events_for_stats');
+
         $mutual = 0;
 
         if ($is_like === 1) {

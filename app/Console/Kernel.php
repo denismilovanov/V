@@ -24,6 +24,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\UpdateWeightsCommand',
         'App\Console\Commands\FillMatchesCommand',
         //
+        'App\Console\Commands\EventsForStatsListenerCommand',
+        //
         'App\Console\Commands\TestRabbitMQCommand',
         'App\Console\Commands\CheckinTestUsersCommand',
         //
