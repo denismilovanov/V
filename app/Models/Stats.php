@@ -15,7 +15,7 @@ class Stats {
         $result = [];
 
         foreach ($data as $row) {
-            $result []= [$row->age, $row->count];
+            $result []= [$row->age, (int)$row->count];
         }
 
         return $result;
@@ -34,7 +34,7 @@ class Stats {
         $result = [];
 
         foreach ($data as $row) {
-            $result []= [$row->date, $row->count];
+            $result []= [$row->date, (int)$row->count];
         }
 
         return $result;
@@ -58,9 +58,9 @@ class Stats {
         ];
 
         foreach ($data as $row) {
-            $result['males'] []= [$row->date, $row->active_males_count];
-            $result['females'] []= [$row->date, $row->active_females_count];
-            $result['all'] []= [$row->date, $row->active_all_count];
+            $result['males'] []= [$row->date, (int)$row->active_males_count];
+            $result['females'] []= [$row->date, (int)$row->active_females_count];
+            $result['all'] []= [$row->date, (int)$row->active_all_count];
         }
 
         return $result;
@@ -84,9 +84,9 @@ class Stats {
         ];
 
         foreach ($data as $row) {
-            $result['males_likes'] []= [$row->date, $row->male_likes];
-            $result['females_likes'] []= [$row->date, $row->female_likes];
-            $result['all_likes'] []= [$row->date, $row->all_likes];
+            $result['males_likes'] []= [$row->date, (int)$row->male_likes];
+            $result['females_likes'] []= [$row->date, (int)$row->female_likes];
+            $result['all_likes'] []= [$row->date, (int)$row->all_likes];
         }
 
         return $result;
