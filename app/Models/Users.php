@@ -25,7 +25,7 @@ class Users
 
     public static function updateLastActivity($user_id, $need_to_trigger_activity_event) {
         // не имеет смысл делать это на каждый запрос
-        if (mt_rand() / mt_getrandmax() <= 10.20) {
+        if (mt_rand() / mt_getrandmax() <= 0.20) {
             \DB::select("
                 UPDATE public.users_index
                     SET last_activity_at = now()
