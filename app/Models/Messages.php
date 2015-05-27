@@ -54,7 +54,7 @@ class Messages {
             }
 
             // эхо-юзеры
-            if (in_array($to_user_id, [100000, 200000])) {
+            if (in_array($to_user_id, [100000, 200000]) and ! in_array($from_user_id, [100000, 200000])) {
                 \Queue::push('echo_messages', [
                     'from_user_id' => $from_user_id,
                     'to_user_id' => $to_user_id,
