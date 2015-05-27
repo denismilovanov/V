@@ -99,7 +99,7 @@ Request.request('GET', '/stats/', {
                 'color': '#4897F1'
             }, {
                 'name': 'Женщины',
-                'y': data.males_count * 1.0 / data.users_count,
+                'y': data.females_count * 1.0 / data.users_count,
                 'value': data.females_count,
                 'color': '#f00'
             }]
@@ -183,7 +183,7 @@ Request.request('GET', '/stats/', {
             'text': 'Распределение по возрасту'
         },
         'subtitle': {
-            'text': 'Только для групп от 50 человек'
+            'text': ''
         },
         'xAxis': {
             'type': 'category',

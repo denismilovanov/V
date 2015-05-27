@@ -111,7 +111,8 @@ class Stats {
             SELECT  sum(CASE WHEN sex = 1 THEN 1 ELSE 0 END) AS females_count,
                     sum(CASE WHEN sex = 2 THEN 1 ELSE 0 END) AS males_count,
                     sum(1) AS users_count
-                FROM public.users;
+                FROM public.users
+                WHERE   id NOT BETWEEN 100000 AND 299999;
         ");
 
         return $data[0];
