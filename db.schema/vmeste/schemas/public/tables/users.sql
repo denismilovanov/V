@@ -26,3 +26,7 @@ ALTER TABLE public.users
 
 ALTER TABLE public.users
     ADD COLUMN time_zone integer NOT NULL DEFAULT +3;
+
+ALTER TABLE public.users
+    ADD COLUMN registered_at timestamp with time zone NOT NULL DEFAULT now(),
+    ADD COLUMN is_blocked_by_vk boolean NOT NULL DEFAULT FALSE;

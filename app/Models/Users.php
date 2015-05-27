@@ -294,6 +294,22 @@ class Users
         return null;
     }
 
+    public static function findByVkId($vk_id) {
+        $user = \DB::select("
+            SELECT user_id
+                FROM users_info_vk
+                WHERE vk_id = ?  -- uniq
+                LIMIT 1;
+        ", [$vk_id]);
+
+        if ($user) {
+            $user = $user[0];
+            return self::findById($user->user_id);
+        }
+
+        return null;
+    }
+
     public static function findById($user_id, $area = '') {
         if (! $area) {
             $user = \DB::select("
@@ -326,6 +342,26 @@ class Users
                         ON uivk.user_id = u.id
                     WHERE u.id = ?;
             ", [ApiController::$user->time_zone, ApiController::$user->geography, $user_id]);
+        } else if ($area == 'admin') {
+            $user = \DB::select("
+                SELECT  u.*,
+                        CASE WHEN u.sex = 1 THEN 'F' ELSE 'M' END AS gender,
+                        extract('year' from age(u.bdate)) AS age,
+                        public.format_date(i.last_activity_at) AS last_activity,
+                        uivk.vk_id,
+                        public.format_date(registered_at) AS registered_at,
+                        us.*,
+                        public.format_date(i.last_activity_at) AS last_activity_at,
+                        (SELECT count(*) FROM public.abuses WHERE to_user_id = u.id) AS abuses_count
+                    FROM public.users AS u
+                    INNER JOIN public.users_index AS i
+                        ON i.user_id = u.id
+                    INNER JOIN public.users_info_vk AS uivk
+                        ON uivk.user_id = u.id
+                    INNER JOIN public.users_stats AS us
+                        ON us.user_id = u.id
+                    WHERE u.id = ?;
+            ", [$user_id]);
         }
 
         if (! $user or ! isset($user[0])) {
@@ -338,6 +374,20 @@ class Users
         // идентификаторы тестовых пользователей отрицательные
         if (isset($user->vk_id) and $user->vk_id < 0) {
             $user->vk_id = $user->sex == 1 ? 308890 : 1;
+        }
+
+        if ($area == 'admin') {
+            $user->abuses = \DB::select("
+                SELECT a.*, u.name AS from_name, u.id AS from_id
+                    FROM public.abuses AS a
+                    INNER JOIN public.users AS u
+                        ON a.from_user_id = u.id
+                    WHERE a.to_user_id = ?
+                    ORDER BY a.created_at DESC
+                    LIMIT 50;
+            ", [$user->id]);
+
+            $user->photos = UsersPhotos::getUserPhotos($user_id);
         }
 
         return $user;
@@ -438,6 +488,36 @@ class Users
         return $users;
     }
 
+    public static function getUsersForAdmin($action, $limit, $offset) {
+        $users = [];
+
+        if ($action == 'all') {
+            $users = \DB::select("
+                SELECT u.id
+                    FROM public.users AS u
+                    ORDER BY u.id DESC
+                    LIMIT ? OFFSET ?
+            ", [$limit, $offset]);
+        } else if ($action == 'search_with_abuses') {
+            $users = \DB::select("
+                WITH a AS (
+                    SELECT DISTINCT to_user_id
+                        FROM public.abuses
+                )
+                SELECT u.id
+                    FROM public.users AS u
+                    WHERE   u.id IN (SELECT to_user_id FROM a) AND
+                            NOT is_blocked
+                    ORDER BY u.id ASC
+                    LIMIT ? OFFSET ?
+            ", [$limit, $offset]);
+        }
+
+        foreach ($users as $user) {
+            yield self::findById($user->id, 'admin');
+        }
+    }
+
     public static function removeOldKeys() {
         return \DB::select("
             UPDATE public.users_devices
@@ -447,5 +527,21 @@ class Users
                         key IS NOT NULL
                 RETURNING user_id;
         ");
+    }
+
+    public static function block($user_id) {
+        return \DB::select("
+            UPDATE public.users
+                SET is_blocked = 't'
+                WHERE id = ?;
+        ", [$user_id]);
+    }
+
+    public static function unblock($user_id) {
+        return \DB::select("
+            UPDATE public.users
+                SET is_blocked = 'f'
+                WHERE id = ?;
+        ", [$user_id]);
     }
 }

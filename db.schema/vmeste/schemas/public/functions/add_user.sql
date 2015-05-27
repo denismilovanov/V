@@ -76,6 +76,9 @@ BEGIN
             extract('year' from age(d_bdate))
         );
 
+    INSERT INTO users_stats
+        SELECT  i_id;
+
     -- добавляем картинку
     IF COALESCE(s_avatar_url, '') != '' THEN
         PERFORM add_user_photo(

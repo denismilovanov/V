@@ -21,4 +21,18 @@ class Abuses {
         ", [$from_user_id, $to_user_id, $text])[0]->add_abuse;
     }
 
+    public static function remove($abuse_id) {
+        \DB::select("
+            DELETE FROM public.abuses
+                WHERE id = ?;
+        ", [$abuse_id]);
+    }
+
+    public static function removeAllByToUserId($to_user_id) {
+        \DB::select("
+            DELETE FROM public.abuses
+                WHERE to_user_id = ?
+        ", [$to_user_id]);
+    }
+
 }
