@@ -110,6 +110,11 @@ class UsersMatches
                 $liked_users = '0';
             }
 
+            $likes_users = Likes::getLikesUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
+            if (! $likes_users) {
+                $likes_users = '0';
+            }
+
             // селект на основании foreign table
             self::getConnection($user_id)->select("
                 SET synchronous_commit TO off;
@@ -125,7 +130,8 @@ class UsersMatches
                                 35.0 * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) / 5.0 +
                                 10.0 * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
                                 10.0 * popularity +
-                                10.0 * friendliness
+                                10.0 * friendliness +
+                                20.0 * (ui.user_id IN ($likes_users))::integer
                             )
                             ::integer AS matching_level
 

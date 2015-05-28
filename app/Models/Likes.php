@@ -75,6 +75,7 @@ class Likes {
         ];
     }
 
+    // список тех, кого я лайкнул или дизлайкнул, требуется для ограничения выдачи
     public static function getLikedUsers($user_id, $from, $to) {
         $result = \DB::select("
             SELECT string_agg(user2_id::varchar, ',') AS result
@@ -82,6 +83,23 @@ class Likes {
                 WHERE   user1_id = ? AND
                         user2_id BETWEEN ? AND ?;
         ", [$user_id, $from, $to]);
+
+        if (! $result) {
+            return '';
+        }
+        return $result[0]->result;
+    }
+
+    // список тех, кто меня лайкнул, требуется для повышения их в выдаче
+    public static function getLikesUsers($user_id, $from, $to) {
+        $result = \DB::select("
+            SELECT string_agg(user1_id::varchar, ',') AS result
+                FROM public.likes
+                WHERE   user1_id BETWEEN ? AND ? AND
+                        user2_id = ? AND
+                        is_liked AND
+                        NOT is_blocked
+        ", [$from, $to, $user_id]);
 
         if (! $result) {
             return '';
