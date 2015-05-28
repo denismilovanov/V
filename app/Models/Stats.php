@@ -134,6 +134,21 @@ class Stats {
                 ", [$date]);
             }
 
+            $action_active = $data['is_like'] == 1 ? 'likes' : 'dislikes';
+            $action_passive = $data['is_like'] == 1 ? 'liked' : 'disliked';
+
+            \DB::select("
+                UPDATE stats.users_overall
+                    SET {$action_active}_count = {$action_active}_count + 1
+                    WHERE user_id = ?
+            ", [$data['from_user_id']]);
+
+            \DB::select("
+                UPDATE stats.users_overall
+                    SET {$action_passive}_count = {$action_passive}_count + 1
+                    WHERE user_id = ?
+            ", [$data['to_user_id']]);
+
         } else if ($data['type'] == 'activity') {
             $user_sex = Users::findById($data['user_id'])->sex == 1 ? 'female' : 'male';
 
