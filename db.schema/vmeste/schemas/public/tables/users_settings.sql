@@ -3,7 +3,6 @@
 
 CREATE TABLE users_settings (
     user_id integer NOT NULL PRIMARY KEY REFERENCES users(id),
-    sex integer,
     radius integer,
     age_from integer,
     age_to integer,

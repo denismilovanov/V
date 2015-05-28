@@ -14,3 +14,7 @@ CREATE TABLE public.messages_new (
 CREATE INDEX messages_new_pair_idx
     ON public.messages_new
     USING btree (me_id, buddy_id);
+
+CREATE INDEX messages_new_reverse_idx
+    ON public.messages_new
+    USING btree (buddy_id, me_id);

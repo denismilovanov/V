@@ -40,32 +40,21 @@ BEGIN
     RAISE NOTICE 'public.add_user: %', s_name;
 
     INSERT INTO users
-        (id, updated_at, sex, name, bdate, about, time_zone)
+        (id, updated_at, sex, name, bdate, about, time_zone, vk_id)
         VALUES (
-            i_id, now(), i_sex, s_name, d_bdate, s_about, i_time_zone
+            i_id, now(), i_sex, s_name, d_bdate, s_about, i_time_zone, s_vk_id::integer
         );
 
     INSERT INTO users_settings
-        (user_id, sex, radius, age_from, age_to, is_show_male, is_show_female, is_notification)
+        (user_id, radius, age_from, age_to, is_show_male, is_show_female, is_notification)
         VALUES (
             i_id,
-            i_sex,
             20,
             20,
             30,
             i_sex = 1, -- по умолчанию показываем мальчиков девочкам
             i_sex = 2, -- и девочек мальчикам
             TRUE
-        );
-
-    INSERT INTO users_info_vk
-        (user_id, vk_id, sex, name, bdate)
-        VALUES (
-            i_id,
-            s_vk_id,
-            i_sex,
-            s_name,
-            d_bdate
         );
 
     INSERT INTO users_index

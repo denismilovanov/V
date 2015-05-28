@@ -115,7 +115,7 @@ class Users
         $settings = $settings[0];
 
         return [
-            'sex' => $settings->sex,
+            'sex' => self::findById($user_id)->sex,
             'radius' => $settings->radius,
             'age_from' => $settings->age_from,
             'age_to' => $settings->age_to,
@@ -139,7 +139,7 @@ class Users
 
         \DB::select("
             UPDATE public.users_settings
-                SET sex = ?, radius = ?, age_from = ?, age_to = ?,
+                SET radius = ?, age_from = ?, age_to = ?,
                     is_show_male = ?, is_show_female = ?,
                     is_notification = ?, is_notification_likes = ?, is_notification_messages = ?
                 WHERE user_id = ?;
@@ -147,10 +147,17 @@ class Users
             UPDATE public.users
                 SET sex = ?
                 WHERE id = ?;
+
+            UPDATE public.users_index
+                SET sex = ?
+                WHERE user_id = ?;
             ", [
-                $sex, $radius, $age_from, $age_to, $is_show_male,
+                $radius, $age_from, $age_to, $is_show_male,
                 $is_show_female, $is_notification,
                 $is_notification_likes, $is_notification_messages,
+                $user_id,
+
+                $sex,
                 $user_id,
 
                 $sex,
@@ -264,7 +271,7 @@ class Users
                     u.name,
                     u.about,
                     u.avatar_url,
-                    uivk.vk_id,
+                    u.vk_id,
                     date_part('year', age(u.bdate)) as age,
                     u.time_zone,
                     ui.geography,
@@ -272,8 +279,6 @@ class Users
                 FROM users_devices AS ud
                 INNER JOIN users AS u
                     ON u.id = ud.user_id
-                INNER JOIN users_info_vk AS uivk
-                    ON uivk.user_id = ud.user_id
                 INNER JOIN users_index AS ui
                     ON ui.user_id = ud.user_id
                 WHERE ud.key = ?;
@@ -290,15 +295,15 @@ class Users
 
     public static function findByVkId($vk_id) {
         $user = \DB::select("
-            SELECT user_id
-                FROM users_info_vk
+            SELECT id
+                FROM public.users
                 WHERE vk_id = ?  -- uniq
                 LIMIT 1;
         ", [$vk_id]);
 
         if ($user) {
             $user = $user[0];
-            return self::findById($user->user_id);
+            return self::findById($user->id);
         }
 
         return null;
@@ -321,7 +326,6 @@ class Users
                 SELECT  u.*,
                         extract('year' from age(u.bdate)) AS age,
                         public.format_date(i.last_activity_at, ?) AS last_activity,
-                        uivk.vk_id,
                         icount(i.groups_vk_ids) AS groups_count,
                         icount(i.friends_vk_ids) AS friends_count,
                         round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
@@ -332,8 +336,6 @@ class Users
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
-                    INNER JOIN public.users_info_vk AS uivk
-                        ON uivk.user_id = u.id
                     WHERE u.id = ?;
             ", [ApiController::$user->time_zone, ApiController::$user->geography, $user_id]);
         } else if ($area == 'admin') {
@@ -342,7 +344,6 @@ class Users
                         CASE WHEN u.sex = 1 THEN 'F' ELSE 'M' END AS gender,
                         extract('year' from age(u.bdate)) AS age,
                         public.format_date(i.last_activity_at) AS last_activity,
-                        uivk.vk_id,
                         public.format_date(registered_at) AS registered_at,
                         us.*,
                         public.format_date(i.last_activity_at) AS last_activity_at,
@@ -350,8 +351,6 @@ class Users
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
-                    INNER JOIN public.users_info_vk AS uivk
-                        ON uivk.user_id = u.id
                     INNER JOIN public.users_stats AS us
                         ON us.user_id = u.id
                     WHERE u.id = ?;
@@ -407,7 +406,6 @@ class Users
             $users = \DB::select("
                 SELECT  u.*,
                         public.format_date(i.last_activity_at, ?) AS last_activity_at,
-                        uivk.vk_id,
                         icount(i.groups_vk_ids) AS groups_vk_count,
                         icount(i.friends_vk_ids) AS friends_vk_count,
                         0 AS photos_count,
@@ -419,8 +417,6 @@ class Users
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
-                    INNER JOIN public.users_info_vk AS uivk
-                        ON uivk.user_id = u.id
                     WHERE u.id IN (" . implode(', ', $users_ids) . ")
             ", [ApiController::$user->time_zone, ApiController::$user->geography]);
         }

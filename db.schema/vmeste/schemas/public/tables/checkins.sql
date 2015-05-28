@@ -10,3 +10,6 @@ CREATE TABLE public.checkins (
     geography geography NOT NULL
 );
 
+CREATE INDEX checkins_user_id_idx
+    ON public.checkins
+    USING btree(user_id);

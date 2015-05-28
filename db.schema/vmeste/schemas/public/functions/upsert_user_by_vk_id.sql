@@ -17,9 +17,9 @@ DECLARE
     i_id integer;
 BEGIN
 
-    SELECT user_id, 0 AS is_new  INTO r_user
-        FROM public.users_info_vk
-        WHERE vk_id = s_vk_id -- uniq
+    SELECT id AS user_id, 0 AS is_new  INTO r_user
+        FROM public.users
+        WHERE vk_id = s_vk_id::integer -- uniq
         LIMIT 1;
 
     IF FOUND THEN
