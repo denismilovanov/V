@@ -8,41 +8,25 @@ class UsersMatches
     }
     public static function createMatchesTables($user_id) {
         self::getConnection($user_id)->select("
-            SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
-            CREATE TABLE IF NOT EXISTS public.processing_levels_$user_id (LIKE public.processing_levels INCLUDING ALL);
-            CREATE TABLE IF NOT EXISTS public.matching_levels_$user_id (LIKE public.matching_levels INCLUDING ALL);
-        ");
-    }
+            SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
 
-    public static function stopProcessing($user_id) {
-        self::getConnection($user_id)->select("
-            SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
-            DROP TABLE public.processing_levels_$user_id;
-            CREATE TABLE IF NOT EXISTS public.processing_levels_$user_id (LIKE public.processing_levels INCLUDING ALL);
+            CREATE UNLOGGED TABLE IF NOT EXISTS public.matching_levels_$user_id (LIKE public.matching_levels INCLUDING ALL);
+
+            CREATE UNLOGGED TABLE IF NOT EXISTS public.matching_levels_fresh_$user_id
+                (LIKE public.matching_levels INCLUDING ALL)
+                WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
         ");
     }
 
     public static function deleteMatch($user_id, $match_user_id, $weight_level) {
         self::createMatchesTables($user_id);
 
-        self::getConnection($user_id)->select("
-            WITH lock AS (
-                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
-            )
-            UPDATE public.processing_levels_$user_id
-                SET users_ids = users_ids - intset(:match_user_id);
-                -- удаляет по всем уровням, хотя значение присутствует только на одном из них
-                -- это самый быстрый вариант
-        ", [
-            'match_user_id' => $match_user_id,
-        ]);
-
         $deleted_matching_levels = [];
 
         if ($weight_level !== null) {
             $deleted_matching_levels = self::getConnection($user_id)->select("
                 WITH lock AS (
-                    SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
                 )
                 UPDATE public.matching_levels_$user_id
                     SET users_ids = users_ids - intset(:match_user_id)
@@ -59,7 +43,7 @@ class UsersMatches
             // не нашли на указанном уровне, удаляем отовсюду
             self::getConnection($user_id)->select("
                 WITH lock AS (
-                    SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
                 )
                 UPDATE public.matching_levels_$user_id
                     SET users_ids = users_ids - intset(:match_user_id);
@@ -67,6 +51,16 @@ class UsersMatches
                 'match_user_id' => $match_user_id,
             ]);
         }
+
+        self::getConnection($user_id)->select("
+            WITH lock AS (
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
+            )
+            UPDATE public.matching_levels_fresh_$user_id
+                SET users_ids = users_ids - intset(:match_user_id);
+        ", [
+            'match_user_id' => $match_user_id,
+        ]);
     }
 
     public static function jobFillMatches($user_id) {
@@ -93,14 +87,10 @@ class UsersMatches
         self::getConnection($user_id)->select("
             SET synchronous_commit TO off;
 
-            SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
+            SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
 
-            TRUNCATE public.processing_levels_$user_id;
-            INSERT INTO public.processing_levels_$user_id
-                SELECT generate_series(0, 100) AS level_id;
-
-            TRUNCATE public.matching_levels_$user_id;
-            INSERT INTO public.matching_levels_$user_id
+            TRUNCATE public.matching_levels_fresh_$user_id;
+            INSERT INTO public.matching_levels_fresh_$user_id
                 SELECT generate_series(0, 100) AS level_id;
         ", [
             'user_id' => $user_id,
@@ -108,6 +98,10 @@ class UsersMatches
 
         $limit = 10000;
         $users_max_id = Users::getMaxId();
+
+        $search_weights_params = Users::getMySearchWeightParams($user_id);
+        $friends_vk_ids = $search_weights_params->friends_vk_ids;
+        $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
         for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
 
@@ -120,18 +114,18 @@ class UsersMatches
             self::getConnection($user_id)->select("
                 SET synchronous_commit TO off;
 
-                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'));
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
 
                 WITH all_users AS (
                     SELECT  ui.user_id AS match_user_id,
 
-                            -- порядок для подсчета весов
-                            public.get_processing_level(
-                                icount(groups_vk_ids),
-                                icount(friends_vk_ids),
+                            -- уровень
+                            public.get_weight_level(
+                                icount(groups_vk_ids & array[$groups_vk_ids]::int[]),
+                                icount(friends_vk_ids & array[$friends_vk_ids]::int[]),
                                 :radius * 1000,
                                 st_distance(geography, (:geography)::geography)::integer
-                            ) AS processing_level
+                            ) AS matching_level
 
                         FROM public.users_index AS ui
 
@@ -143,15 +137,15 @@ class UsersMatches
                                 ST_DWithin(geography, (:geography)::geography, :radius * 1000)
                 ),
                 levels AS (
-                    SELECT processing_level, array_agg(match_user_id) AS users_ids
+                    SELECT matching_level, array_agg(match_user_id) AS users_ids
                         FROM all_users
-                        GROUP BY processing_level
+                        GROUP BY matching_level
                 )
 
-                UPDATE public.processing_levels_$user_id AS l
+                UPDATE public.matching_levels_fresh_$user_id AS l
                     SET users_ids = l.users_ids + levels.users_ids
                     FROM levels
-                    WHERE level_id = levels.processing_level;
+                    WHERE level_id = levels.matching_level;
 
             ", [
                 'user_id' => $user_id,
@@ -163,94 +157,38 @@ class UsersMatches
             ]);
         }
 
-        // \Queue::push('update_weights', ['user_id' => $user_id], 'update_weights');
-        // первую пачку весов обновим сразу, без очереди
-        self::updateWeights($user_id);
+        self::getConnection($user_id)->select("
+            SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
 
-        return true;
-    }
+            DROP TABLE IF EXISTS public.matching_levels_$user_id;
+            CREATE UNLOGGED TABLE public.matching_levels_$user_id (LIKE public.matching_levels INCLUDING ALL);
 
-    public static function updateWeights($user_id, $already_filled = 0) {
-        self::createMatchesTables($user_id);
-
-        $search_weights_params = Users::getMySearchWeightParams($user_id);
-
-        $friends_vk_ids = $search_weights_params->friends_vk_ids;
-        $groups_vk_ids = $search_weights_params->groups_vk_ids;
-
-        $result = self::getConnection($user_id)->select("
-            SET synchronous_commit TO off;
-            WITH lock AS (
-                SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
+            WITH levels AS (
+                SELECT level_id, sum(icount(users_ids)) OVER (ORDER BY level_id DESC) AS cumulative_sum
+                    FROM public.matching_levels_fresh_$user_id
             ),
-            level_id AS (
-                SELECT level_id
-                    FROM public.processing_levels_$user_id
-                    WHERE icount(users_ids) > 0
-                    ORDER BY level_id DESC
-                    LIMIT 1
-            ),
-            users_ids AS (
-                SELECT subarray(users_ids, 0, 500) AS users_ids
-                    FROM public.processing_levels_$user_id
-                    WHERE level_id = (SELECT level_id FROM level_id)
+            low_level AS (
+                SELECT COALESCE((
+                    SELECT level_id
+                        FROM levels
+                        WHERE cumulative_sum > :MAX_MAINTAINED_MATCHES_COUNT
+                        ORDER BY level_id DESC
+                        LIMIT 1
+                    ), 0) AS level_id
             )
-            UPDATE public.processing_levels_$user_id AS pl
-                SET users_ids = pl.users_ids - ids.users_ids
-                FROM users_ids AS ids, level_id AS l
-                WHERE pl.level_id = l.level_id
-                RETURNING array_to_string(ids.users_ids, ',') AS users_ids, l.level_id
-        ");
+            INSERT INTO public.matching_levels_$user_id
+                SELECT fresh.*
+                    FROM public.matching_levels_fresh_$user_id AS fresh, low_level
+                    WHERE   fresh.level_id >= low_level.level_id AND
+                            icount(fresh.users_ids) > 0;
 
-        $count = 0;
-        $users_ids = '';
-        $level_id = 'n/a';
-        $users_ids = '';
-
-        if ($result) {
-            $result = $result[0];
-            $users_ids = $result->users_ids;
-            $level_id = $result->level_id;
-            $count = count(explode(",", $users_ids));
-
-            if ($count) {
-                // апдейт на основании foreign table
-                self::getConnection($user_id)->select("
-                    WITH lock AS (
-                        SELECT pg_advisory_xact_lock(hashtext('users_matches_$user_id'))
-                    ),
-                    weights_levels AS (
-                        SELECT  i.user_id AS match_user_id,
-                                public.get_weight_level(
-                                    icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
-                                    icount(i.friends_vk_ids & array[$friends_vk_ids]::int[])
-                                ) AS weight_level
-                        FROM public.users_index AS i
-                        WHERE i.user_id IN ($users_ids)
-                    ),
-                    levels AS (
-                        SELECT weight_level, array_agg(match_user_id) AS users_ids
-                            FROM weights_levels
-                            GROUP BY weight_level
-                    )
-                    UPDATE public.matching_levels_$user_id AS m
-                        SET users_ids = m.users_ids + l.users_ids
-                        FROM levels AS l
-                        WHERE m.level_id = l.weight_level;
-                ");
-            }
-        }
-
-        \Log::info('level_id = ' . $level_id . ', count = ' . $count . ', already_filled = ' . $already_filled .
-            ', sum = ' . ($count + $already_filled));
-        // \Log::info('users_ids = ' . $users_ids);
-
-        if ($count and $already_filled + $count < env('MAX_MAINTAINED_MATCHES_COUNT', 1000)) {
-            // чем выше уровень мы только что посчитали, тем выше должен быть приоритет для подсчета следующего
-            \Queue::push('update_weights', ['user_id' => $user_id, 'count' => $already_filled + $count], 'update_weights', ['priority' => $level_id]);
-        } else {
-            self::stopProcessing($user_id);
-        }
+            DROP TABLE public.matching_levels_fresh_$user_id;
+            CREATE UNLOGGED TABLE public.matching_levels_fresh_$user_id
+                (LIKE public.matching_levels INCLUDING ALL)
+                WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
+        ", [
+            'MAX_MAINTAINED_MATCHES_COUNT' => env('MAX_MAINTAINED_MATCHES_COUNT', 1000)
+        ]);
 
         return true;
     }

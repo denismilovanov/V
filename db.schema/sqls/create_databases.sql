@@ -22,67 +22,57 @@ create database matches9 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' templat
 \c matches0 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches1 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches1 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches2 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches2 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches3 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches3 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches4 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches4 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches5 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches5 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches6 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches6 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches7 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches7 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches8 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches8 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
 
 \c matches9 postgres
 \i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
 \c matches9 vmeste
 \i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
 \i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-\i ~/work/v/db.schema/matches/functions/get_processing_level.sql
