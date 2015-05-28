@@ -34,3 +34,7 @@ CREATE INDEX users_fetch_all
 ALTER TABLE public.users_index
     ADD COLUMN city_id integer NULL,
     ADD COLUMN region_id integer NULL;
+
+ALTER TABLE public.users_index
+    ADD COLUMN friendliness numeric(3, 2) NOT NULL DEFAULT 0.50,
+    ADD COLUMN popularity numeric(3, 2) NOT NULL DEFAULT 0.50;

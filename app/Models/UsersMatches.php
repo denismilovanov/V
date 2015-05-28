@@ -91,7 +91,7 @@ class UsersMatches
 
             TRUNCATE public.matching_levels_fresh_$user_id;
             INSERT INTO public.matching_levels_fresh_$user_id
-                SELECT generate_series(0, 100) AS level_id;
+                SELECT generate_series(0, 1000) AS level_id;
         ", [
             'user_id' => $user_id,
         ]);
@@ -120,12 +120,14 @@ class UsersMatches
                     SELECT  ui.user_id AS match_user_id,
 
                             -- уровень
-                            public.get_weight_level(
-                                icount(groups_vk_ids & array[$groups_vk_ids]::int[]),
-                                icount(friends_vk_ids & array[$friends_vk_ids]::int[]),
-                                :radius * 1000,
-                                st_distance(geography, (:geography)::geography)::integer
-                            ) AS matching_level
+                            (
+                                35.0 * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) / 10.0 +
+                                35.0 * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) / 5.0 +
+                                10.0 * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
+                                10.0 * popularity +
+                                10.0 * friendliness
+                            )
+                            ::integer AS matching_level
 
                         FROM public.users_index AS ui
 
@@ -137,9 +139,10 @@ class UsersMatches
                                 ST_DWithin(geography, (:geography)::geography, :radius * 1000)
                 ),
                 levels AS (
-                    SELECT matching_level, array_agg(match_user_id) AS users_ids
+                    SELECT  CASE WHEN matching_level < 1000 THEN matching_level ELSE 1000 END AS matching_level,
+                            array_agg(match_user_id) AS users_ids
                         FROM all_users
-                        GROUP BY matching_level
+                        GROUP BY CASE WHEN matching_level < 1000 THEN matching_level ELSE 1000 END
                 )
 
                 UPDATE public.matching_levels_fresh_$user_id AS l

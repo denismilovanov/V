@@ -22,3 +22,7 @@ CREATE TABLE IF NOT EXISTS public.processing_levels (
     users_ids integer[] NOT NULL DEFAULT array[]::integer[]
 );
 
+ALTER FOREIGN TABLE public.users_index
+    ADD COLUMN friendliness numeric(3, 2) NOT NULL DEFAULT 0.50,
+    ADD COLUMN popularity numeric(3, 2) NOT NULL DEFAULT 0.50;
+
