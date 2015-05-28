@@ -9,9 +9,17 @@ class UsersGroupsVk
     public static function setUserGroupsVk($user_id, $groups_ids)
     {
         $groups_ids = array_slice($groups_ids, 0, 5000);
+        $groups = [];
+
+        foreach ($groups_ids as $record) {
+            if (! is_scalar($record) or ! is_int($record)) {
+                continue;
+            }
+            $groups []= $record;
+        }
 
         return \DB::select("
-            SELECT public.set_user_groups_vk(?, array[" . implode(', ', $groups_ids) . "]::integer[]);
+            SELECT public.set_user_groups_vk(?, array[" . implode(', ', $groups) . "]::integer[]);
         ", [$user_id]);
     }
 
