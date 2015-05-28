@@ -65,7 +65,7 @@ BEGIN
             extract('year' from age(d_bdate))
         );
 
-    INSERT INTO users_stats
+    INSERT INTO stats.users_overall
         SELECT  i_id;
 
     -- добавляем картинку

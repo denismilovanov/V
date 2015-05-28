@@ -1,7 +1,7 @@
 -------------------------------------------------------------
 -- статистика
 
-CREATE TABLE public.users_stats (
+CREATE TABLE stats.users_overall (
     user_id integer NOT NULL PRIMARY KEY REFERENCES public.users (id),
     likes_count integer NOT NULL DEFAULT 0,
     dislikes_count integer NOT NULL DEFAULT 0,
@@ -9,4 +9,3 @@ CREATE TABLE public.users_stats (
     disliked_count integer NOT NULL DEFAULT 0
 );
 
--- INSERT INTO public.users_stats SELECT id FROM users;

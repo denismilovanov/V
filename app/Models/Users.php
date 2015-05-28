@@ -351,7 +351,7 @@ class Users
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
-                    INNER JOIN public.users_stats AS us
+                    INNER JOIN stats.users_overall AS us
                         ON us.user_id = u.id
                     WHERE u.id = ?;
             ", [$user_id]);
