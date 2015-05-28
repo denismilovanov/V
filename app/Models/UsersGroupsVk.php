@@ -8,6 +8,8 @@ class UsersGroupsVk
 
     public static function setUserGroupsVk($user_id, $groups_ids)
     {
+        $groups_ids = array_slice($groups_ids, 0, 5000);
+
         return \DB::select("
             SELECT public.set_user_groups_vk(?, array[" . implode(', ', $groups_ids) . "]::integer[]);
         ", [$user_id]);

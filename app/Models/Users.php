@@ -71,6 +71,10 @@ class Users
 
         foreach($groups as $group)
         {
+            if (! isset($group['id'], $group['name'], $group['photo_200'])) {
+                continue;
+            }
+
             $group['gid'] = intval($group['id']);
 
             // вставляем группу, если ее еще нет

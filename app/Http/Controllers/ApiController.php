@@ -88,7 +88,8 @@ class ApiController extends BaseController {
 
         $result = false;
 
-        if (isset($_POST['groups']) and $groups = json_decode($_POST['groups'], 'assoc')) {
+        if (isset($_POST['groups']) and $groups = json_decode($_POST['groups'], 'assoc') and is_array($groups)) {
+            $groups = array_slice($groups, 0, 5000);
             $result = Users::syncGroupsVK(
                 self::$user->id,
                 $groups
@@ -108,7 +109,8 @@ class ApiController extends BaseController {
 
         $result = false;
 
-        if (isset($_POST['friends']) and $friends = json_decode($_POST['friends'], 'assoc')) {
+        if (isset($_POST['friends']) and $friends = json_decode($_POST['friends'], 'assoc') and is_array($friends)) {
+            $friends = array_slice($friends, 0, 5000);
             $result = Users::syncFriendsVK(
                 self::$user->id,
                 $friends
