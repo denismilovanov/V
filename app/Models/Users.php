@@ -66,10 +66,6 @@ class Users
     }
 
     public static function syncGroupsVK($user_id, $groups) {
-        if(function_exists('pinba_timer_start')){
-            $timer = pinba_timer_start(array('query' => 'authVK', 'resource' => 'DB_updateGroups'));
-        }
-
         // собираем айдишки
         $groups_ids = array();
 
@@ -93,26 +89,14 @@ class Users
             $groups_ids
         );
 
-        if(function_exists('pinba_timer_stop')){
-            pinba_timer_stop($timer);
-        }
-
         return true;
     }
 
     public static function syncFriendsVK($user_id, $friends) {
-        if(function_exists('pinba_timer_start')){
-            $timer = pinba_timer_start(array('query' => 'authVK', 'resource' => 'DB_updateFriends'));
-        }
-
         UsersFriendsVk::setUserFriendsVk(
             $user_id,
             $friends
         );
-
-        if(function_exists('pinba_timer_stop')){
-            pinba_timer_stop($timer);
-        }
 
         return true;
     }
