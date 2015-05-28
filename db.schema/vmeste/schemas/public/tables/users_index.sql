@@ -19,7 +19,7 @@ CREATE INDEX users_index_geography
 
 CREATE INDEX users_fetch_sex1
     ON users_index
-    USING btree(user_id, age)
+    USING btree(user_id, age=\
     WHERE sex = 1;
 
 CREATE INDEX users_fetch_sex2
@@ -38,3 +38,6 @@ ALTER TABLE public.users_index
 ALTER TABLE public.users_index
     ADD COLUMN friendliness numeric(3, 2) NOT NULL DEFAULT 0.50,
     ADD COLUMN popularity numeric(3, 2) NOT NULL DEFAULT 0.50;
+
+ALTER TABLE public.users_index
+    ADD COLUMN last_updated_at timestamp with time zone NOT NULL DEFAULT now();

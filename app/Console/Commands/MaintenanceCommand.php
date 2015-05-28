@@ -4,6 +4,7 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Users;
 use \App\Models\Stats;
+use \App\Models\UsersIndex;
 
 
 class MaintenanceCommand extends \App\Console\SingleCommand
@@ -15,12 +16,17 @@ class MaintenanceCommand extends \App\Console\SingleCommand
         parent::run($input, $output);
 
         $result = Users::removeOldKeys();
-
         foreach ($result as $user) {
             \Log::info('Сбросили key пользователю ' . $user->user_id);
         }
 
+        $result = UsersIndex::updateBatch();
+        if ($result) {
+            \Log::info('Обновили индекс пользователям ' . $result);
+        }
+
         Stats::createTodayStatsRecord();
+
 
     }
 
