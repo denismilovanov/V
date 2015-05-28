@@ -66,31 +66,9 @@ class Users
     }
 
     public static function syncGroupsVK($user_id, $groups) {
-        // собираем айдишки
-        $groups_ids = array();
-
-        foreach($groups as $group)
-        {
-            if (! isset($group['id'], $group['name'], $group['photo_200'])) {
-                continue;
-            }
-
-            $group['gid'] = intval($group['id']);
-
-            // вставляем группу, если ее еще нет
-            GroupsVk::upsert(
-                $group['gid'],
-                $group['name'],
-                $group['photo_200']
-            );
-
-            $groups_ids []= $group['gid'];
-        }
-
-        // линкуем пользователя на группы
         UsersGroupsVk::setUserGroupsVk(
             $user_id,
-            $groups_ids
+            $groups
         );
 
         return true;

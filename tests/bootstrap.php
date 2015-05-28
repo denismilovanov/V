@@ -186,7 +186,7 @@ class Bootstrap {
     public static function getFriendsGroupsVK($access_token) {
         $code = 'var profile = API.users.get({"fields":"id,sex,photo_max,bdate,name"});
                  var friends = API.friends.get({});
-                 var groups = API.groups.get({"extended":1, "fields":"gid,name,photo_big"});
+                 var groups = API.groups.get({});
                  var photos = API.photos.get({"album_id":"profile", "limit":"5", "offset":"0", "rev":"1"});
                  return {"name":profile@.first_name,"sex":profile@.sex, "avatar_url":profile@.photo_max,
                  "bdate":profile@.bdate, "groups":groups, "friends":friends, "photos":photos};';
