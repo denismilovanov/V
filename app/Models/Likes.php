@@ -23,6 +23,7 @@ class Likes {
             'type' => 'like',
             'to_user_id' => $to_user_id,
             'from_user_id' => $from_user_id,
+            'is_like' => $is_like,
         ], 'events_for_stats');
 
         $mutual = 0;

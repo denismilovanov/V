@@ -125,12 +125,15 @@ class Stats {
 
             $date = date("Y-m-d", strtotime($data['ts']));
 
-            \DB::select("
-                UPDATE stats.daily
-                    SET {$from_user_sex}_likes_{$to_user_sex}_count = {$from_user_sex}_likes_{$to_user_sex}_count + 1,
-                        likes_count = likes_count + 1
-                    WHERE date = ?
-            ", [$date]);
+            if ($data['is_like'] == 1) {
+                \DB::select("
+                    UPDATE stats.daily
+                        SET {$from_user_sex}_likes_{$to_user_sex}_count = {$from_user_sex}_likes_{$to_user_sex}_count + 1,
+                            likes_count = likes_count + 1
+                        WHERE date = ?
+                ", [$date]);
+            }
+
         } else if ($data['type'] == 'activity') {
             $user_sex = Users::findById($data['user_id'])->sex == 1 ? 'female' : 'male';
 
