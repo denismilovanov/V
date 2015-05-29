@@ -20,6 +20,8 @@ class Kernel extends ConsoleKernel
         //
         'App\Console\Commands\PushMatchesCommand',
         'App\Console\Commands\PushMessagesCommand',
+        'App\Console\Commands\PushSystemMessagesCommand',
+        'App\Console\Commands\CreateMassPushCommand',
         //
         'App\Console\Commands\FillMatchesCommand',
         //

@@ -71,6 +71,8 @@ if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
         $app->post('users/{user_id}', ['uses' => 'AdminController@user']);
 
         $app->get('stats/', ['uses' => 'AdminController@stats']);
+
+        $app->get('tools/push', ['uses' => 'AdminController@push']);
     });
 
 }

@@ -5,6 +5,7 @@ use App\Models\Api;
 use App\Models\Users;
 use App\Models\Abuses;
 use App\Models\Stats;
+use App\Models\Queues;
 
 
 class AdminController extends BaseController {
@@ -132,11 +133,28 @@ class AdminController extends BaseController {
             } else if ($action == 'likes_activity_data') {
                 return response()->json(Stats::getLikesActivityData());
             }
-
-
         }
+
         return view('admin.stats.all', [
 
         ]);
     }
+
+    public function push() {
+        $user_id = intval(\Request::get('user_id'));
+        $action = \Request::get('action');
+
+        if ($action == 'personal_push') {
+            $status = Queues::personalPush($user_id, \Request::get('message'));
+            return response()->json(['status' => $status]);
+        } else if ($action == 'mass_push') {
+            $status = Queues::enqueueMassPush(\Request::get('message'));
+            return response()->json(['status' => $status]);
+        }
+
+        return view('admin.tools.push', [
+            'user_id' => $user_id,
+        ]);
+    }
+
 }

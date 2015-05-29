@@ -8,6 +8,12 @@ Messager = {
     hideFlash: function() {
         $('#message-wrapper').hide();
         $('#message').text('');
+    },
+
+    info: function(message) {
+        $('#message').text(message);
+        $('#message-wrapper').show();
+        setTimeout("$('#message-wrapper').hide();", 1000);
     }
 
 };
@@ -24,9 +30,17 @@ Request = {
         }).done(function(data) {
             Messager.hideFlash();
             success(data);
-        }).fail(function() {
+        }).fail(function(e) {
             Messager.hideFlash();
-            //Messager.alert(0, 'Ошибка во время запроса.');
+            var error = 'неизвестная ошибка, код ' + e.status;
+            if (e.status == 200) {
+                error = 'ответ не в формате JSON';
+            } else if (e.status == 404) {
+                error = 'контроллер не найден';
+            } else if (e.status == 500) {
+                error = 'внутренняя ошибка сервера';
+            }
+            Messager.info('Ошибка во время запроса: ' + error);
         });
     }
 

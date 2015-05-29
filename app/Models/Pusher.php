@@ -33,11 +33,23 @@ class Pusher
         self::getApplePusher()->disconnect();
     }
 
-    public static function push($data, $type) {
-        $from_user = Users::findById($data['from_user_id']);
-        $to_user = Users::findById($data['to_user_id']);
+    public static function push($data, $type, $given_text = '') {
+        if (in_array($type, ['MATCH', 'MESSAGE'])) {
+            $from_user = Users::findById($data['from_user_id']);
+            $to_user = Users::findById($data['to_user_id']);
+        } else if ($type == 'SYSTEM_MESSAGE') {
+            $to_user = Users::findById($data['user_id']);
+        } else {
+            dd($type);
+            throw new \Exception('Неподдеживаемый тип пуша ' . $type);
+        }
 
         $devices = Users::getDevices($to_user->id);
+
+        if (! $devices) {
+            \Log::info('Нет устройств');
+            return true;
+        }
 
         $sent = false;
 
@@ -49,8 +61,8 @@ class Pusher
                         $text = 'У вас совпадение c ' . Helper::casusInstrumentalis($from_user->name, $from_user->sex);
                     } else if ($type == 'MESSAGE') {
                         $text = 'У вас сообщение от ' . Helper::genitivus($from_user->name, $from_user->sex);
-                    } else {
-                        throw new \Exception('Неподдеживаемый тип пуша ' . $type);
+                    } else if ($type == 'SYSTEM_MESSAGE') {
+                        $text = $given_text;
                     }
 
                     \Log::info($type . ': ' . $text . ' -> iOS ' . $device->device_token);
@@ -67,9 +79,11 @@ class Pusher
                     $message->setBadge(5);
                     $message->setSound();
 
-                    $message->setCustomProperty('userID', $from_user->id);
-                    $message->setCustomProperty('name', $from_user->name);
-                    $message->setCustomProperty('avatar_url', $from_user->avatar_url);
+                    if (in_array($type, ['MATCH', 'MESSAGE'])) {
+                        $message->setCustomProperty('userID', $from_user->id);
+                        $message->setCustomProperty('name', $from_user->name);
+                        $message->setCustomProperty('avatar_url', $from_user->avatar_url);
+                    }
 
                     $pusher = Pusher::getApplePusher();
 
@@ -92,6 +106,9 @@ class Pusher
                         json_encode($e->getMessage())
                     );
                 }
+            } else if ($device->device_type == 2) {
+                $sent = true;
+                break;
             }
         }
 

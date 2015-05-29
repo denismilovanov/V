@@ -424,11 +424,25 @@ class Users
         return $result;
     }
 
+    public static function getUsersIdsBetween($from_id, $to_id, $area = '') {
+        if ($area == 'mass_push') {
+            return \DB::select("
+                SELECT u.id
+                    FROM public.users AS u
+                    INNER JOIN public.users_settings AS us
+                        ON us.user_id = u.id
+                    WHERE   u.id BETWEEN ? AND ? AND
+                            us.is_notification;
+            ", [$from_id, $to_id]);
+        }
+    }
+
     public static function getDevices($user_id) {
         return \DB::select("
             SELECT *
                 FROM public.users_devices
-                WHERE user_id = ?
+                WHERE   user_id = ? AND
+                        device_token IS NOT NULL
                 ORDER BY updated_at DESC; -- свежие наверх
         ", [$user_id]);
     }

@@ -32,3 +32,6 @@ ALTER TABLE public.users_devices
 
 ALTER TABLE public.users_devices
     ALTER COLUMN key DROP NOT NULL;
+
+ALTER TABLE public.users_devices
+    ALTER COLUMN device_type SET NOT NULL;
