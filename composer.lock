@@ -173,12 +173,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/denismilovanov/laravel-queue-rabbitmq.git",
-                "reference": "0f8e8b2b14d65d744b8c26c10855d6294f190e50"
+                "reference": "4f1dfe107e33aafad293e9ca6340baa7391835af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/0f8e8b2b14d65d744b8c26c10855d6294f190e50",
-                "reference": "0f8e8b2b14d65d744b8c26c10855d6294f190e50",
+                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/4f1dfe107e33aafad293e9ca6340baa7391835af",
+                "reference": "4f1dfe107e33aafad293e9ca6340baa7391835af",
                 "shasum": ""
             },
             "require": {
@@ -186,6 +186,9 @@
                 "illuminate/support": "5.0.*",
                 "php": ">=5.4.0",
                 "videlalvaro/php-amqplib": "2.5.*"
+            },
+            "require-dev": {
+                "orchestra/testbench": "~3.0"
             },
             "type": "library",
             "autoload": {
@@ -206,7 +209,7 @@
             "support": {
                 "source": "https://github.com/denismilovanov/laravel-queue-rabbitmq/tree/fork"
             },
-            "time": "2015-05-18 09:25:25"
+            "time": "2015-05-29 15:40:44"
         },
         {
             "name": "guzzlehttp/guzzle",

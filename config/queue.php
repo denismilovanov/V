@@ -25,12 +25,12 @@ return [
             'queues_params'   => [
                 'fill_matches' => [
                     'arguments' => [
-                        'x-max-priority' => ['s', 255], // https://www.rabbitmq.com/priority.html
+                        'x-max-priority' => 255
                     ],
                 ],
                 'test_priority' => [
                     'arguments' => [
-                        'x-max-priority' => ['s', 255], // https://www.rabbitmq.com/priority.html
+                        'x-max-priority' => 255,
                     ],
                 ],
             ],
