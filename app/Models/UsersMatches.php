@@ -21,6 +21,8 @@ class UsersMatches
     public static function deleteMatch($user_id, $match_user_id, $weight_level) {
         self::createMatchesTables($user_id);
 
+        $weight_level = intval($weight_level);
+
         $deleted_matching_levels = [];
 
         if ($weight_level !== null) {
@@ -35,7 +37,7 @@ class UsersMatches
                     RETURNING level_id
             ", [
                 'match_user_id' => $match_user_id,
-                'level_id' => intval($weight_level),
+                'level_id' => $weight_level,
             ]);
         }
 
@@ -52,15 +54,36 @@ class UsersMatches
             ]);
         }
 
-        self::getConnection($user_id)->select("
-            WITH lock AS (
-                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
-            )
-            UPDATE public.matching_levels_fresh_$user_id
-                SET users_ids = users_ids - intset(:match_user_id);
-        ", [
-            'match_user_id' => $match_user_id,
-        ]);
+        $deleted_matching_levels = [];
+
+        if ($weight_level !== null) {
+            $deleted_matching_levels = self::getConnection($user_id)->select("
+                WITH lock AS (
+                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
+                )
+                UPDATE public.matching_levels_fresh_$user_id
+                    SET users_ids = users_ids - intset(:match_user_id)
+                    WHERE level_id = :level_id AND
+                          users_ids @> intset(:match_user_id)
+                    RETURNING level_id;
+            ", [
+                'match_user_id' => $match_user_id,
+                'level_id' => $weight_level,
+            ]);
+        }
+
+        if (! sizeof($deleted_matching_levels)) {
+            // не нашли на указанном уровне, удаляем отовсюду
+            self::getConnection($user_id)->select("
+                WITH lock AS (
+                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
+                )
+                UPDATE public.matching_levels_fresh_$user_id
+                    SET users_ids = users_ids - intset(:match_user_id);
+            ", [
+                'match_user_id' => $match_user_id,
+            ]);
+        }
     }
 
     public static function jobFillMatches($user_id) {
@@ -202,43 +225,81 @@ class UsersMatches
         return true;
     }
 
-    private static function getMatchesAtLevel($user_id, $level_id, $limit) {
-        return self::getConnection($user_id)->select("
-            WITH u AS (
-                SELECT unnest(users_ids) AS user_id
-                    FROM public.matching_levels_$user_id
-                    WHERE level_id = ?
-            )
-            SELECT u.user_id
-                FROM u
-                LIMIT ?
-                -- ORDER BY u.user_id
-        ", [$level_id, $limit]);
-    }
-
     public static function getMatches($user_id, $limit) {
         self::createMatchesTables($user_id);
 
-        $levels_ids = self::getConnection($user_id)->select("
-            SELECT level_id
-                FROM public.matching_levels_$user_id
-                WHERE icount(users_ids) > 0
-                ORDER BY level_id DESC
-                LIMIT 1;
-        ");
+        $users_ids = [];
+        $iterations = 0;
+        $level_id = null;
 
-        $result = [];
+        // пояснение необходимости итерирование см. ниже
+        do {
+            $iterations ++;
 
-        foreach ($levels_ids as $level_id) {
-            $level_id = $level_id->level_id;
-            $result = self::getMatchesAtLevel($user_id, $level_id, $limit);
-            break;
+            // читаем максимальный уровень из таблицы со старыми данными
+            // и из таблицы с данными, которые заполняются в настоящее время
+            $max_levels_ids = self::getConnection($user_id)->select("
+                SELECT  COALESCE((
+                            SELECT level_id
+                                FROM public.matching_levels_$user_id
+                                WHERE icount(users_ids) > 0
+                                ORDER BY level_id DESC
+                                LIMIT 1
+                            ), -1
+                        ) AS old_level_id,
+                        COALESCE((
+                            SELECT level_id
+                                FROM public.matching_levels_fresh_$user_id
+                                WHERE icount(users_ids) > 0
+                                ORDER BY level_id DESC
+                                LIMIT 1
+                            ), -1
+                        ) AS fresh_level_id;
+            ")[0];
+
+            $max_old_level_id = $max_levels_ids->old_level_id;
+            $max_fresh_level_id = $max_levels_ids->fresh_level_id;
+
+            if ($max_fresh_level_id >= $max_old_level_id and $max_fresh_level_id >= 0) {
+                // в строящейся таблице данные лучше, читаем из нее
+                $table = 'fresh_';
+                $level_id = $max_fresh_level_id;
+            } else if ($max_old_level_id >= $max_fresh_level_id and $max_old_level_id >= 0) {
+                // в старой таблице данные лучше, читаем из нее
+                $table = '';
+                $level_id = $max_old_level_id;
+            } else {
+                // уровни в обеих таблицах пусты, то есть пользователей нет ни там, ни там
+                break;
+            }
+
+            $users_ids = self::getConnection($user_id)->select("
+                SELECT array_to_string(subarray(users_ids, 0, $limit), ',') AS users_ids
+                    FROM public.matching_levels_{$table}{$user_id}
+                    WHERE level_id = ?;
+            ", [$level_id]);
+
+            // за то время, которое прошло между считыванием уровня и считыванием пользователей на нем
+            // таблица fresh могла быть отротирована в таблицу без суффикса
+            // а новая fresh становится пустой
+            // поэтому сейчас мы могли считать пустой набор пользователей
+            // поэтому повторим итерацию
+            if (sizeof($users_ids)) {
+                $users_ids = explode(',', $users_ids[0]->users_ids);
+            }
+            // $users_ids может остаться пустым
+
+        // повторяем пока не найдем, на всякий случай ограничим еще и число итераций
+        } while (! $users_ids and $iterations < 5);
+
+        // запасной вариант
+        if (! sizeof($users_ids)) {
+
         }
 
-        if (! sizeof($result)) {
-            // запасной вариант
-        }
-
-        return $result;
+        return [
+            'users_ids' => $users_ids,
+            'weight_level' => $level_id,
+        ];
     }
 }

@@ -368,7 +368,7 @@ class Users
         return $user;
     }
 
-    public static function findByIds($users_ids, $area = '') {
+    public static function findByIds($users_ids, $area = '', $additional_data = []) {
         if (! $users_ids) {
             return [];
         }
@@ -386,21 +386,26 @@ class Users
             $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
             $users = \DB::select("
-                SELECT  u.*,
-                        public.format_date(i.last_activity_at, ?) AS last_activity_at,
+                SELECT  u.id,
+                        u.name,
+                        u.avatar_url,
+                        u.vk_id,
+                        u.sex,
+                        public.format_date(i.last_activity_at, :time_zone) AS last_activity_at,
                         icount(i.groups_vk_ids) AS groups_vk_count,
                         icount(i.friends_vk_ids) AS friends_vk_count,
                         0 AS photos_count,
-                        round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
-                        public.get_weight_level(
-                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
-                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[])
-                        ) AS weight_level
+                        round(ST_Distance(i.geography, :geography)::decimal / 1000) AS distance,
+                        :weight_level AS weight_level
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
                     WHERE u.id IN (" . implode(', ', $users_ids) . ")
-            ", [ApiController::$user->time_zone, ApiController::$user->geography]);
+            ", [
+                'time_zone' => ApiController::$user->time_zone,
+                'geography' => ApiController::$user->geography,
+                'weight_level' => $additional_data['weight_level'],
+            ]);
         }
 
         $result = [];
@@ -434,30 +439,8 @@ class Users
 
     public static function searchAround($me_id, $limit) {
         $users = UsersMatches::getMatches($me_id, $limit);
-
-        $users_ids = [];
-
-        foreach ($users as $user) {
-            $users_ids []= $user->user_id;
-        }
-
-        $users_all = self::findByIds($users_ids, 'searchAround');
-
-        foreach ($users as $user) {
-            $user->id = $users_all[$user->user_id]->id;
-            $user->name = $users_all[$user->user_id]->name;
-            $user->last_activity_at = $users_all[$user->user_id]->last_activity_at;
-            $user->distance = $users_all[$user->user_id]->distance;
-            $user->weight_level = $users_all[$user->user_id]->weight_level;
-            $user->vk_id = $users_all[$user->user_id]->vk_id;
-            $user->groups_vk_count = $users_all[$user->user_id]->groups_vk_count;
-            $user->friends_vk_count = $users_all[$user->user_id]->friends_vk_count;
-            $user->photos_count = $users_all[$user->user_id]->photos_count;
-            $user->avatar_url = $users_all[$user->user_id]->avatar_url;
-            unset($user->user_id);
-        }
-
-        return $users;
+        $users_all = self::findByIds($users['users_ids'], 'searchAround', ['weight_level' => $users['weight_level']]);
+        return array_values($users_all);
     }
 
     public static function getUsersForAdmin($action, $limit, $offset) {
