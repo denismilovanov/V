@@ -27,6 +27,7 @@ return [
                     'arguments' => [
                         'x-max-priority' => 255
                     ],
+                    'prefetch_count' => 1,
                 ],
                 'test_priority' => [
                     'arguments' => [

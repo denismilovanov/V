@@ -5,6 +5,7 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use \App\Models\Users;
 use \App\Models\Stats;
 use \App\Models\UsersIndex;
+use \App\Models\UsersMatches;
 
 
 class MaintenanceCommand extends \App\Console\SingleCommand
@@ -23,6 +24,11 @@ class MaintenanceCommand extends \App\Console\SingleCommand
         $result = UsersIndex::updateBatch();
         if ($result) {
             \Log::info('Обновили индекс пользователям ' . $result);
+        }
+
+        $result = UsersMatches::rebuildBatch();
+        if ($result) {
+            \Log::info('Отправили на построение заново поисковый индекс пользователям ' . $result);
         }
 
         Stats::createTodayStatsRecord();

@@ -65,6 +65,12 @@ BEGIN
             extract('year' from age(d_bdate))
         );
 
+    INSERT INTO users_matches
+        (user_id)
+        VALUES (
+            i_id
+        );
+
     INSERT INTO stats.users_overall
         SELECT  i_id;
 

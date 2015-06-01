@@ -86,8 +86,8 @@ class UsersMatches
         }
     }
 
-    public static function jobFillMatches($user_id) {
-        \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches');
+    public static function jobFillMatches($user_id, $priority = 10) {
+        \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches', ['priority' => $priority]);
     }
 
     public static function fillMatchesInUsersMatches($user_id) {
@@ -104,6 +104,14 @@ class UsersMatches
             $sex []= 1;
         }
         $sex = implode(", ", $sex);
+
+        // считаем, что индекс уже построен (хотя будем строить прямо сейчас
+        // чтобы не напороться на регулярные обновления)
+        \DB::select("
+            UPDATE public.users_matches
+                SET last_reindexed_at = now()
+                WHERE user_id = ?
+        ", [$user_id]);
 
         self::createMatchesTables($user_id);
 
@@ -302,4 +310,33 @@ class UsersMatches
             'weight_level' => $level_id,
         ];
     }
+
+    public static function rebuildBatch() {
+        $users_ids = \DB::select("
+            WITH u AS (
+                SELECT user_id
+                    FROM public.users_matches
+                    WHERE last_reindexed_at < now() - interval '1 day'
+                    ORDER BY last_reindexed_at
+                    LIMIT 100
+            )
+            UPDATE public.users_matches
+                SET last_reindexed_at = now()
+                WHERE user_id IN (SELECT user_id FROM u)
+                RETURNING user_id;
+        ");
+
+        $list = [];
+
+        foreach ($users_ids as $user_id) {
+            $user_id = $user_id->user_id;
+            $list []= $user_id;
+
+            // посылаем на перестраивание
+            self::jobFillMatches($user_id, 0); // 0 - приоритет
+        }
+
+        return implode(', ', $list);
+    }
+
 }
