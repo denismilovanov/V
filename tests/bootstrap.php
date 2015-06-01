@@ -1,6 +1,6 @@
 <?php
 
-//class_alias('Illuminate\Support\Facades\Config', 'Config');
+define('APP_ENV', env('APP_ENV'));
 
 class TestCase extends Laravel\Lumen\Testing\TestCase {
     /**

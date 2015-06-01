@@ -1,5 +1,21 @@
 <?php namespace App\Models;
 
+use Sly\NotificationPusher\PushManager,
+    Sly\NotificationPusher\Adapter\Gcm as GcmAdapter,
+    Sly\NotificationPusher\Collection\DeviceCollection,
+    Sly\NotificationPusher\Model\Device,
+    Sly\NotificationPusher\Model\Message,
+    Sly\NotificationPusher\Model\Push;
+
+class GooglePushWrapper extends Push
+{
+    public static $gcmAdapter = null;
+
+    public function __construct($devices, $message) {
+        return parent::__construct(self::$gcmAdapter, $devices, $message);
+    }
+}
+
 class Pusher
 {
     private static $apple_pusher = null;
@@ -29,6 +45,27 @@ class Pusher
         return self::$apple_pusher = $pusher;
     }
 
+    public static function getGooglePusher() {
+        if (self::$google_pusher) {
+            return self::$google_pusher;
+        }
+
+        $env = null;
+
+        if (APP_ENV == 'dev' or APP_ENV == 'test') {
+            $env = PushManager::ENVIRONMENT_DEV;
+        } else if (APP_ENV == 'production') {
+            $env = PushManager::ENVIRONMENT_PROD;
+        }
+
+        $pusher = new PushManager();
+        GooglePushWrapper::$gcmAdapter = new GcmAdapter([
+            'apiKey' => env('GOOGLE_PUSH_API_KEY'),
+        ]);
+
+        return self::$google_pusher = $pusher;
+    }
+
     public static function disconnect() {
         self::getApplePusher()->disconnect();
     }
@@ -40,8 +77,11 @@ class Pusher
         } else if ($type == 'SYSTEM_MESSAGE') {
             $to_user = Users::findById($data['user_id']);
         } else {
-            dd($type);
             throw new \Exception('Неподдеживаемый тип пуша ' . $type);
+        }
+
+        if (! $to_user) {
+            throw new \Exception('Нет пользователя ' . $data['user_id']);
         }
 
         $devices = Users::getDevices($to_user->id);
@@ -54,23 +94,25 @@ class Pusher
         $sent = false;
 
         foreach ($devices as $device) {
-            if ($device->device_type == 1) {
-                try {
 
-                    if ($type == 'MATCH') {
-                        $text = 'У вас совпадение c ' . Helper::casusInstrumentalis($from_user->name, $from_user->sex);
-                    } else if ($type == 'MESSAGE') {
-                        $text = 'У вас сообщение от ' . Helper::genitivus($from_user->name, $from_user->sex);
-                    } else if ($type == 'SYSTEM_MESSAGE') {
-                        $text = $given_text;
-                    }
+            if ($type == 'MATCH') {
+                $text = 'У вас совпадение c ' . Helper::casusInstrumentalis($from_user->name, $from_user->sex);
+            } else if ($type == 'MESSAGE') {
+                $text = 'У вас сообщение от ' . Helper::genitivus($from_user->name, $from_user->sex);
+            } else if ($type == 'SYSTEM_MESSAGE') {
+                $text = $given_text;
+            }
 
-                    \Log::info($type . ': ' . $text . ' -> iOS ' . $device->device_token);
+            \Log::info($type . ': ' . $text . ' ' . $device->device_token);
 
-                    if (Users::isTestUser($to_user->id)) {
-                        \Log::info('Предназначено тестовому пользователю, пропускаем');
-                        return true;
-                    }
+            if (Users::isTestUser($to_user->id)) {
+                \Log::info('Предназначено тестовому пользователю, пропускаем');
+                return true;
+            }
+
+            try {
+
+                if ($device->device_type == 1) {
 
                     $message = new \ApnsPHP_Message($device->device_token);
 
@@ -85,7 +127,7 @@ class Pusher
                         $message->setCustomProperty('avatar_url', $from_user->avatar_url);
                     }
 
-                    $pusher = Pusher::getApplePusher();
+                    $pusher = self::getApplePusher();
 
                     $pusher->add($message);
 
@@ -95,20 +137,35 @@ class Pusher
                         \Log::info('Пропускаем (dev)');
                     }
 
+                    \Log::info('Отправлено Apple');
                     $sent = true;
-                    \Log::info('Отправлено');
 
-                } catch (\Exception $e) {
-                    \Log::error(get_class($e) . ' ' . $e->getMessage());
-                    ErrorCollector::addError(
-                        'PUSH_LIKES_ERROR',
-                        '',
-                        json_encode($e->getMessage())
-                    );
+                } else if ($device->device_type == 2) {
+
+                    $pusher = self::getGooglePusher();
+                    $devices = new DeviceCollection([new Device($device->device_token)]);
+                    $message = new Message($text);
+                    $push = new GooglePushWrapper($devices, $message);
+
+                    if (APP_ENV != 'dev') {
+                        $pusher->add($push);
+                        $pusher->push();
+                    } else {
+                        \Log::info('Пропускаем (dev)');
+                    }
+
+                    \Log::info('Отправлено Google');
+                    $sent = true;
+
                 }
-            } else if ($device->device_type == 2) {
-                $sent = true;
-                break;
+
+            } catch (\Exception $e) {
+                \Log::error(get_class($e) . ' ' . $e->getMessage());
+                ErrorCollector::addError(
+                    'PUSH_LIKES_ERROR',
+                    '',
+                    json_encode($e->getMessage())
+                );
             }
         }
 
