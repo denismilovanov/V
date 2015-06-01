@@ -15,11 +15,9 @@ class UsersIndex {
                 FROM users_ids;
         ");
 
-        if (! $users_ids) {
+        if (! $users_ids or ! ($users_ids = $users_ids[0]->users_ids)) {
             return;
         }
-
-        $users_ids = $users_ids[0]->users_ids;
 
         \DB::select("
             UPDATE public.users_index AS i
