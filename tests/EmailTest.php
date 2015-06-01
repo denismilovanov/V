@@ -4,7 +4,7 @@ require_once 'bootstrap.php';
 
 use \App\Models\Pusher;
 
-class IOSPushTest extends TestCase {
+class EmailTest extends TestCase {
 
     public function test1() {
         $message = \Swift_Message::newInstance()
