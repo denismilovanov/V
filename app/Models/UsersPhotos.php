@@ -102,11 +102,14 @@ class UsersPhotos {
         return $avatar_url;
     }
 
-    public static function getUserPhotos($user_id) {
+    public static function getUserPhotos($user_id, $source_id = null) {
         $photos_url = env('PHOTOS_URL');
 
         $photos_raw = \DB::select("
-            SELECT * FROM public.get_user_photos(?);
+            SELECT *
+                FROM public.users_photos
+                WHERE user_id = ?
+                ORDER BY rank, id;
         ", [$user_id]);
 
         $photos = array();
@@ -114,6 +117,9 @@ class UsersPhotos {
         foreach ($photos_raw as $photo) {
             if ($photo->source_id == 0) {
                 $photo->url = $photos_url . $photo->url;
+            }
+            if ($source_id != null and $photo->source_id != $source_id) {
+                continue;
             }
             $photos []= array(
                 'id' => $photo->id,
@@ -123,6 +129,37 @@ class UsersPhotos {
         }
 
         return $photos;
+    }
+
+    public static function setPhotosVK($user_id, $photos) {
+        $added = false;
+
+        $photos_ids = [0];
+
+        foreach ($photos as $photo) {
+            if (isset($photo['url'], $photo['rank'])) {
+                $url = $photo['url'];
+                $rank = intval($photo['rank']);
+
+                $photo_id = \DB::select("
+                    SELECT public.upsert_photo_vk(?, ?, ?);
+                ", [$user_id, $url, $rank])[0]->upsert_photo_vk;
+
+                $photos_ids []= $photo_id;
+
+                $added = true;
+            }
+        }
+
+        // удаляем то, что отсутствует в переданном списке
+        \DB::select("
+            DELETE FROM public.users_photos
+                WHERE   user_id = ? AND
+                        source_id = 1 AND -- vk
+                        id NOT IN (" . implode(', ', $photos_ids) . ")
+        ", [$user_id]);
+
+        return $added;
     }
 
 }

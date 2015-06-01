@@ -22,3 +22,7 @@ CREATE TABLE public.users_photos (
 -- порядок
 ALTER TABLE public.users_photos
     ADD COLUMN rank integer NOT NULL DEFAULT 0;
+
+CREATE INDEX users_photos_user_id_idx
+    ON public.users_photos
+    USING btree(user_id);

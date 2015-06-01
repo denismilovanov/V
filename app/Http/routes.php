@@ -35,6 +35,9 @@ if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
         $app->get('getMySettings', ['uses' => 'ApiController@getMySettings']);
         $app->get('setMySettings', ['uses' => 'ApiController@setMySettings']);
 
+        $app->post('setPhotosVK', ['uses' => 'ApiController@setPhotosVK']);
+        $app->get('getPhotosVK', ['uses' => 'ApiController@getPhotosVK']);
+
         $app->get('setAbout', ['uses' => 'ApiController@setAbout']);
         $app->get('getAbout', ['uses' => 'ApiController@getAbout']);
 

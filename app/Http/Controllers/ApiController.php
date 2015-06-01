@@ -122,6 +122,39 @@ class ApiController extends BaseController {
         ]);
     }
 
+    public function setPhotosVK() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $result = false;
+
+        if (isset($_POST['photos']) and $photos = json_decode($_POST['photos'], 'assoc') and is_array($photos)) {
+            $photos = array_slice($photos, 0, 50);
+            $result = UsersPhotos::setPhotosVK(
+                self::$user->id,
+                $photos
+            );
+        }
+
+        return response()->json([
+            'status' => $result ? self::SUCCESS : self::ERROR,
+        ]);
+    }
+
+    public function getPhotosVK() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        return response()->json([
+            'status' => self::SUCCESS,
+            'photos' => UsersPhotos::getUserPhotos(self::$user->id, 1),
+        ]);
+    }
+
     public function uploadPhoto() {
         if (! $this->beforeAction()) {
             $data['status'] = self::ERROR_KEY;
@@ -395,7 +428,7 @@ class ApiController extends BaseController {
             ]);
         }
 
-        $photos = UsersPhotos::getUserPhotos($user_id);
+        $photos = UsersPhotos::getUserPhotos($user_id, 1);
 
         return response()->json([
             'status' => self::SUCCESS,

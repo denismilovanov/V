@@ -197,9 +197,20 @@ class Bootstrap {
             array('code' => $code)
         );
 
+        $photos = [];
+        $rank = 0;
+
+        foreach ($result['response']['photos']['items'] as $photo) {
+            $photos []= [
+                'url' => $photo['photo_130'],
+                'rank' => $rank ++,
+            ];
+        }
+
         return array(
             'friends' => $result['response']['friends']['items'],
             'groups' => $result['response']['groups']['items'],
+            'photos' => $photos,
         );
     }
 

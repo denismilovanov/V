@@ -30,7 +30,21 @@ class SyncFriendsVKActionTest extends TestCase {
             'groups' => json_encode($data['groups']),
         ));
 
+        // и фотографии
+
+        $result = Bootstrap::postFromApi('setPhotosVK', array(
+            'key' => $access['key'],
+            'photos' => json_encode($data['photos']),
+        ));
+
         $this->assertEquals($result['status'], 1);
+
+        $result = Bootstrap::getFromApi('getPhotosVK', array(
+            'key' => $access['key'],
+            'photos' => json_encode($data['photos']),
+        ));
+
+        $this->assertEquals(sizeof($result['photos']), sizeof($data['photos']));
 
     }
 
