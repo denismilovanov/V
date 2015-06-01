@@ -173,12 +173,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/denismilovanov/laravel-queue-rabbitmq.git",
-                "reference": "4f1dfe107e33aafad293e9ca6340baa7391835af"
+                "reference": "26e83573f30f4542aa09af5430d520f19ca7ec35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/4f1dfe107e33aafad293e9ca6340baa7391835af",
-                "reference": "4f1dfe107e33aafad293e9ca6340baa7391835af",
+                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/26e83573f30f4542aa09af5430d520f19ca7ec35",
+                "reference": "26e83573f30f4542aa09af5430d520f19ca7ec35",
                 "shasum": ""
             },
             "require": {
@@ -209,7 +209,7 @@
             "support": {
                 "source": "https://github.com/denismilovanov/laravel-queue-rabbitmq/tree/fork"
             },
-            "time": "2015-05-29 15:40:44"
+            "time": "2015-05-29 19:59:22"
         },
         {
             "name": "guzzlehttp/guzzle",
