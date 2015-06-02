@@ -2,11 +2,13 @@
 
 class UsersMatches
 {
+    // get connection to one from the 10 working databases
     private static function getConnection($user_id) {
         $num = $user_id % 10;
         return \DB::connection('matches' . $num);
     }
 
+    // create tables for "search index" ("current" and "fresh")
     public static function createMatchesTables($user_id) {
         self::getConnection($user_id)->select("
             SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
@@ -19,6 +21,7 @@ class UsersMatches
         ");
     }
 
+    // delete match user from both indexes
     public static function deleteMatch($user_id, $match_user_id, $weight_level) {
         self::createMatchesTables($user_id);
 
@@ -43,7 +46,7 @@ class UsersMatches
         }
 
         if (! sizeof($deleted_matching_levels)) {
-            // не нашли на указанном уровне, удаляем отовсюду
+            // no hit, remove from all levels
             self::getConnection($user_id)->select("
                 WITH lock AS (
                     SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
@@ -74,7 +77,7 @@ class UsersMatches
         }
 
         if (! sizeof($deleted_matching_levels)) {
-            // не нашли на указанном уровне, удаляем отовсюду
+            // no hit, remove from all levels
             self::getConnection($user_id)->select("
                 WITH lock AS (
                     SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
@@ -87,10 +90,12 @@ class UsersMatches
         }
     }
 
+    // enqueue job for rebuilding (filling up)
     public static function enqueueFillMatchesJob($user_id, $priority = 10) {
         \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches', ['priority' => $priority]);
     }
 
+    // the heart of the system - the formula for ranging users
     private static function weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) {
         return "
         (
@@ -104,6 +109,7 @@ class UsersMatches
         ::integer ";
     }
 
+    // helping function to take is_show_male/is_show_female settings and join them by comma
     private static function aggregateSexIds($settings) {
         $sex = [];
         if ($settings->is_show_male) {
@@ -116,6 +122,7 @@ class UsersMatches
         return implode(", ", $sex);
     }
 
+    // rebuilding algorithm (fill up fresh index and rotate)
     public static function fillMatchesInUsersMatches($user_id) {
         self::createMatchesTables($user_id);
 
@@ -127,16 +134,14 @@ class UsersMatches
             return true;
         }
 
-        // считаем, что индекс уже построен (хотя будем строить прямо сейчас
-        // чтобы не напороться на регулярные обновления)
+        // update ts
         \DB::select("
             UPDATE public.users_matches
                 SET last_reindexed_at = now()
                 WHERE user_id = ?
         ", [$user_id]);
 
-        self::createMatchesTables($user_id);
-
+        // filling up "fresh" index with initial data - 1000 empty levels
         self::getConnection($user_id)->select("
             SET synchronous_commit TO off;
 
@@ -156,12 +161,19 @@ class UsersMatches
         $friends_vk_ids = $search_weights_params->friends_vk_ids;
         $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
+        // take 10000 users from foreign table public.users_index
+        // filter by region, age, sex, geography
+        // calculate weights, group by them
+        // do it in cycle
         for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
 
+            // users I liked - remove them from index
             $liked_users = Likes::getLikedUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
+
+            // users I was liked by - increase weights for them
             $likes_users = Likes::getLikesUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
 
-            // селект на основании foreign table
+            // main query
             self::getConnection($user_id)->select("
                 SET synchronous_commit TO off;
 
@@ -204,6 +216,8 @@ class UsersMatches
             ]);
         }
 
+        // replace present index for fresh index
+        // leave only given amount of the most relevant users
         self::getConnection($user_id)->select("
             SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
 
@@ -242,6 +256,7 @@ class UsersMatches
         return true;
     }
 
+    //
     public static function getMatches($user_id, $limit) {
         self::createMatchesTables($user_id);
 
@@ -249,12 +264,12 @@ class UsersMatches
         $iterations = 0;
         $level_id = null;
 
-        // пояснение необходимости итерирование см. ниже
+        // we need to perform some iterations, because we gonna
+        // read from both indexes (current and fresh)
         do {
             $iterations ++;
 
-            // читаем максимальный уровень из таблицы со старыми данными
-            // и из таблицы с данными, которые заполняются в настоящее время
+            // read the highest levels from current and fresh
             $max_levels_ids = self::getConnection($user_id)->select("
                 SELECT  COALESCE((
                             SELECT level_id
@@ -263,7 +278,7 @@ class UsersMatches
                                 ORDER BY level_id DESC
                                 LIMIT 1
                             ), -1
-                        ) AS old_level_id,
+                        ) AS current_level_id,
                         COALESCE((
                             SELECT level_id
                                 FROM public.matching_levels_fresh_$user_id
@@ -274,42 +289,43 @@ class UsersMatches
                         ) AS fresh_level_id;
             ")[0];
 
-            $max_old_level_id = $max_levels_ids->old_level_id;
+            // compare them
+            $max_old_level_id = $max_levels_ids->current_level_id;
             $max_fresh_level_id = $max_levels_ids->fresh_level_id;
 
-            if ($max_fresh_level_id >= $max_old_level_id and $max_fresh_level_id >= 0) {
-                // в строящейся таблице данные лучше, читаем из нее
+            if ($max_fresh_level_id >= $max_current_level_id and $max_fresh_level_id >= 0) {
+                // we need to read from fresh
                 $table = 'fresh_';
                 $level_id = $max_fresh_level_id;
-            } else if ($max_old_level_id >= $max_fresh_level_id and $max_old_level_id >= 0) {
-                // в старой таблице данные лучше, читаем из нее
+            } else if ($max_current_level_id >= $max_fresh_level_id and $max_current_level_id >= 0) {
+                // we need to read from current
                 $table = '';
-                $level_id = $max_old_level_id;
+                $level_id = $max_current_level_id;
             } else {
-                // уровни в обеих таблицах пусты, то есть пользователей нет ни там, ни там
+                // both indexes are empty
                 break;
             }
 
+            // read users at level
             $users_ids = self::getConnection($user_id)->select("
                 SELECT array_to_string(subarray(users_ids, 0, $limit), ',') AS users_ids
                     FROM public.matching_levels_{$table}{$user_id}
                     WHERE level_id = ?;
             ", [$level_id]);
 
-            // за то время, которое прошло между считыванием уровня и считыванием пользователей на нем
-            // таблица fresh могла быть отротирована в таблицу без суффикса
-            // а новая fresh становится пустой
-            // поэтому сейчас мы могли считать пустой набор пользователей
-            // поэтому повторим итерацию
-            if (sizeof($users_ids)) {
+            // there is time lag between reading level and reading users
+            // it is possible fresh index to be truncated between these moments of time
+            // the actual data is now in current index
+            if (sizeof($users_ids) and $users_ids[0]->users_ids) {
                 $users_ids = explode(',', $users_ids[0]->users_ids);
             }
-            // $users_ids может остаться пустым
+            // so $users_ids can be still empty and we need to take another iteration
 
-        // повторяем пока не найдем, на всякий случай ограничим еще и число итераций
+        // it is unbelievable 5 iterations take place :)
         } while (! $users_ids and $iterations < 5);
 
-        // запасной вариант
+
+        // indexes are empty, we need to find matching users right now!
         if (! sizeof($users_ids)) {
             $settings = Users::getMySettings($user_id);
             $geography = Users::getMyGeography($user_id);
@@ -324,10 +340,13 @@ class UsersMatches
                 $liked_users = Likes::getAllLikedUsers($user_id);
                 $likes_users = Likes::getAllLikesUsers($user_id);
 
+                // heavy query without any guarantee to get the most relative users
+                // they will be simply matching by geo, age and sex
                 $users_ids = \DB::select("
                     WITH matches AS (
                         SELECT  ui.user_id AS match_user_id,
 
+                                -- not used yet:
                                 " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS weight_level
 
                             FROM public.users_index AS ui
@@ -348,6 +367,7 @@ class UsersMatches
                     'radius' => $settings->radius,
                     'geography' =>  $geography['geography'],
                     'region_id' => $geography['region_id'],
+                    // 20 seems to be enough
                     'limit' => $limit > 20 ? 20 : $limit,
                 ]);
 
@@ -355,6 +375,7 @@ class UsersMatches
                 if (sizeof($users_ids) and $users_ids[0]->users_ids) {
                     $users_ids = explode(',', $users_ids[0]->users_ids);
                 } else {
+                    // there are no mathing users at all
                     $users_ids = '';
                 }
             }
@@ -366,6 +387,7 @@ class UsersMatches
         ];
     }
 
+    // take users with old current index and enqueue rebuild job
     public static function rebuildBatch() {
         $users_ids = \DB::select("
             WITH u AS (
@@ -387,11 +409,12 @@ class UsersMatches
             $user_id = $user_id->user_id;
             $list []= $user_id;
 
-            // посылаем на перестраивание
-            self::enqueueFillMatchesJob($user_id, 0); // 0 - приоритет
+            // enqueue with priority = 0
+            self::enqueueFillMatchesJob($user_id, 0);
         }
 
         return implode(', ', $list);
     }
 
 }
+
