@@ -31,12 +31,15 @@ class SendErrorsCommand extends \App\Console\SingleCommand
                 $job->release(60);
             }
 
+            self::closeDBConnections();
+
             if (++ $jobs == 1000) {
                 \Queue::unsubscribe($tag);
             }
         });
 
-        \Log::info('Завершили ' . $tag);
+        \Log::info('Завершили подписку ' . $tag);
+        self::closeDBConnections();
     }
 
     private static function sendError($data) {

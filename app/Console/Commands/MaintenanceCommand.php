@@ -33,7 +33,7 @@ class MaintenanceCommand extends \App\Console\SingleCommand
 
         Stats::createTodayStatsRecord();
 
-
+        self::closeDBConnections();
     }
 
 }

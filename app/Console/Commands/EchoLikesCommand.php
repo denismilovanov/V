@@ -28,11 +28,14 @@ class EchoLikesCommand extends \App\Console\SingleCommand
                 $job->delete();
             }
 
+            self::closeDBConnections();
+
             if (++ $jobs == 10000) {
                 \Queue::unsubscribe($tag);
             }
         });
 
-        \Log::info('Завершили ' . $tag);
+        \Log::info('Завершили подписку ' . $tag);
+        self::closeDBConnections();
     }
 }

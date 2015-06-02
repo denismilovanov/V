@@ -33,6 +33,8 @@ class CreateMassPushCommand extends \App\Console\SingleCommand
                 $job->release(10);
             }
 
+            self::closeDBConnections();
+
             if (++ $jobs == 10) {
                 \Queue::unsubscribe($tag);
             }
@@ -41,6 +43,7 @@ class CreateMassPushCommand extends \App\Console\SingleCommand
         \Log::info('Завершили подписку ' . $tag);
 
         Pusher::disconnect();
+        self::closeDBConnections();
 
         return 0;
     }

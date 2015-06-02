@@ -29,6 +29,8 @@ class EventsForStatsListenerCommand extends \App\Console\SingleCommand
                 $job->release(10);
             }
 
+            self::closeDBConnections();
+
             if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
             }
@@ -37,6 +39,7 @@ class EventsForStatsListenerCommand extends \App\Console\SingleCommand
         \Log::info('Завершили подписку ' . $tag);
 
         Pusher::disconnect();
+        self::closeDBConnections();
 
         return 0;
     }

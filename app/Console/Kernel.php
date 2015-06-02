@@ -83,4 +83,10 @@ class SingleCommand extends \Illuminate\Console\Command
         pcntl_signal(15, $shutdown);
         register_shutdown_function($shutdown);
     }
+
+    public static function closeDBConnections()
+    {
+        \DB::disconnect();
+        \DB::connection('logs')->disconnect();
+    }
 }

@@ -236,7 +236,6 @@ class UsersMatches
         ]);
 
         self::getConnection($user_id)->disconnect();
-        \DB::disconnect();
 
         return true;
     }

@@ -28,11 +28,16 @@ class FillMatchesCommand extends \App\Console\SingleCommand
                 $job->delete();
             }
 
+            self::closeDBConnections();
+
             if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
             }
         });
 
-        \Log::info('Завершили ' . $tag);
+        \Log::info('Завершили подписку ' . $tag);
+        self::closeDBConnections();
+
+        return 0;
     }
 }

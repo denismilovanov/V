@@ -34,6 +34,8 @@ class PushMatchesCommand extends \App\Console\SingleCommand
                 $job->release(10);
             }
 
+            self::closeDBConnections();
+
             if (++ $jobs == 1000) {
                 \Queue::unsubscribe($tag);
             }
@@ -42,6 +44,7 @@ class PushMatchesCommand extends \App\Console\SingleCommand
         \Log::info('Завершили подписку ' . $tag);
 
         Pusher::disconnect();
+        self::closeDBConnections();
 
         return 0;
     }
