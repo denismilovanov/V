@@ -155,7 +155,7 @@ class Users
             $old_settings['is_show_male'] != $is_show_male
         ) {
             // надо (делаем это после апдейта базы, кот. был выше)
-            UsersMatches::jobFillMatches($user_id);
+            UsersMatches::enqueueFillMatchesJob($user_id);
         }
 
         return true;

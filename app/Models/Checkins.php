@@ -22,7 +22,7 @@ class Checkins {
         // важно было записать географию в базу прежде, чем создавать этот джоб
         // чтобы он получил новую географию
         if ($fill_matches) {
-            UsersMatches::jobFillMatches($user_id);
+            UsersMatches::enqueueFillMatchesJob($user_id);
         }
 
         return $result;

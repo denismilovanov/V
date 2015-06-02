@@ -86,7 +86,7 @@ class UsersMatches
         }
     }
 
-    public static function jobFillMatches($user_id, $priority = 10) {
+    public static function enqueueFillMatchesJob($user_id, $priority = 10) {
         \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches', ['priority' => $priority]);
     }
 
@@ -340,7 +340,7 @@ class UsersMatches
             $list []= $user_id;
 
             // посылаем на перестраивание
-            self::jobFillMatches($user_id, 0); // 0 - приоритет
+            self::enqueueFillMatchesJob($user_id, 0); // 0 - приоритет
         }
 
         return implode(', ', $list);
