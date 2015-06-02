@@ -103,6 +103,11 @@ class UsersMatches
         if ($settings->is_show_female) {
             $sex []= 1;
         }
+
+        if (! $sex) {
+            return true;
+        }
+
         $sex = implode(", ", $sex);
 
         // считаем, что индекс уже построен (хотя будем строить прямо сейчас
@@ -229,6 +234,9 @@ class UsersMatches
         ", [
             'MAX_MAINTAINED_MATCHES_COUNT' => env('MAX_MAINTAINED_MATCHES_COUNT', 1000)
         ]);
+
+        self::getConnection($user_id)->disconnect();
+        \DB::disconnect();
 
         return true;
     }
