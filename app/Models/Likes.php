@@ -84,8 +84,21 @@ class Likes {
                         user2_id BETWEEN ? AND ?;
         ", [$user_id, $from, $to]);
 
-        if (! $result) {
-            return '';
+        if (! $result or ! $result[0]->result) {
+            return '0';
+        }
+        return $result[0]->result;
+    }
+
+    public static function getAllLikedUsers($user_id) {
+        $result = \DB::select("
+            SELECT string_agg(user2_id::varchar, ',') AS result
+                FROM public.likes
+                WHERE   user1_id = ?;
+        ", [$user_id]);
+
+        if (! $result or ! $result[0]->result) {
+            return '0';
         }
         return $result[0]->result;
     }
@@ -101,8 +114,23 @@ class Likes {
                         NOT is_blocked
         ", [$from, $to, $user_id]);
 
-        if (! $result) {
-            return '';
+        if (! $result or ! $result[0]->result) {
+            return '0';
+        }
+        return $result[0]->result;
+    }
+
+    public static function getAllLikesUsers($user_id) {
+        $result = \DB::select("
+            SELECT string_agg(user1_id::varchar, ',') AS result
+                FROM public.likes
+                WHERE   user2_id = ? AND
+                        is_liked AND
+                        NOT is_blocked
+        ", [$user_id]);
+
+        if (! $result or ! $result[0]->result) {
+            return '0';
         }
         return $result[0]->result;
     }

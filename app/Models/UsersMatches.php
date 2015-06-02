@@ -6,6 +6,7 @@ class UsersMatches
         $num = $user_id % 10;
         return \DB::connection('matches' . $num);
     }
+
     public static function createMatchesTables($user_id) {
         self::getConnection($user_id)->select("
             SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
@@ -90,12 +91,20 @@ class UsersMatches
         \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches', ['priority' => $priority]);
     }
 
-    public static function fillMatchesInUsersMatches($user_id) {
-        self::createMatchesTables($user_id);
+    private static function weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) {
+        return "
+        (
+            35.0 * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) / 10.0 +
+            35.0 * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) / 5.0 +
+            10.0 * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
+            10.0 * popularity +
+            10.0 * friendliness +
+            20.0 * (ui.user_id IN ($likes_users))::integer
+        )
+        ::integer ";
+    }
 
-        $settings = Users::getMySettings($user_id);
-        $geography = Users::getMyGeography($user_id);
-
+    private static function aggregateSexIds($settings) {
         $sex = [];
         if ($settings->is_show_male) {
             $sex []= 2;
@@ -104,11 +113,19 @@ class UsersMatches
             $sex []= 1;
         }
 
+        return implode(", ", $sex);
+    }
+
+    public static function fillMatchesInUsersMatches($user_id) {
+        self::createMatchesTables($user_id);
+
+        $settings = Users::getMySettings($user_id);
+        $geography = Users::getMyGeography($user_id);
+
+        $sex = self::aggregateSexIds($settings);
         if (! $sex) {
             return true;
         }
-
-        $sex = implode(", ", $sex);
 
         // считаем, что индекс уже построен (хотя будем строить прямо сейчас
         // чтобы не напороться на регулярные обновления)
@@ -142,14 +159,7 @@ class UsersMatches
         for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
 
             $liked_users = Likes::getLikedUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
-            if (! $liked_users) {
-                $liked_users = '0';
-            }
-
             $likes_users = Likes::getLikesUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
-            if (! $likes_users) {
-                $likes_users = '0';
-            }
 
             // селект на основании foreign table
             self::getConnection($user_id)->select("
@@ -160,16 +170,8 @@ class UsersMatches
                 WITH all_users AS (
                     SELECT  ui.user_id AS match_user_id,
 
-                            -- уровень
-                            (
-                                35.0 * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) / 10.0 +
-                                35.0 * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) / 5.0 +
-                                10.0 * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
-                                10.0 * popularity +
-                                10.0 * friendliness +
-                                20.0 * (ui.user_id IN ($likes_users))::integer
-                            )
-                            ::integer AS matching_level
+                            " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . "
+                            AS matching_level
 
                         FROM public.users_index AS ui
 
@@ -309,7 +311,53 @@ class UsersMatches
 
         // запасной вариант
         if (! sizeof($users_ids)) {
+            $settings = Users::getMySettings($user_id);
+            $geography = Users::getMyGeography($user_id);
 
+            $sex = self::aggregateSexIds($settings);
+
+            if ($sex) {
+                $search_weights_params = Users::getMySearchWeightParams($user_id);
+                $friends_vk_ids = $search_weights_params->friends_vk_ids;
+                $groups_vk_ids = $search_weights_params->groups_vk_ids;
+
+                $liked_users = Likes::getAllLikedUsers($user_id);
+                $likes_users = Likes::getAllLikesUsers($user_id);
+
+                $users_ids = \DB::select("
+                    WITH matches AS (
+                        SELECT  ui.user_id AS match_user_id,
+
+                                " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS weight_level
+
+                            FROM public.users_index AS ui
+                            WHERE   region_id = :region_id AND
+                                    age BETWEEN :age_from AND :age_to AND
+                                    sex IN ($sex) AND
+                                    ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
+                                    user_id NOT IN (" . $liked_users . ")
+                            ORDER BY ui.last_activity_at DESC
+                            LIMIT :limit
+                    )
+                    SELECT string_agg(m.match_user_id::varchar, ',') AS users_ids
+                        FROM matches AS m;
+                ", [
+                    'user_id' => $user_id,
+                    'age_from' => $settings->age_from ? : 18,
+                    'age_to' => $settings->age_to ? : 80,
+                    'radius' => $settings->radius,
+                    'geography' =>  $geography['geography'],
+                    'region_id' => $geography['region_id'],
+                    'limit' => $limit > 20 ? 20 : $limit,
+                ]);
+
+                $level_id = 0;
+                if (sizeof($users_ids) and $users_ids[0]->users_ids) {
+                    $users_ids = explode(',', $users_ids[0]->users_ids);
+                } else {
+                    $users_ids = '';
+                }
+            }
         }
 
         return [
