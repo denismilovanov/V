@@ -122,6 +122,26 @@ class ApiController extends BaseController {
         ]);
     }
 
+    public function syncProfileVK() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $result = false;
+
+        if (isset($_POST['profile']) and $profile = json_decode($_POST['profile'], 'assoc') and is_array($profile)) {
+            $result = Users::syncProfileVK(
+                self::$user->id,
+                $profile
+            );
+        }
+
+        return response()->json([
+            'status' => $result ? self::SUCCESS : self::ERROR,
+        ]);
+    }
+
     public function setPhotosVK() {
         if (! $this->beforeAction()) {
             $data['status'] = self::ERROR_KEY;

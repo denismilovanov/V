@@ -184,11 +184,11 @@ class Bootstrap {
     }
 
     public static function getFriendsGroupsVK($access_token) {
-        $code = 'var profile = API.users.get({"fields":"id,sex,photo_max,bdate,name"});
+        $code = 'var profile = API.users.get({"fields":"id,sex,photo_max,bdate,name,occupation,activities,interests,music,movies,tv,books,games,quotes,personal"});
                  var friends = API.friends.get({});
                  var groups = API.groups.get({});
                  var photos = API.photos.get({"album_id":"profile", "limit":"5", "offset":"0", "rev":"1"});
-                 return {"name":profile@.first_name,"sex":profile@.sex, "avatar_url":profile@.photo_max,
+                 return {"profile":profile,"name":profile@.first_name,"sex":profile@.sex, "avatar_url":profile@.photo_max,
                  "bdate":profile@.bdate, "groups":groups, "friends":friends, "photos":photos};';
 
         $result = self::vkApiMethod(
@@ -211,6 +211,7 @@ class Bootstrap {
             'friends' => $result['response']['friends']['items'],
             'groups' => $result['response']['groups']['items'],
             'photos' => $photos,
+            'profile' => $result['response']['profile'][0],
         );
     }
 

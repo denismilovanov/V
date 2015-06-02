@@ -83,6 +83,50 @@ class Users
         return true;
     }
 
+    public static function syncProfileVK($user_id, $profile) {
+        $keys = ['occupation', 'activities', 'interests', 'music', 'movies', 'tv', 'books', 'games', 'quotes', 'personal'];
+
+        foreach ($keys as $key) {
+            if (! isset($profile[$key])) {
+                $profile[$key] = null;
+            }
+
+            if (! is_scalar($profile[$key]) and $key != 'personal') {
+                $profile[$key] = null;
+            }
+
+            if (is_scalar($profile[$key]) and ! $profile[$key]) {
+                $profile[$key] = null;
+            }
+        }
+
+        \DB::select("
+            UPDATE public.users_profiles_vk
+                SET occupation = ?,
+                    activities = ?,
+                    interests = ?,
+
+                    music = ?,
+                    movies = ?,
+                    tv = ?,
+
+                    books = ?,
+                    games = ?,
+
+                    quotes = ?,
+                    personal = ?
+                WHERE user_id = ?;
+        ", [
+            $profile['occupation'], $profile['activities'], $profile['interests'],
+            $profile['music'], $profile['movies'], $profile['tv'],
+            $profile['books'], $profile['games'],
+            $profile['quotes'], json_encode($profile['personal'], JSON_UNESCAPED_UNICODE),
+            $user_id
+        ]);
+
+        return true;
+    }
+
     public static function getSettings($user_id) {
         $settings = \DB::select("
             SELECT *

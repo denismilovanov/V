@@ -46,6 +46,15 @@ class SyncFriendsVKActionTest extends TestCase {
 
         $this->assertEquals(sizeof($result['photos']), sizeof($data['photos']));
 
+        // и профиль
+
+        $result = Bootstrap::postFromApi('syncProfileVK', array(
+            'key' => $access['key'],
+            'profile' => json_encode($data['profile']),
+        ));
+
+        $this->assertEquals($result['status'], 1);
+
     }
 
 }

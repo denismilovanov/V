@@ -25,6 +25,7 @@ if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
 
         $app->post('syncGroupsVK', ['uses' => 'ApiController@syncGroupsVK']);
         $app->post('syncFriendsVK', ['uses' => 'ApiController@syncFriendsVK']);
+        $app->post('syncProfileVK', ['uses' => 'ApiController@syncProfileVK']);
 
         $app->post('uploadPhoto', ['uses' => 'ApiController@uploadPhoto']);
         $app->get('removePhoto', ['uses' => 'ApiController@removePhoto']);

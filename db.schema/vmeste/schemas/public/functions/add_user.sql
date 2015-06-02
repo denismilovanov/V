@@ -71,6 +71,12 @@ BEGIN
             i_id
         );
 
+    INSERT INTO users_profiles_vk
+        (user_id)
+        VALUES (
+            i_id
+        );
+
     INSERT INTO stats.users_overall
         SELECT  i_id;
 
