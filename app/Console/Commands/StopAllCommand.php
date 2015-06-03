@@ -9,13 +9,26 @@ class StopAllCommand extends \App\Console\SingleCommand {
         sort($pids);
 
         foreach ($pids as $pid_file) {
+            $remove_pid = false;
+
             $pid = file_get_contents($pid_file);
-            $result = posix_kill($pid, 15);
-            \Log::info('Тормозим: ' . $pid_file . ' -> ' . $pid);
-            if ($result) {
-                \Log::info('Успешно');
+            if (is_numeric($pid)) {
+                $result = posix_kill($pid, 15);
+                \Log::info('Тормозим: ' . $pid_file . ' -> ' . $pid);
+                if ($result) {
+                    \Log::info('Успешно');
+                } else {
+                    \Log::info('Нет такого процесса');
+                    $remove_pid = true;
+                }
             } else {
-                \Log::info('Нет такого процесса');
+                \Log::info('Внутри файла нет числа');
+                $remove_pid = true;
+            }
+
+            if ($remove_pid and file_exists($pid_file)) {
+                unlink($pid_file);
+                \Log::info('Удаляем: ' . $pid_file);
             }
         }
 

@@ -16,8 +16,12 @@ class RemovePidsCommand extends \App\Console\SingleCommand {
 
             $pid = file_get_contents($pid_file);
 
-            $result = exec('ps --pid ' . $pid);
-            $does_not_work = strpos($result, $pid) === false;
+            if ($pid) {
+                $result = exec('ps --pid ' . $pid);
+                $does_not_work = strpos($result, $pid) === false;
+            } else {
+                $does_not_work = true;
+            }
 
             if ($does_not_work) {
                 \Log::info('Удаляем: ' . $pid_file . ' -> ' . $pid);

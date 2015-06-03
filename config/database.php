@@ -64,7 +64,7 @@ return [
             'driver'   => 'pgsql',
             'host'     => env('DB_MATCHES_HOST', ''),
             'port'     => env('DB_MATCHES_PORT', '5432'),
-            'database' => 'matches1',
+            'database' => 'matches2',
             'username' => env('DB_MATCHES_USERNAME', ''),
             'password' => env('DB_MATCHES_PASSWORD', ''),
             'charset'  => 'utf8',
