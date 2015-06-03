@@ -80,26 +80,36 @@ class Messages {
         \DB::select("
             INSERT INTO public.messages_dialogs
                 (me_id, buddy_id, last_message, last_message_i, is_new)
-                VALUES (
+                SELECT
                     ?,
                     ?,
                     '',
                     't',
                     'f'
+                WHERE NOT EXISTS (
+                    SELECT 1
+                        FROM public.messages_dialogs
+                        WHERE   me_id = ? AND
+                                buddy_id = ?
                 );
-        ", [$from_user_id, $to_user_id]);
+        ", [$from_user_id, $to_user_id, $from_user_id, $to_user_id]);
 
         \DB::select("
             INSERT INTO public.messages_dialogs
                 (me_id, buddy_id, last_message, last_message_i, is_new)
-                VALUES (
+                SELECT
                     ?,
                     ?,
                     '',
                     't',
                     'f'
+                WHERE NOT EXISTS (
+                    SELECT 1
+                        FROM public.messages_dialogs
+                        WHERE   me_id = ? AND
+                                buddy_id = ?
                 );
-        ", [$to_user_id, $from_user_id]);
+        ", [$to_user_id, $from_user_id, $to_user_id, $from_user_id]);
     }
 
     public static function echoMessage($data) {
