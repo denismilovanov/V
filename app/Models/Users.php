@@ -291,6 +291,14 @@ class Users
         return 100000 + (int)(200000 * mt_rand() / mt_getrandmax());
     }
 
+    private static function correctVkId($vk_id, $sex) {
+        if ($vk_id < 0) {
+            // идентификаторы тестовых пользователей отрицательные
+            return $sex == 1 ? 308890 : 1;
+        }
+        return $vk_id;
+    }
+
     public static function findByKey($key) {
         $user = \DB::select("
             SELECT  u.id, u.sex,
@@ -349,11 +357,11 @@ class Users
             $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
             $user = \DB::select("
-                SELECT  u.*,
+                SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url,
                         extract('year' from age(u.bdate)) AS age,
-                        public.format_date(i.last_activity_at, ?) AS last_activity,
-                        icount(i.groups_vk_ids) AS groups_count,
-                        icount(i.friends_vk_ids) AS friends_count,
+                        public.format_date(i.last_activity_at, ?) AS last_activity_at,
+                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
+                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
                         round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
                         public.get_weight_level(
                             icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
@@ -389,11 +397,7 @@ class Users
 
         $user = $user[0];
         $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
-
-        // идентификаторы тестовых пользователей отрицательные
-        if (isset($user->vk_id) and $user->vk_id < 0) {
-            $user->vk_id = $user->sex == 1 ? 308890 : 1;
-        }
+        $user->vk_id = self::correctVkId($user->vk_id, $user->sex);
 
         if ($area == 'admin') {
             $user->abuses = \DB::select("
@@ -405,9 +409,9 @@ class Users
                     ORDER BY a.created_at DESC
                     LIMIT 50;
             ", [$user->id]);
-
-            $user->photos = UsersPhotos::getUserPhotos($user_id);
         }
+
+        $user->photos = UsersPhotos::getUserPhotos($user_id, 1);
 
         return $user;
     }
@@ -436,9 +440,8 @@ class Users
                         u.vk_id,
                         u.sex,
                         public.format_date(i.last_activity_at, :time_zone) AS last_activity_at,
-                        icount(i.groups_vk_ids) AS groups_vk_count,
-                        icount(i.friends_vk_ids) AS friends_vk_count,
-                        0 AS photos_count,
+                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
+                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
                         round(ST_Distance(i.geography, :geography)::decimal / 1000) AS distance,
                         :weight_level AS weight_level
                     FROM public.users AS u
@@ -456,10 +459,10 @@ class Users
 
         foreach ($users as $user) {
             $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
+            $user->vk_id = self::correctVkId($user->vk_id, $user->sex);
 
-            // идентификаторы тестовых пользователей отрицательные
-            if (isset($user->vk_id) and $user->vk_id < 0) {
-                $user->vk_id = $user->sex == 1 ? 308890 : 1;
+            if ($area == 'searchAround') {
+                $user->photos = UsersPhotos::getUserPhotos($user->id, 1);
             }
 
             $result[$user->id] = $user;

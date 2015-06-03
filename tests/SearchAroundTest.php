@@ -93,6 +93,16 @@ class SearchAroundTest extends TestCase {
         ));
         $this->assertEquals($result['status'], 1);
         $this->assertTrue(is_array($result['users']));
+
+        $match = $result['users'][0];
+
+        $this->assertTrue(is_array($match['photos']));
+        $this->assertTrue(isset($match['common_groups_vk'],
+                                $match['common_friends_vk'],
+                                $match['last_activity_at'],
+                                $match['weight_level'],
+                                $match['distance'],
+                                $match['vk_id']));
     }
 
 }

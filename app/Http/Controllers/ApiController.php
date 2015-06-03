@@ -448,21 +448,9 @@ class ApiController extends BaseController {
             ]);
         }
 
-        $photos = UsersPhotos::getUserPhotos($user_id, 1);
-
         return response()->json([
             'status' => self::SUCCESS,
-            'vk_id' => $profile->vk_id,
-            'name' => $profile->name,
-            'sex' => $profile->sex,
-            'age' => $profile->age,
-            'about' => $profile->about,
-            'last_activity' => $profile->last_activity,
-            'distance' => $profile->distance,
-            'weight_level' => $profile->weight_level,
-            'is_deleted' => $profile->is_deleted,
-            'photos' => $photos,
-        ]);
+        ] + (array) $profile);
     }
 
     public function sendMessageToUser() {

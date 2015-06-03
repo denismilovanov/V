@@ -290,7 +290,7 @@ class UsersMatches
             ")[0];
 
             // compare them
-            $max_old_level_id = $max_levels_ids->current_level_id;
+            $max_current_level_id = $max_levels_ids->current_level_id;
             $max_fresh_level_id = $max_levels_ids->fresh_level_id;
 
             if ($max_fresh_level_id >= $max_current_level_id and $max_fresh_level_id >= 0) {
