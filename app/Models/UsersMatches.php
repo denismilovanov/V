@@ -392,20 +392,14 @@ class UsersMatches
 
     // take users with old current index and enqueue rebuild job
     public static function checkIfNeedRebuilding($user_id) {
-        $users_ids = \DB::select("
-            WITH u AS (
-                SELECT user_id
-                    FROM public.users_matches
-                    WHERE   user_id = ? AND
-                            last_reindexed_at < now() - interval '1 day'
-            )
-            UPDATE public.users_matches
-                SET last_reindexed_at = now()
-                WHERE user_id IN (SELECT user_id FROM u)
-                RETURNING user_id;
+        $check = \DB::select("
+            SELECT user_id
+                FROM public.users_matches
+                WHERE   user_id = ? AND
+                        last_reindexed_at < now() - interval '1 day';
         ", [$user_id]);
 
-        if (sizeof($users_ids)) {
+        if (sizeof($check)) {
             // enqueue with priority = 0
             self::enqueueFillMatchesJob($user_id, 0);
         }
