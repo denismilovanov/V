@@ -327,7 +327,6 @@ class UsersMatches
         // it is unbelievable 5 iterations take place :)
         } while (! $users_ids and $iterations < 5);
 
-
         // indexes are empty, we need to find matching users right now!
         if (! sizeof($users_ids)) {
             $settings = Users::getMySettings($user_id);
@@ -349,7 +348,6 @@ class UsersMatches
                     WITH matches AS (
                         SELECT  ui.user_id AS match_user_id,
 
-                                -- not used yet:
                                 " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS weight_level
 
                             FROM public.users_index AS ui
@@ -360,9 +358,14 @@ class UsersMatches
                                     user_id NOT IN (" . $liked_users . ")
                             ORDER BY ui.last_activity_at DESC
                             LIMIT :limit
+                    ),
+                    matches_ordered AS (
+                        SELECT match_user_id
+                            FROM matches
+                            ORDER BY weight_level DESC
                     )
                     SELECT string_agg(m.match_user_id::varchar, ',') AS users_ids
-                        FROM matches AS m;
+                        FROM matches_ordered AS m;
                 ", [
                     'user_id' => $user_id,
                     'age_from' => $settings->age_from ? : 18,
