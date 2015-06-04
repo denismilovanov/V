@@ -26,11 +26,6 @@ class MaintenanceCommand extends \App\Console\SingleCommand
             \Log::info('Обновили индекс пользователям ' . $result);
         }
 
-        $result = UsersMatches::rebuildBatch();
-        if ($result) {
-            \Log::info('Отправили на построение заново поисковый индекс пользователям ' . $result);
-        }
-
         Stats::createTodayStatsRecord();
 
         self::closeDBConnections();

@@ -258,6 +258,8 @@ class UsersMatches
 
     //
     public static function getMatches($user_id, $limit) {
+        self::checkIfNeedRebuilding($user_id);
+
         self::createMatchesTables($user_id);
 
         $users_ids = [];
@@ -388,32 +390,24 @@ class UsersMatches
     }
 
     // take users with old current index and enqueue rebuild job
-    public static function rebuildBatch() {
+    public static function checkIfNeedRebuilding($user_id) {
         $users_ids = \DB::select("
             WITH u AS (
                 SELECT user_id
                     FROM public.users_matches
-                    WHERE last_reindexed_at < now() - interval '1 day'
-                    ORDER BY last_reindexed_at
-                    LIMIT 100
+                    WHERE   user_id = ? AND
+                            last_reindexed_at < now() - interval '1 day'
             )
             UPDATE public.users_matches
                 SET last_reindexed_at = now()
                 WHERE user_id IN (SELECT user_id FROM u)
                 RETURNING user_id;
-        ");
+        ", [$user_id]);
 
-        $list = [];
-
-        foreach ($users_ids as $user_id) {
-            $user_id = $user_id->user_id;
-            $list []= $user_id;
-
+        if (sizeof($users_ids)) {
             // enqueue with priority = 0
             self::enqueueFillMatchesJob($user_id, 0);
         }
-
-        return implode(', ', $list);
     }
 
     // remove user from all indexes
