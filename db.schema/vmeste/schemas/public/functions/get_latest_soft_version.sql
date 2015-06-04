@@ -16,7 +16,7 @@ BEGIN
         FROM public.soft_versions
         WHERE   device_type = i_device_type AND
                 is_actual
-        ORDER BY created_at DESC
+        ORDER BY id DESC
         LIMIT 1;
 
     RETURN r_result;

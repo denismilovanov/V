@@ -6,6 +6,7 @@ use App\Models\Users;
 use App\Models\Abuses;
 use App\Models\Stats;
 use App\Models\Queues;
+use App\Models\SoftVersions;
 
 
 class AdminController extends BaseController {
@@ -154,6 +155,43 @@ class AdminController extends BaseController {
 
         return view('admin.tools.push', [
             'user_id' => $user_id,
+        ]);
+    }
+
+    public function softVersions() {
+        $action = \Request::get('action');
+
+        $id = \Request::get('id');
+        $device_type = \Request::get('device_type');
+        $description =  strip_tags(\Request::get('description'));
+
+        $version = SoftVersions::findById($id, $device_type);
+
+        if ($action == 'upsert') {
+            $status = SoftVersions::upsert($id, $device_type, $description);
+            if ($status) {
+                return redirect('/tools/softVersions');
+            }
+        } else if ($action == 'make_actual') {
+            if ($version) {
+                SoftVersions::makeActual($id, $device_type, true);
+            }
+        } else if ($action == 'make_noactual') {
+            if ($version) {
+                SoftVersions::makeActual($id, $device_type, false);
+            }
+        }
+
+        if (! $version) {
+            $version = new \stdClass;
+            $version->id = $id;
+            $version->device_type = $device_type;
+            $version->description = $description;
+        }
+
+        return view('admin.tools.softVersions', [
+            'versions' => SoftVersions::getAll(),
+            'version' => $version,
         ]);
     }
 

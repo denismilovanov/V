@@ -77,6 +77,7 @@ if ($_SERVER['SERVER_NAME'] == env('DOMAIN')) {
         $app->get('stats/', ['uses' => 'AdminController@stats']);
 
         $app->get('tools/push', ['uses' => 'AdminController@push']);
+        $app->get('tools/softVersions', ['uses' => 'AdminController@softVersions']);
     });
 
 }

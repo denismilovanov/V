@@ -32,6 +32,7 @@
         </a>
         <ul class="dropdown-menu" role="menu">
             <li><a href="/tools/push">Push</a></li>
+            <li><a href="/tools/softVersions">Версии приложений</a></li>
         </ul>
     </li>
 </ul>

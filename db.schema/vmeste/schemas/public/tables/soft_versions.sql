@@ -13,4 +13,3 @@ CREATE TABLE public.soft_versions (
 ALTER TABLE public.soft_versions
     ADD COLUMN description text NULL;
 
-
