@@ -93,6 +93,14 @@ class UsersMatches
     // enqueue job for rebuilding (filling up)
     public static function enqueueFillMatchesJob($user_id, $priority = 10) {
         \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches', ['priority' => $priority]);
+
+        // update ts before daemon really takes and performes task
+        // it prevents creating the second job in getMatches > checkIfNeedRebuilding
+        \DB::select("
+            UPDATE public.users_matches
+                SET last_reindexed_at = now()
+                WHERE user_id = ?
+        ", [$user_id]);
     }
 
     // the heart of the system - the formula for ranging users
@@ -133,13 +141,6 @@ class UsersMatches
         if (! $sex) {
             return true;
         }
-
-        // update ts
-        \DB::select("
-            UPDATE public.users_matches
-                SET last_reindexed_at = now()
-                WHERE user_id = ?
-        ", [$user_id]);
 
         // filling up "fresh" index with initial data - 1000 empty levels
         self::getConnection($user_id)->select("
