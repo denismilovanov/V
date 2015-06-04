@@ -35,4 +35,12 @@ class UsersIndex {
         return $users_ids;
     }
 
+    public static function removeUser($user_id) {
+        \DB::select("
+            UPDATE public.users_index
+                SET region_id = NULL
+                WHERE user_id = ?;
+        ", [$user_id]);
+    }
+
 }

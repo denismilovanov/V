@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\CreateMassPushCommand',
         //
         'App\Console\Commands\FillMatchesCommand',
+        'App\Console\Commands\CleanIndexesFromDeletedUsersCommand',
         //
         'App\Console\Commands\EventsForStatsListenerCommand',
         //

@@ -401,6 +401,19 @@ class ApiController extends BaseController {
         ]);
     }
 
+    public function removeProfile() {
+        if (! $this->beforeAction()) {
+            $data['status'] = self::ERROR_KEY;
+            return response()->json($data);
+        }
+
+        $result = Users::removeProfile(self::$user->id, intval(\Request::get('test', 0)));
+
+        return response()->json([
+            'status' => $result ? self::SUCCESS : self::ERROR,
+        ]);
+    }
+
     public function setDeviceToken() {
         if (! $this->beforeAction()) {
             $data['status'] = self::ERROR_KEY;

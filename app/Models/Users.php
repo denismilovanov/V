@@ -2,6 +2,7 @@
 
 use \App\Http\Controllers\ApiController;
 use App\Models\UsersMatches;
+use App\Models\UsersIndex;
 
 class Users
 {
@@ -427,6 +428,13 @@ class Users
                     FROM public.users
                     WHERE id IN (" . implode(', ', $users_ids) . ")
             ");
+        } else if ($area == 'dialogs') {
+            $users = \DB::select("
+                SELECT *
+                    FROM public.users
+                    WHERE   id IN (" . implode(', ', $users_ids) . ") AND
+                            NOT is_deleted;
+            ");
         } else if ($area == 'searchAround') {
             $search_weights_params = Users::getMySearchWeightParams(ApiController::$user->id);
 
@@ -439,6 +447,7 @@ class Users
                         u.avatar_url,
                         u.vk_id,
                         u.sex,
+                        u.is_deleted,
                         public.format_date(i.last_activity_at, :time_zone) AS last_activity_at,
                         icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
                         icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
@@ -463,9 +472,15 @@ class Users
 
             if ($area == 'searchAround') {
                 $user->photos = UsersPhotos::getUserPhotos($user->id, 1);
+                if ($user->is_deleted) {
+                    UsersMatches::enqueueRemoveFromIndex($additional_data['for_user_id'], $user->id);
+                    $user = null;
+                }
             }
 
-            $result[$user->id] = $user;
+            if ($user) {
+                $result[$user->id] = $user;
+            }
         }
 
         return $result;
@@ -500,7 +515,10 @@ class Users
 
     public static function searchAround($me_id, $limit) {
         $users = UsersMatches::getMatches($me_id, $limit);
-        $users_all = self::findByIds($users['users_ids'], 'searchAround', ['weight_level' => $users['weight_level']]);
+        $users_all = self::findByIds($users['users_ids'], 'searchAround', [
+            'weight_level' => $users['weight_level'],
+            'for_user_id' => $me_id,
+        ]);
         return array_values($users_all);
     }
 
@@ -563,4 +581,28 @@ class Users
                 WHERE id = ?;
         ", [$user_id]);
     }
+
+    public static function removeProfile($user_id, $test) {
+        \DB::select("
+            UPDATE public.users
+                SET is_deleted = 't'
+                WHERE id = ?;
+        ", [$user_id]);
+
+        if (! $test) {
+            UsersIndex::removeUser($user_id);
+            UsersMatches::removeUser($user_id);
+        }
+
+        return true;
+    }
+
+    public static function unremove($user_id) {
+        \DB::select("
+            UPDATE public.users
+                SET is_deleted = 'f'
+                WHERE id = ?;
+        ", [$user_id]);
+    }
+
 }

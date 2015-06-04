@@ -416,5 +416,24 @@ class UsersMatches
         return implode(', ', $list);
     }
 
+    // remove user from all indexes
+    public static function removeUser($user_id) {
+        // to do
+        return true;
+    }
+
+    // enqueue special task for removing one user from another's user index
+    public static function enqueueRemoveFromIndex($user_id, $match_user_id) {
+        try {
+            \Queue::push('remove_from_index', [
+                'user_id' => $user_id,
+                'match_user_id' => $match_user_id,
+            ], 'remove_from_index');
+        } catch (\Exception $e) {
+            // we can survive without this job done
+            ;
+        }
+    }
+
 }
 

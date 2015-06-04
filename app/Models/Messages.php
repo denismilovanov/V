@@ -198,7 +198,7 @@ class Messages {
         }
 
         // получаем всех сразу
-        $buddies = Users::findByIds($buddies_ids);
+        $buddies = Users::findByIds($buddies_ids, 'dialogs');
 
         // подтягиваем в список чатов недостающее - имя и аватар
         foreach ($chats as $chat) {
