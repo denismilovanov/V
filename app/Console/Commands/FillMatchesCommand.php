@@ -3,14 +3,15 @@
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\UsersMatches;
+use \App\Models\Helper;
 
-class FillMatchesCommand extends \App\Console\SingleCommand
+class FillMatchesCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'fill_matches';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'fill_matches_' . mt_rand();
         $jobs = 0;
@@ -28,7 +29,7 @@ class FillMatchesCommand extends \App\Console\SingleCommand
                 $job->delete();
             }
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
@@ -36,7 +37,7 @@ class FillMatchesCommand extends \App\Console\SingleCommand
         });
 
         \Log::info('Завершили подписку ' . $tag);
-        self::closeDBConnections();
+        Helper::closeDBConnections();
 
         return 0;
     }

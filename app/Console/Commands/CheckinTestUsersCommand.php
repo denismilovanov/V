@@ -2,7 +2,7 @@
 
 use \App\Models\Checkins;
 use \App\Models\Users;
-
+use \App\Models\Helper;
 
 class CheckinTestUsersCommand extends \Illuminate\Console\Command
 {

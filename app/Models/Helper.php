@@ -186,4 +186,11 @@ class Helper
         }
         return isset(self::$genitivus[$nameL]) ? self::$genitivus[$nameL] : $name;
     }
+
+    public static function closeDBConnections()
+    {
+        \DB::disconnect();
+        \DB::connection('logs')->disconnect();
+    }
+
 };

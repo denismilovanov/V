@@ -2,17 +2,15 @@
 
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
-use \App\Models\Pusher;
 use \App\Models\Queues;
-use \App\Models\ErrorCollector;
+use \App\Models\Helper;
 
-
-class CreateMassPushCommand extends \App\Console\SingleCommand
+class CreateMassPushCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'create_mass_push';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'create_mass_push' . mt_rand();
         $jobs = 0;
@@ -33,7 +31,7 @@ class CreateMassPushCommand extends \App\Console\SingleCommand
                 $job->release(10);
             }
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 10) {
                 \Queue::unsubscribe($tag);
@@ -43,7 +41,7 @@ class CreateMassPushCommand extends \App\Console\SingleCommand
         \Log::info('Завершили подписку ' . $tag);
 
         Pusher::disconnect();
-        self::closeDBConnections();
+        Helper::closeDBConnections();
 
         return 0;
     }

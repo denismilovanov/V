@@ -4,15 +4,15 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Checkins;
 use \App\Models\Users;
+use \App\Models\Helper;
 
-
-class ImitateActivityCommand extends \App\Console\SingleCommand
+class ImitateActivityCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'imitate_activity';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $min_latitude = 59.7;
         $max_latitude = 60.1;

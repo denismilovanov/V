@@ -3,14 +3,15 @@
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Likes;
+use \App\Models\Helper;
 
-class EchoLikesCommand extends \App\Console\SingleCommand
+class EchoLikesCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'echo_likes';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'echo_likes' . mt_rand();
         $jobs = 0;
@@ -28,7 +29,7 @@ class EchoLikesCommand extends \App\Console\SingleCommand
                 $job->delete();
             }
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 10000) {
                 \Queue::unsubscribe($tag);
@@ -36,6 +37,6 @@ class EchoLikesCommand extends \App\Console\SingleCommand
         });
 
         \Log::info('Завершили подписку ' . $tag);
-        self::closeDBConnections();
+        Helper::closeDBConnections();
     }
 }

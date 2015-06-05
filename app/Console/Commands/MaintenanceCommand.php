@@ -5,16 +5,15 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use \App\Models\Users;
 use \App\Models\Stats;
 use \App\Models\UsersIndex;
-use \App\Models\UsersMatches;
+use \App\Models\Helper;
 
-
-class MaintenanceCommand extends \App\Console\SingleCommand
+class MaintenanceCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'maintenance';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $result = Users::removeOldKeys();
         foreach ($result as $user) {
@@ -28,7 +27,7 @@ class MaintenanceCommand extends \App\Console\SingleCommand
 
         Stats::createTodayStatsRecord();
 
-        self::closeDBConnections();
+        Helper::closeDBConnections();
     }
 
 }

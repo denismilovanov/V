@@ -4,16 +4,13 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Pusher;
 use \App\Models\Helper;
-use \App\Models\Users;
-use \App\Models\ErrorCollector;
 
-
-class PushMessagesCommand extends \App\Console\SingleCommand
+class PushMessagesCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'push_messages';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'push_messages' . mt_rand();
         $jobs = 0;
@@ -34,7 +31,7 @@ class PushMessagesCommand extends \App\Console\SingleCommand
                 $job->release(10);
             }
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 1000) {
                 \Queue::unsubscribe($tag);
@@ -44,7 +41,7 @@ class PushMessagesCommand extends \App\Console\SingleCommand
         \Log::info('Завершили подписку ' . $tag);
 
         Pusher::disconnect();
-        self::closeDBConnections();
+        Helper::closeDBConnections();
 
         return 0;
     }

@@ -17,7 +17,8 @@
         "fintech-fab/laravel-queue-rabbitmq": "dev-fork",
         "guzzlehttp/guzzle": "~5.0",
         "swiftmailer/swiftmailer": "^5.4",
-        "sly/notification-pusher": "^2.2"
+        "sly/notification-pusher": "^2.2",
+        "denismilovanov/laravel-single-instance-command": "0.1.*@dev"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.0"

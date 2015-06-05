@@ -3,13 +3,14 @@
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\Stats;
+use \App\Models\Helper;
 
-class EventsForStatsListenerCommand extends \App\Console\SingleCommand
+class EventsForStatsListenerCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'events_for_stats';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'events_for_stats' . mt_rand();
         $jobs = 0;
@@ -29,7 +30,7 @@ class EventsForStatsListenerCommand extends \App\Console\SingleCommand
                 $job->release(10);
             }
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
@@ -39,7 +40,7 @@ class EventsForStatsListenerCommand extends \App\Console\SingleCommand
         \Log::info('Завершили подписку ' . $tag);
 
         Pusher::disconnect();
-        self::closeDBConnections();
+        Helper::closeDBConnections();
 
         return 0;
     }

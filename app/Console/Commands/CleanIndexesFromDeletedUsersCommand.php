@@ -3,14 +3,15 @@
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
 use \App\Models\UsersMatches;
+use \App\Models\Helper;
 
-class CleanIndexesFromDeletedUsersCommand extends \App\Console\SingleCommand
+class CleanIndexesFromDeletedUsersCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'remove_from_index';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'remove_from_index' . mt_rand();
         $jobs = 0;
@@ -27,7 +28,7 @@ class CleanIndexesFromDeletedUsersCommand extends \App\Console\SingleCommand
             \Log::info('Завершили');
             $job->delete();
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 1e6) {
                 \Queue::unsubscribe($tag);
@@ -35,7 +36,7 @@ class CleanIndexesFromDeletedUsersCommand extends \App\Console\SingleCommand
         });
 
         \Log::info('Завершили подписку ' . $tag);
-        self::closeDBConnections();
+        Helper::closeDBConnections();
 
         return 0;
     }

@@ -2,15 +2,15 @@
 
 use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 
-use \App\Models\Messages;
+use \App\Models\Helper;
 
-class SendErrorsCommand extends \App\Console\SingleCommand
+class SendErrorsCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'send_errors';
 
     public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
     {
-        parent::run($input, $output);
+        $this->checkInstance($input);
 
         $tag = 'send_errors' . mt_rand();
         $jobs = 0;
@@ -31,7 +31,7 @@ class SendErrorsCommand extends \App\Console\SingleCommand
                 $job->release(60);
             }
 
-            self::closeDBConnections();
+            Helper::closeDBConnections();
 
             if (++ $jobs == 1000) {
                 \Queue::unsubscribe($tag);
@@ -39,7 +39,7 @@ class SendErrorsCommand extends \App\Console\SingleCommand
         });
 
         \Log::info('Завершили подписку ' . $tag);
-        self::closeDBConnections();
+        Helper::closeDBConnections();
     }
 
     private static function sendError($data) {
