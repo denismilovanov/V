@@ -122,10 +122,12 @@ class Pusher
                     $message->setSound();
 
                     if (in_array($type, ['MATCH', 'MESSAGE'])) {
-                        $message->setCustomProperty('userID', $from_user->id);
-                        $message->setCustomProperty('name', $from_user->name);
-                        $message->setCustomProperty('avatar_url', $from_user->avatar_url);
+                        $message->setCustomProperty('userId', $from_user->id);
+                        //$message->setCustomProperty('name', $from_user->name);
+                        //$message->setCustomProperty('avatar_url', $from_user->avatar_url);
                     }
+
+                    $message->setCustomProperty('type', strtolower($type));
 
                     $pusher = self::getApplePusher();
 
