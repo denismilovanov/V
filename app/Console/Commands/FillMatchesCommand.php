@@ -5,11 +5,14 @@ use FintechFab\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob;
 use \App\Models\UsersMatches;
 use \App\Models\Helper;
 
+use \Symfony\Component\Console\Input\InputInterface;
+use \Symfony\Component\Console\Output\OutputInterface;
+
 class FillMatchesCommand extends \LaravelSingleInstanceCommand\Command
 {
     public $name = 'fill_matches';
 
-    public function run(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output)
+    public function run(InputInterface $input, OutputInterface $output)
     {
         $this->checkInstance($input);
 
@@ -24,7 +27,7 @@ class FillMatchesCommand extends \LaravelSingleInstanceCommand\Command
 
             \Log::info('Начали ' . $jobs);
 
-            if (\App\Models\UsersMatches::fillMatchesInUsersMatches($data['user_id'])) {
+            if (\App\Models\UsersMatches::fillMatchesInUsersMatches($data['user_id'], $data['ts'])) {
                 \Log::info('Завершили');
                 $job->delete();
             }

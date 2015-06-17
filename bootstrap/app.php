@@ -93,4 +93,45 @@ $app->register('FintechFab\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvi
 
 require __DIR__.'/../app/Http/routes.php';
 
+if (! function_exists('START')) {
+    $timers = [];
+
+    function START($operation) {
+        global $timers;
+        array_push($timers, [
+            'time' => microtime(true),
+            'operation' => $operation,
+        ]);
+    }
+
+    function FINISH() {
+        global $timers;
+        $timer = array_pop($timers);
+        if (! $timer) {
+            throw new \Exception('Не парный таймер.');
+        }
+        $diff = sprintf("%.5f", microtime(true) - $timer['time']);
+        TIMER($timer['operation'], $diff);
+    }
+
+    function STATSD_SOCKET() {
+        return @ fsockopen("udp://localhost", '8125', $errno, $errstr);
+    }
+
+    function TIMER($operation, $value) {
+        if ($fp = STATSD_SOCKET()) {
+            \Log::info('Timer '  . $operation . ' = ' . $value . 's');
+            fwrite($fp, $operation . ":$value|ms|@0.1");
+            fclose($fp);
+        }
+    }
+
+    function GAUGE($name, $value) {
+        if ($fp = STATSD_SOCKET()) {
+            fwrite($fp, $name . ":$value|g");
+            fclose($fp);
+        }
+    }
+}
+
 return $app;

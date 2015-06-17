@@ -92,7 +92,7 @@ class UsersMatches
 
     // enqueue job for rebuilding (filling up)
     public static function enqueueFillMatchesJob($user_id, $priority = 10) {
-        \Queue::push('fill_matches', ['user_id' => $user_id], 'fill_matches', ['priority' => $priority]);
+        \Queue::push('fill_matches', ['user_id' => $user_id, 'ts' => microtime(true)], 'fill_matches', ['priority' => $priority]);
 
         // update ts before daemon really takes and performes task
         // it prevents creating the second job in getMatches > checkIfNeedRebuilding
@@ -131,7 +131,9 @@ class UsersMatches
     }
 
     // rebuilding algorithm (fill up fresh index and rotate)
-    public static function fillMatchesInUsersMatches($user_id) {
+    public static function fillMatchesInUsersMatches($user_id, $enqueued_at) {
+        TIMER('fillMatches.awaiting', microtime(true) - $enqueued_at);
+
         self::createMatchesTables($user_id);
 
         $settings = Users::getMySettings($user_id);
@@ -141,6 +143,8 @@ class UsersMatches
         if (! $sex) {
             return true;
         }
+
+        START('fillMatches.main');
 
         // filling up "fresh" index with initial data - 1000 empty levels
         self::getConnection($user_id)->select("
@@ -170,6 +174,9 @@ class UsersMatches
 
             // users I liked - remove them from index
             $liked_users = Likes::getLikedUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
+
+            // exclude me
+            $liked_users .= ', ' . $user_id;
 
             // users I was liked by - increase weights for them
             $likes_users = Likes::getLikesUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
@@ -215,7 +222,10 @@ class UsersMatches
                 'geography' =>  $geography['geography'],
                 'region_id' => $geography['region_id'],
             ]);
+
         }
+
+        START('fillMatches.aggregation');
 
         // replace present index for fresh index
         // leave only given amount of the most relevant users
@@ -252,6 +262,9 @@ class UsersMatches
             'MAX_MAINTAINED_MATCHES_COUNT' => env('MAX_MAINTAINED_MATCHES_COUNT', 1000)
         ]);
 
+        FINISH();
+        FINISH();
+
         self::getConnection($user_id)->disconnect();
 
         return true;
@@ -259,6 +272,8 @@ class UsersMatches
 
     //
     public static function getMatches($user_id, $limit) {
+        START('getMatches');
+
         self::checkIfNeedRebuilding($user_id);
 
         self::createMatchesTables($user_id);
@@ -327,8 +342,12 @@ class UsersMatches
         // it is unbelievable 5 iterations take place :)
         } while (! $users_ids and $iterations < 5);
 
+        FINISH();
+
         // indexes are empty, we need to find matching users right now!
         if (! sizeof($users_ids)) {
+            START('getMatches.reserveAlgorithm');
+
             $settings = Users::getMySettings($user_id);
             $geography = Users::getMyGeography($user_id);
 
@@ -385,6 +404,8 @@ class UsersMatches
                     $users_ids = '';
                 }
             }
+
+            FINISH();
         }
 
         return [
