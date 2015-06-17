@@ -58,7 +58,7 @@ class Likes {
             } else {
 
                 // если мы лайкнули тестового, то он может ответить
-                if (Users::isTestUser($to_user_id)) {
+                if (Users::isTestUser($to_user_id) and ! Users::isTestUser($from_user_id)) {
                     \Queue::push('echo_likes', [
                         'from_user_id' => $from_user_id,
                         'to_user_id' => $to_user_id,
