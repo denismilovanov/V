@@ -24,7 +24,7 @@ BEGIN
 
         RETURN 1;
 
-    EXCEPTIION WHEN unique_violation THEN
+    EXCEPTION WHEN unique_violation THEN
 
         UPDATE public.likes
             SET liked_at = now()

@@ -11,6 +11,7 @@ use App\Models\Messages;
 use App\Models\Abuses;
 use App\Models\Helper;
 use App\Models\VK;
+use App\Models\ErrorCollector;
 
 
 class ApiController extends BaseController {
@@ -32,7 +33,13 @@ class ApiController extends BaseController {
             Users::updateLastActivity(self::$user->id, self::$user->need_to_trigger_activity_event);
         }
 
-        return self::$user !== null;
+        $auth = self::$user !== null;
+
+        if ($auth) {
+            ErrorCollector::addRequest();
+        }
+
+        return $auth;
     }
 
     public function authorizeVK() {
