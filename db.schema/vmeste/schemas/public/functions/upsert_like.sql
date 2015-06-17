@@ -9,12 +9,8 @@ DECLARE
 
 BEGIN
 
-    UPDATE public.likes
-        SET liked_at = now()
-        WHERE   user1_id = i_from_user_id AND
-                user2_id = i_to_user_id;
+    BEGIN
 
-    IF NOT FOUND THEN
         INSERT INTO public.likes
             (user1_id, user2_id, liked_at, is_liked, is_send, is_blocked)
             VALUES (
@@ -27,7 +23,15 @@ BEGIN
             );
 
         RETURN 1;
-    END IF;
+
+    EXCEPTIION WHEN unique_violation THEN
+
+        UPDATE public.likes
+            SET liked_at = now()
+            WHERE   user1_id = i_from_user_id AND
+                    user2_id = i_to_user_id;
+
+    END;
 
     RETURN 0;
 
