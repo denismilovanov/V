@@ -58,8 +58,29 @@ class ApiController extends BaseController {
             return response()->json($data);
         }
 
+        if (! is_int($vk_id)) {
+            $data['status'] = self::ERROR;
+            $data['error'] = 'vk_id';
+            return response()->json($data);
+        }
+
+        if (! in_array($device_type, [1, 2])) {
+            $data['status'] = self::ERROR;
+            $data['error'] = 'device_type';
+            return response()->json($data);
+        }
+
+        if (($device_type == 1 and $device_token !== null and strlen($device_token) != 64) or
+            ($device_type == 2 and $device_token !== null and strlen($device_token) != 162))
+        {
+            $data['status'] = self::ERROR;
+            $data['error'] = 'device_token_length';
+            return response()->json($data);
+        }
+
         if (! VK::checkVKAccessToken($access_token, $vk_id)) {
             $data['status'] = self::ERROR;
+            $data['error'] = 'access_token';
             return response()->json($data);
         }
 
