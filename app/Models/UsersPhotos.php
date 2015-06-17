@@ -87,6 +87,13 @@ class UsersPhotos {
     public static function correctAvatar($avatar_url, $user_id, $sex) {
         $photos_server_url = env('PHOTOS_URL');
 
+        if (! $avatar_url) {
+            $photos = self::getUserPhotos($user_id, null, 1);
+            if ($photos) {
+                $avatar_url = $photos[0]['url'];
+            }
+        }
+
         if ($avatar_url) {
             if (strpos($avatar_url, 'http') !== 0) {
                 $avatar_url = $photos_server_url . $avatar_url;
@@ -102,15 +109,20 @@ class UsersPhotos {
         return $avatar_url;
     }
 
-    public static function getUserPhotos($user_id, $source_id = null) {
+    public static function getUserPhotos($user_id, $source_id = null, $limit = null) {
         $photos_url = env('PHOTOS_URL');
+
+        if (! $limit or $limit > 100) {
+            $limit = 100;
+        }
 
         $photos_raw = \DB::select("
             SELECT *
                 FROM public.users_photos
                 WHERE user_id = ?
-                ORDER BY rank, id;
-        ", [$user_id]);
+                ORDER BY rank, id
+                LIMIT ?
+        ", [$user_id, $limit]);
 
         $photos = array();
 
