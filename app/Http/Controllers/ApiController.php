@@ -40,6 +40,9 @@ class ApiController extends BaseController {
         $vk_id = intval(\Request::get('vk_id'));
         $device_type = intval(\Request::get('device_type'));
         $device_token = \Request::get('device_token');
+        if (! $device_token) {
+            $device_token = null;
+        }
         $api_version = \Request::get('api_version');
         $soft_version = \Request::get('soft_version');
         $name = \Request::get('name');
