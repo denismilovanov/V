@@ -53,8 +53,8 @@ class Messages {
                 ], 'push_messages');
             }
 
-            // эхо-юзеры
-            if (in_array($to_user_id, [100000, 200000]) and ! in_array($from_user_id, [100000, 200000])) {
+            // эхо
+            if (Users::isTestUser($to_user_id) and ! Users::isTestUser($from_user_id)) {
                 \Queue::push('echo_messages', [
                     'from_user_id' => $from_user_id,
                     'to_user_id' => $to_user_id,
