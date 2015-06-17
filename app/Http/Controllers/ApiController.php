@@ -25,7 +25,7 @@ class ApiController extends BaseController {
     public function __construct() {
     }
 
-    public function beforeAction() {
+    public function beforeAction($method) {
         $key = \Request::get('key');
         self::$user = Users::findByKey($key);
 
@@ -36,7 +36,7 @@ class ApiController extends BaseController {
         $auth = self::$user !== null;
 
         if ($auth) {
-            ErrorCollector::addRequest();
+            ErrorCollector::addRequest($method);
         }
 
         return $auth;
@@ -112,7 +112,7 @@ class ApiController extends BaseController {
     }
 
     public function syncGroupsVK() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -133,7 +133,7 @@ class ApiController extends BaseController {
     }
 
     public function syncFriendsVK() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -154,7 +154,7 @@ class ApiController extends BaseController {
     }
 
     public function syncProfileVK() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -174,7 +174,7 @@ class ApiController extends BaseController {
     }
 
     public function setPhotosVK() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -195,7 +195,7 @@ class ApiController extends BaseController {
     }
 
     public function getPhotosVK() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -207,7 +207,7 @@ class ApiController extends BaseController {
     }
 
     public function uploadPhoto() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -229,7 +229,7 @@ class ApiController extends BaseController {
     }
 
     public function removePhoto() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -247,7 +247,7 @@ class ApiController extends BaseController {
     }
 
     public function checkin() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -271,7 +271,7 @@ class ApiController extends BaseController {
     }
 
     public function getMySettings() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -284,7 +284,7 @@ class ApiController extends BaseController {
     }
 
     public function setMySettings() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -313,7 +313,7 @@ class ApiController extends BaseController {
     }
 
     public function setAbout() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -329,7 +329,7 @@ class ApiController extends BaseController {
     }
 
     public function getAbout() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -350,7 +350,7 @@ class ApiController extends BaseController {
 
 
     public function searchAround() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -364,7 +364,7 @@ class ApiController extends BaseController {
     }
 
     public function like() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -386,7 +386,7 @@ class ApiController extends BaseController {
     }
 
     public function abuse() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -403,7 +403,7 @@ class ApiController extends BaseController {
     }
 
     public function blockUser() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -418,7 +418,7 @@ class ApiController extends BaseController {
     }
 
     public function logout() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -433,7 +433,7 @@ class ApiController extends BaseController {
     }
 
     public function removeProfile() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -446,7 +446,7 @@ class ApiController extends BaseController {
     }
 
     public function setDeviceToken() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -463,7 +463,7 @@ class ApiController extends BaseController {
     }
 
     public function getMyMessages() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -477,7 +477,7 @@ class ApiController extends BaseController {
     }
 
     public function getUserProfile() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -498,7 +498,7 @@ class ApiController extends BaseController {
     }
 
     public function sendMessageToUser() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }
@@ -528,7 +528,7 @@ class ApiController extends BaseController {
     }
 
     public function getMessagesWithUser() {
-        if (! $this->beforeAction()) {
+        if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
             return response()->json($data);
         }

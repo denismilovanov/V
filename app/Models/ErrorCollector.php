@@ -14,8 +14,9 @@ class ErrorCollector {
         ], 'send_errors');
     }
 
-    public static function addRequest() {
+    public static function addRequest($method) {
         $request = $_REQUEST;
+        $request['method'] = $method;
         \DB::connection('logs')->select("
             SELECT logs.add_request(?);
         ", [json_encode($request, JSON_UNESCAPED_UNICODE)]);
