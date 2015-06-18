@@ -16,7 +16,12 @@ class ErrorCollector {
 
     public static function addRequest($method) {
         $request = $_REQUEST;
-        $request['method'] = $method;
+        $request['method'] = str_replace('App\Http\Controllers\ApiController::', '', $method);
+
+        foreach (['photo'] as $key) {
+            unset($request['key']);
+        }
+
         \DB::connection('logs')->select("
             SELECT logs.add_request(?);
         ", [json_encode($request, JSON_UNESCAPED_UNICODE)]);
