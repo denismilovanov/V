@@ -27,7 +27,8 @@ BEGIN
         UPDATE public.users
             SET name = s_name,
                 sex = i_sex,
-                time_zone = i_time_zone
+                time_zone = i_time_zone,
+                is_deleted = 'f'
             WHERE id = r_user.user_id;
 
     ELSE
