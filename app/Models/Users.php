@@ -450,6 +450,7 @@ class Users
                         u.vk_id,
                         u.sex,
                         u.is_deleted,
+                        u.is_blocked,
                         public.format_date(i.last_activity_at, :time_zone) AS last_activity_at,
                         icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
                         icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
@@ -474,7 +475,8 @@ class Users
 
             if ($area == 'searchAround') {
                 $user->photos = UsersPhotos::getUserPhotos($user->id, 1);
-                if ($user->is_deleted) {
+                # async remove deleted or blocked user from index
+                if ($user->is_deleted or $user->is_blocked) {
                     UsersMatches::enqueueRemoveFromIndex($additional_data['for_user_id'], $user->id);
                     $user = null;
                 }
