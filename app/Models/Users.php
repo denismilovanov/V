@@ -9,6 +9,8 @@ class Users
     public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone) {
         $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
         $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone])[0];
+        $user_record = self::findById($user->user_id);
+        $user->is_blocked = $user_record->is_blocked;
         return $user;
     }
 
@@ -358,7 +360,7 @@ class Users
             $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
             $user = \DB::select("
-                SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url,
+                SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url, u.is_blocked,
                         extract('year' from age(u.bdate)) AS age,
                         public.format_date(i.last_activity_at, ?) AS last_activity_at,
                         icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,

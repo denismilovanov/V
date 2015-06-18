@@ -104,6 +104,7 @@ class ApiController extends BaseController {
         $data['key'] = $key;
         $data['user_id'] = $user->user_id;
         $data['is_new'] = $user->is_new;
+        $data['is_blocked'] = $user->is_blocked;
 
         $data['latest_soft_version'] = Helper::softVersionFromIntToString($soft->version);
         $data['latest_soft_description'] = $soft->description;
