@@ -111,11 +111,12 @@ class Bootstrap {
             self::log('Login VK');
             $url = 'https://login.vk.com/?act=login';
             $data = self::post($url, array(
-                'email' => 'me@uelen.ru',
-                'pass' => 'vmesteTEST',
+                'email' => env('VK_APP_TEST_USER_EMAIL'),
+                'pass' => env('VK_APP_TEST_USER_PASS'),
             ));
         }
 
+        /*
         $url = 'https://oauth.vk.com/authorize';
         self::log('Authorize VK');
         $access_token = self::access_token($url, array(
@@ -126,11 +127,11 @@ class Bootstrap {
         ));
         self::log('Access token = ' . $access_token['access_token']);
         self::log('User id = ' . $access_token['user_id']);
+        */
 
         $access = array(
-            'access_token' => $access_token['access_token'],
-            'user_id' => $access_token['user_id'],
-            'vk_id' => 176338986,
+            'access_token' => env('VK_APP_TEST_USER_ACCESS_TOKEN'), //$access_token['access_token'],
+            'vk_id' => env('VK_APP_TEST_USER_ID'), //$access_token['user_id'],
         );
 
         $auth = self::getFromApi('authorizeVK', array(
