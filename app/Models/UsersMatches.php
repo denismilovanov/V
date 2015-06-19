@@ -435,12 +435,6 @@ class UsersMatches
         }
     }
 
-    // remove user from all indexes
-    public static function removeUser($user_id) {
-        // to do
-        return true;
-    }
-
     // enqueue special task for removing one user from another's user index
     public static function enqueueRemoveFromIndex($user_id, $match_user_id) {
         try {

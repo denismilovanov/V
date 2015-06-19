@@ -595,7 +595,6 @@ class Users
 
         if (! $test) {
             UsersIndex::removeUser($user_id);
-            UsersMatches::removeUser($user_id);
         }
 
         return true;
