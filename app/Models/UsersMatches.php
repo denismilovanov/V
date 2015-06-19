@@ -146,7 +146,7 @@ class UsersMatches
 
         START('fillMatches.main');
 
-        // filling up "fresh" index with initial data - 1000 empty levels
+        // filling up "fresh" index with initial data - WEIGHTS_LEVELS empty levels
         self::getConnection($user_id)->select("
             SET synchronous_commit TO off;
 
@@ -154,19 +154,19 @@ class UsersMatches
 
             TRUNCATE public.matching_levels_fresh_$user_id;
             INSERT INTO public.matching_levels_fresh_$user_id
-                SELECT generate_series(0, 1000) AS level_id;
+                SELECT generate_series(0, :weights_levels) AS level_id;
         ", [
-            'user_id' => $user_id,
+            'weights_levels' => env('WEIGHTS_LEVELS'),
         ]);
 
-        $limit = 10000;
+        $limit = env('WEIGHTS_PROCESSING_BATCH_SIZE');
         $users_max_id = Users::getMaxId();
 
         $search_weights_params = Users::getMySearchWeightParams($user_id);
         $friends_vk_ids = $search_weights_params->friends_vk_ids;
         $groups_vk_ids = $search_weights_params->groups_vk_ids;
 
-        // take 10000 users from foreign table public.users_index
+        // take WEIGHTS_PROCESSING_BATCH_SIZE users from foreign table public.users_index
         // filter by region, age, sex, geography
         // calculate weights, group by them
         // do it in cycle
@@ -203,10 +203,16 @@ class UsersMatches
                                 ST_DWithin(geography, (:geography)::geography, :radius * 1000)
                 ),
                 levels AS (
-                    SELECT  CASE WHEN matching_level < 1000 THEN matching_level ELSE 1000 END AS matching_level,
+                    SELECT  CASE WHEN matching_level < :weights_levels
+                                THEN matching_level
+                                ELSE :weights_levels
+                            END AS matching_level,
                             array_agg(match_user_id) AS users_ids
                         FROM all_users
-                        GROUP BY CASE WHEN matching_level < 1000 THEN matching_level ELSE 1000 END
+                        GROUP BY CASE WHEN matching_level < :weights_levels
+                                        THEN matching_level
+                                        ELSE :weights_levels
+                                 END
                 )
 
                 UPDATE public.matching_levels_fresh_$user_id AS l
@@ -216,11 +222,12 @@ class UsersMatches
 
             ", [
                 'user_id' => $user_id,
-                'age_from' => $settings->age_from ? : 18,
-                'age_to' => $settings->age_to ? : 80,
+                'age_from' => $settings->age_from ? : env('MIN_AGE'),
+                'age_to' => $settings->age_to ? : env('MAX_AGE'),
                 'radius' => $settings->radius,
                 'geography' =>  $geography['geography'],
                 'region_id' => $geography['region_id'],
+                'weights_levels' => env('WEIGHTS_LEVELS'),
             ]);
 
         }
@@ -259,7 +266,7 @@ class UsersMatches
                 (LIKE public.matching_levels INCLUDING ALL)
                 WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
         ", [
-            'MAX_MAINTAINED_MATCHES_COUNT' => env('MAX_MAINTAINED_MATCHES_COUNT', 1000)
+            'MAX_MAINTAINED_MATCHES_COUNT' => env('MAX_MAINTAINED_MATCHES_COUNT')
         ]);
 
         FINISH();
@@ -387,13 +394,12 @@ class UsersMatches
                         FROM matches_ordered AS m;
                 ", [
                     'user_id' => $user_id,
-                    'age_from' => $settings->age_from ? : 18,
-                    'age_to' => $settings->age_to ? : 80,
+                    'age_from' => $settings->age_from ? : env('MIN_AGE'),
+                    'age_to' => $settings->age_to ? : env('MAX_AGE'),
                     'radius' => $settings->radius,
                     'geography' =>  $geography['geography'],
                     'region_id' => $geography['region_id'],
-                    // 20 seems to be enough
-                    'limit' => $limit > 20 ? 20 : $limit,
+                    'limit' => min($limit, env('RESERVE_ALGORITHM_USERS_COUNT')),
                 ]);
 
                 $level_id = 0;
