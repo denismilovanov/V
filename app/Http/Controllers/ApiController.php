@@ -36,7 +36,7 @@ class ApiController extends BaseController {
         $auth = self::$user !== null;
 
         if ($auth) {
-            ErrorCollector::addRequest($method);
+            ErrorCollector::addRequest($method, self::$user->id);
         }
 
         return $auth;

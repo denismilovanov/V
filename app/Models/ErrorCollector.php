@@ -14,7 +14,7 @@ class ErrorCollector {
         ], 'send_errors');
     }
 
-    public static function addRequest($method) {
+    public static function addRequest($method, $user_id) {
         $request = $_REQUEST;
         $request['method'] = str_replace('App\Http\Controllers\ApiController::', '', $method);
 
@@ -23,8 +23,8 @@ class ErrorCollector {
         }
 
         \DB::connection('logs')->select("
-            SELECT logs.add_request(?);
-        ", [json_encode($request, JSON_UNESCAPED_UNICODE)]);
+            SELECT logs.add_request(?, ?);
+        ", [json_encode($request, JSON_UNESCAPED_UNICODE), $user_id]);
     }
 
 }

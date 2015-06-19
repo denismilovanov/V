@@ -1,5 +1,6 @@
 CREATE OR REPLACE FUNCTION logs.add_request(
-    j_request json
+    j_request json,
+    i_user_id integer
 )
 RETURNS bigint AS
 $BODY$
@@ -8,9 +9,9 @@ DECLARE
 BEGIN
 
     INSERT INTO logs.requests
-        (request)
+        (request, user_id)
         VALUES (
-            j_request
+            j_request, i_user_id
         )
         RETURNING id INTO i_request_id;
 
