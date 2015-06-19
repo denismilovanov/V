@@ -107,12 +107,12 @@ class UsersMatches
     private static function weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) {
         return "
         (
-            35.0 * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) / 10.0 +
-            35.0 * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) / 5.0 +
-            10.0 * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
-            10.0 * popularity +
-            10.0 * friendliness +
-            20.0 * (ui.user_id IN ($likes_users))::integer
+            " . env('WEIGHT_GROUPS_VK') . " * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) +
+            " . env('WEIGHT_FRIENDS_VK') . " * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) +
+            " . env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
+            " . env('WEIGHT_POPULARITY') . " * popularity +
+            " . env('WEIGHT_FRIENDLINESS') . " * friendliness +
+            " . env('WEIGHT_LIKED_ME') . " * (ui.user_id IN ($likes_users))::integer
         )
         ::integer ";
     }
