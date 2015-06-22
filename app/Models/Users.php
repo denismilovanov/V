@@ -529,6 +529,10 @@ class Users
         return array_values($users_all);
     }
 
+    public static function getCountForBadge($user_id) {
+        return 1;
+    }
+
     public static function getUsersForAdmin($action, $limit, $offset) {
         $users = [];
 

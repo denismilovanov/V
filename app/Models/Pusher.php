@@ -118,7 +118,7 @@ class Pusher
 
                     $message->setText($text);
                     $message->setExpiry(30);
-                    $message->setBadge(5);
+                    $message->setBadge(Users::getCountForBadge($to_user->id));
                     $message->setSound();
 
                     if (in_array($type, ['MATCH', 'MESSAGE'])) {
