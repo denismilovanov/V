@@ -87,11 +87,14 @@ class UsersPhotos {
     public static function getPhotosForTests($user_id, $sex) {
         $photos_server_url = env('PHOTOS_URL');
         if ($sex == 1) {
-            $photo = $photos_server_url . '/test/female1.jpg';
+            return [
+                $photos_server_url . '/test/female1.jpg',
+                $photos_server_url . '/test/female2.jpg',
+                $photos_server_url . '/test/female3.jpg',
+            ];
         } else if ($sex == 2) {
-            $photo = $photos_server_url . '/test/male1.jpg';
+            return [$photos_server_url . '/test/male1.jpg'];
         }
-        return [$photo];
     }
 
     public static function correctAvatar($avatar_url, $user_id, $sex) {
@@ -147,11 +150,14 @@ class UsersPhotos {
         }
 
         if (Users::isTestUser($user_id)) {
-            $photos []= [
-                'id' => 0,
-                'url' => self::getPhotosForTests($user_id, $sex)[0],
-                'rank' => 10,
-            ];
+            $rank = 0;
+            foreach (self::getPhotosForTests($user_id, $sex) as $url) {
+                $photos []= [
+                    'id' => $rank,
+                    'url' => $url,
+                    'rank' => $rank ++,
+                ];
+            }
         }
 
         return $photos;
