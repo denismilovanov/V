@@ -297,7 +297,7 @@ class Users
     private static function correctVkId($vk_id, $sex) {
         if ($vk_id < 0) {
             // идентификаторы тестовых пользователей отрицательные
-            return $sex == 1 ? 308890 : 1;
+            return $sex == 1 ? env('VK_TEST_MALE_ID') : env('VK_TEST_FEMALE_ID');
         }
         return $vk_id;
     }
