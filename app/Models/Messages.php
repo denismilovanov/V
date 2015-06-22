@@ -210,6 +210,8 @@ class Messages {
 
             $chat->name = $buddy->name;
             $chat->avatar_url = $buddy->avatar_url;
+            $chat->is_blocked = $buddy->is_blocked;
+            $chat->is_deleted = $buddy->is_deleted;
         }
 
         return $chats;

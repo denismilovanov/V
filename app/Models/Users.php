@@ -434,8 +434,7 @@ class Users
             $users = \DB::select("
                 SELECT *
                     FROM public.users
-                    WHERE   id IN (" . implode(', ', $users_ids) . ") AND
-                            NOT is_deleted;
+                    WHERE id IN (" . implode(', ', $users_ids) . ")
             ");
         } else if ($area == 'searchAround') {
             $search_weights_params = Users::getMySearchWeightParams(ApiController::$user->id);
