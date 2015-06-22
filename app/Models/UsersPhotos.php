@@ -87,11 +87,11 @@ class UsersPhotos {
     public static function getPhotosForTests($user_id, $sex) {
         $photos_server_url = env('PHOTOS_URL');
         if ($sex == 1) {
-            return [
-                $photos_server_url . '/test/female1.jpg',
-                $photos_server_url . '/test/female2.jpg',
-                $photos_server_url . '/test/female3.jpg',
-            ];
+            $photos = [];
+            foreach (range(1, 10) as $num) {
+                $photos []= $photos_server_url . '/test/female' . $num . '.jpg';
+            }
+            return $photos;
         } else if ($sex == 2) {
             return [$photos_server_url . '/test/male1.jpg'];
         }
@@ -151,6 +151,7 @@ class UsersPhotos {
 
         if (Users::isTestUser($user_id)) {
             $rank = 0;
+
             foreach (self::getPhotosForTests($user_id, $sex) as $url) {
                 $photos []= [
                     'id' => $rank,
@@ -158,6 +159,10 @@ class UsersPhotos {
                     'rank' => $rank ++,
                 ];
             }
+
+            srand($user_id);
+            shuffle($photos);
+            $photos = array_slice($photos, 0, rand(2, 6));
         }
 
         return $photos;
