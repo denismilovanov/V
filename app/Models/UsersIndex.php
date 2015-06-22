@@ -22,8 +22,8 @@ class UsersIndex {
         \DB::select("
             UPDATE public.users_index AS i
                 SET last_updated_at = now(),
-                    popularity = uo.liked_count / (uo.liked_count + uo.disliked_count + 1),
-                    friendliness = uo.likes_count / (uo.likes_count + uo.dislikes_count + 1),
+                    popularity = uo.liked_count::numeric / (uo.liked_count + uo.disliked_count + 1),
+                    friendliness = uo.likes_count::numeric / (uo.likes_count + uo.dislikes_count + 1),
                     age = extract('year' from age(u.bdate))
                 FROM    stats.users_overall AS uo,
                         users AS u
