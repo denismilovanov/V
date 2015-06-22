@@ -5,3 +5,6 @@ CREATE UNLOGGED TABLE logs.requests (
     added_at timestamp with time zone NOT NULL DEFAULT now(),
     user_id integer NULL
 );
+
+ALTER TABLE logs.requests
+    ADD COLUMN response json NULL;

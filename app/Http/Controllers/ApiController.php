@@ -21,6 +21,7 @@ class ApiController extends BaseController {
     const ERROR_DISLIKE = 7;
 
     public static $user = null;
+    private static $request_id = null;
 
     public function __construct() {
     }
@@ -35,11 +36,16 @@ class ApiController extends BaseController {
 
         $auth = self::$user !== null;
 
-        if ($auth) {
-            ErrorCollector::addRequest($method, self::$user->id);
-        }
+        self::$request_id = ErrorCollector::addRequest($method, $auth ? self::$user->id : null);
 
         return $auth;
+    }
+
+    private function json($data) {
+        if (self::$request_id) {
+            ErrorCollector::addResponse(self::$request_id, $data);
+        }
+        return response()->json($data);
     }
 
     public function authorizeVK() {
@@ -63,23 +69,23 @@ class ApiController extends BaseController {
 
         $soft_version_int = Helper::softVersionFromStringToInt($soft_version);
 
-        ErrorCollector::addRequest(__METHOD__, null);
+        self::$request_id = ErrorCollector::addRequest(__METHOD__, null);
 
         if (! $soft_version_int) {
             $data['status'] = self::ERROR;
-            return response()->json($data);
+            return self::json($data);
         }
 
         if (! is_int($vk_id)) {
             $data['status'] = self::ERROR;
             $data['error'] = 'vk_id';
-            return response()->json($data);
+            return self::json($data);
         }
 
         if (! in_array($device_type, [1, 2])) {
             $data['status'] = self::ERROR;
             $data['error'] = 'device_type';
-            return response()->json($data);
+            return self::json($data);
         }
 
         if (($device_type == 1 and $device_token !== null and strlen($device_token) != 64) or
@@ -87,13 +93,13 @@ class ApiController extends BaseController {
         {
             $data['status'] = self::ERROR;
             $data['error'] = 'device_token_length';
-            return response()->json($data);
+            return self::json($data);
         }
 
         if (! VK::checkVKAccessToken($access_token, $vk_id)) {
             $data['status'] = self::ERROR;
             $data['error'] = 'access_token';
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $timezone, $timezone);
@@ -111,13 +117,13 @@ class ApiController extends BaseController {
         $data['latest_soft_version'] = Helper::softVersionFromIntToString($soft->version);
         $data['latest_soft_description'] = $soft->description;
 
-        return response()->json($data);
+        return self::json($data);
     }
 
     public function syncGroupsVK() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $result = false;
@@ -130,7 +136,7 @@ class ApiController extends BaseController {
             );
         }
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -138,7 +144,7 @@ class ApiController extends BaseController {
     public function syncFriendsVK() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $result = false;
@@ -151,7 +157,7 @@ class ApiController extends BaseController {
             );
         }
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -159,7 +165,7 @@ class ApiController extends BaseController {
     public function syncProfileVK() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $result = false;
@@ -171,7 +177,7 @@ class ApiController extends BaseController {
             );
         }
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -179,7 +185,7 @@ class ApiController extends BaseController {
     public function setPhotosVK() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $result = false;
@@ -192,7 +198,7 @@ class ApiController extends BaseController {
             );
         }
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -200,10 +206,10 @@ class ApiController extends BaseController {
     public function getPhotosVK() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
-        return response()->json([
+        return self::json([
             'status' => self::SUCCESS,
             'photos' => UsersPhotos::getUserPhotos(self::$user->id, 1, null, self::$user->sex),
         ]);
@@ -212,7 +218,7 @@ class ApiController extends BaseController {
     public function uploadPhoto() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $result = false;
@@ -225,7 +231,7 @@ class ApiController extends BaseController {
             );
         }
 
-        return response()->json([
+        return self::json([
             'status' => $photo_id ? self::SUCCESS : self::ERROR,
             'photo_id' => $photo_id,
         ]);
@@ -234,7 +240,7 @@ class ApiController extends BaseController {
     public function removePhoto() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $photo_id = intval(\Request::get('photo_id'));
@@ -244,7 +250,7 @@ class ApiController extends BaseController {
             $photo_id
         );
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -252,7 +258,7 @@ class ApiController extends BaseController {
     public function checkin() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $latitude = floatval(\Request::get('latitude'));
@@ -268,7 +274,7 @@ class ApiController extends BaseController {
             );
         }
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -276,12 +282,12 @@ class ApiController extends BaseController {
     public function getMySettings() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $settings = Users::getSettings(self::$user->id);
 
-        return response()->json($settings + [
+        return self::json($settings + [
             'status' => $settings ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -289,7 +295,7 @@ class ApiController extends BaseController {
     public function setMySettings() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $sex = intval(\Request::get('sex'));
@@ -310,7 +316,7 @@ class ApiController extends BaseController {
                                          $is_notification_likes, $is_notification_messages);
         }
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -318,7 +324,7 @@ class ApiController extends BaseController {
     public function setAbout() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $about = strip_tags(\Request::get('about'));
@@ -326,7 +332,7 @@ class ApiController extends BaseController {
 
         $result = Users::setAbout(self::$user->id, $about);
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -334,7 +340,7 @@ class ApiController extends BaseController {
     public function getAbout() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $about = '';
@@ -344,7 +350,7 @@ class ApiController extends BaseController {
             $about = $user->about;
         }
 
-        return response()->json([
+        return self::json([
             'status' => $user ? self::SUCCESS : self::ERROR,
             'about' => $about,
         ]);
@@ -355,7 +361,7 @@ class ApiController extends BaseController {
     public function searchAround() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $limit = intval(\Request::get('limit', 50));
@@ -363,13 +369,13 @@ class ApiController extends BaseController {
         $data['status'] = self::SUCCESS;
         $data['users'] = Users::searchAround(self::$user->id, $limit);
 
-        return response()->json($data);
+        return self::json($data);
     }
 
     public function like() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user_id = intval(\Request::get('user_id'));
@@ -382,7 +388,7 @@ class ApiController extends BaseController {
 
         $result = Likes::like(self::$user->id, $user_id, $is_like, $weight_level);
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
             'mutual' => $result ? $result['mutual'] : 0,
             'user' => $result ? $result['user'] : null,
@@ -392,7 +398,7 @@ class ApiController extends BaseController {
     public function abuse() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user_id = intval(\Request::get('user_id'));
@@ -400,7 +406,7 @@ class ApiController extends BaseController {
 
         $abuse_id = Abuses::abuse(self::$user->id, $user_id, $text);
 
-        return response()->json([
+        return self::json([
             'status' => $abuse_id ? self::SUCCESS : self::ERROR,
             'abuse_id' => $abuse_id,
         ]);
@@ -409,14 +415,14 @@ class ApiController extends BaseController {
     public function blockUser() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user_id = intval(\Request::get('user_id'));
 
         $result = Likes::blockUser(self::$user->id, $user_id);
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -424,14 +430,14 @@ class ApiController extends BaseController {
     public function logout() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $key = \Request::get('key');
 
         $result = Users::logout(self::$user->id, $key);
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -439,12 +445,12 @@ class ApiController extends BaseController {
     public function removeProfile() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $result = Users::removeProfile(self::$user->id, intval(\Request::get('test', 0)));
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -452,7 +458,7 @@ class ApiController extends BaseController {
     public function setDeviceToken() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $key = \Request::get('key');
@@ -461,7 +467,7 @@ class ApiController extends BaseController {
 
         $result = Users::setDeviceToken(self::$user->id, $key, $device_token, $device_type);
 
-        return response()->json([
+        return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
@@ -469,12 +475,12 @@ class ApiController extends BaseController {
     public function getMyMessages() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $messages = Messages::getMessages(self::$user->id);
 
-        return response()->json([
+        return self::json([
             'status' => self::SUCCESS,
             'messages' => $messages,
         ]);
@@ -483,7 +489,7 @@ class ApiController extends BaseController {
     public function getUserProfile() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user_id = intval(\Request::get('user_id'));
@@ -491,12 +497,12 @@ class ApiController extends BaseController {
         $profile = Users::findById($user_id, 'getUserProfile');
 
         if (! $profile) {
-            return response()->json([
+            return self::json([
                 'status' => APIController::ERROR,
             ]);
         }
 
-        return response()->json([
+        return self::json([
             'status' => self::SUCCESS,
         ] + (array) $profile);
     }
@@ -504,27 +510,27 @@ class ApiController extends BaseController {
     public function sendMessageToUser() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user_id = intval(\Request::get('user_id'));
         $text = strip_tags(\Request::get('text'));
 
         if (! Likes::isMutual(self::$user->id, $user_id)) {
-            return response()->json([
+            return self::json([
                 'status' => self::ERROR_DISLIKE,
             ]);
         }
 
         if (trim($text) === '') {
-            return response()->json([
+            return self::json([
                 'status' => self::ERROR,
             ]);
         }
 
         $result = Messages::addMessage(self::$user->id, $user_id, $text);
 
-        return response()->json([
+        return self::json([
             'status' => $result['message_id'] ? self::SUCCESS : self::ERROR,
             'message_id' => $result['message_id'],
             'added_at' => $result['added_at'],
@@ -534,7 +540,7 @@ class ApiController extends BaseController {
     public function getMessagesWithUser() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
-            return response()->json($data);
+            return self::json($data);
         }
 
         $user_id = intval(\Request::get('user_id'));
@@ -543,7 +549,7 @@ class ApiController extends BaseController {
 
         $messages = Messages::getAllBetweenUsers(self::$user->id, $user_id, $older_than, $later_than);
 
-        return response()->json([
+        return self::json([
             'status' => self::SUCCESS,
             'messages' => $messages,
         ]);

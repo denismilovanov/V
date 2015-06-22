@@ -22,9 +22,17 @@ class ErrorCollector {
             unset($request['key']);
         }
 
-        \DB::connection('logs')->select("
+        return \DB::connection('logs')->select("
             SELECT logs.add_request(?, ?);
-        ", [json_encode($request, JSON_UNESCAPED_UNICODE), $user_id]);
+        ", [json_encode($request), $user_id])[0]->add_request;
+    }
+
+    public static function addResponse($request_id, $response) {
+        return \DB::connection('logs')->select("
+            UPDATE logs.requests
+                SET response = ?
+                WHERE id = ?;
+        ", [json_encode($response), $request_id]);
     }
 
 }
