@@ -458,7 +458,8 @@ class Users
                         icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
                         icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
                         round(ST_Distance(i.geography, :geography)::decimal / 1000) AS distance,
-                        :weight_level AS weight_level
+                        :weight_level AS weight_level,
+                        i.age
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
