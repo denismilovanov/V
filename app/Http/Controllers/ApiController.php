@@ -203,7 +203,7 @@ class ApiController extends BaseController {
 
         return response()->json([
             'status' => self::SUCCESS,
-            'photos' => UsersPhotos::getUserPhotos(self::$user->id, 1),
+            'photos' => UsersPhotos::getUserPhotos(self::$user->id, 1, null, self::$user->sex),
         ]);
     }
 

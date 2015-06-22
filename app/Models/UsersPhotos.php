@@ -84,11 +84,21 @@ class UsersPhotos {
         return true;
     }
 
+    public static function getPhotosForTests($user_id, $sex) {
+        $photos_server_url = env('PHOTOS_URL');
+        if ($sex == 1) {
+            $photo = $photos_server_url . '/test/female1.jpg';
+        } else if ($sex == 2) {
+            $photo = $photos_server_url . '/test/male1.jpg';
+        }
+        return [$photo];
+    }
+
     public static function correctAvatar($avatar_url, $user_id, $sex) {
         $photos_server_url = env('PHOTOS_URL');
 
         if (! $avatar_url) {
-            $photos = self::getUserPhotos($user_id, null, 1);
+            $photos = self::getUserPhotos($user_id, null, 1, $sex);
             if ($photos) {
                 $avatar_url = $photos[0]['url'];
             }
@@ -99,17 +109,13 @@ class UsersPhotos {
                 $avatar_url = $photos_server_url . $avatar_url;
             }
         } else if (Users::isTestUser($user_id)) {
-            if ($sex == 1) {
-                $avatar_url = $photos_server_url . '/test/female1.jpg';
-            } else if ($sex == 2) {
-                $avatar_url = $photos_server_url . '/test/male1.jpg';
-            }
+            $avatar_url = self::getPhotosForTests($user_id, $sex)[0];
         }
 
         return $avatar_url;
     }
 
-    public static function getUserPhotos($user_id, $source_id = null, $limit = null) {
+    public static function getUserPhotos($user_id, $source_id = null, $limit = null, $sex = null) {
         $photos_url = env('PHOTOS_URL');
 
         if (! $limit or $limit > 100) {
@@ -138,6 +144,14 @@ class UsersPhotos {
                 'url' => $photo->url,
                 'rank' => $photo->rank,
             );
+        }
+
+        if (Users::isTestUser($user_id)) {
+            $photos []= [
+                'id' => 0,
+                'url' => self::getPhotosForTests($user_id, $sex)[0],
+                'rank' => 10,
+            ];
         }
 
         return $photos;

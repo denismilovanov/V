@@ -414,7 +414,7 @@ class Users
             ", [$user->id]);
         }
 
-        $user->photos = UsersPhotos::getUserPhotos($user_id, 1);
+        $user->photos = UsersPhotos::getUserPhotos($user_id, 1, null, $user->sex);
 
         return $user;
     }
@@ -473,7 +473,7 @@ class Users
             $user->vk_id = self::correctVkId($user->vk_id, $user->sex);
 
             if ($area == 'searchAround') {
-                $user->photos = UsersPhotos::getUserPhotos($user->id, 1);
+                $user->photos = UsersPhotos::getUserPhotos($user->id, 1, null, $user->sex);
                 # async remove deleted or blocked user from index
                 if ($user->is_deleted or $user->is_blocked) {
                     UsersMatches::enqueueRemoveFromIndex($additional_data['for_user_id'], $user->id);
