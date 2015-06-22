@@ -383,6 +383,7 @@ class ApiController extends BaseController {
         return response()->json([
             'status' => $result ? self::SUCCESS : self::ERROR,
             'mutual' => $result ? $result['mutual'] : 0,
+            'user' => $result ? $result['user'] : null,
         ]);
     }
 

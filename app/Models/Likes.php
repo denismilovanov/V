@@ -5,7 +5,7 @@ use \App\Http\Controllers\ApiController;
 class Likes {
 
     public static function like($from_user_id, $to_user_id, $is_like, $weight_level = null) {
-        if (! Users::findById($to_user_id) or $from_user_id == $to_user_id) {
+        if (! ($user = Users::findById($to_user_id, 'like')) or $from_user_id == $to_user_id) {
             return false;
         }
 
@@ -72,6 +72,7 @@ class Likes {
 
         return [
             'mutual' => $mutual,
+            'user' => $user,
         ];
     }
 

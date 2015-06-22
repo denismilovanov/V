@@ -347,7 +347,7 @@ class Users
     }
 
     public static function findById($user_id, $area = '') {
-        if (! $area) {
+        if (! $area or $area == 'like') {
             $user = \DB::select("
                 SELECT *
                     FROM public.users
@@ -412,6 +412,10 @@ class Users
                     ORDER BY a.created_at DESC
                     LIMIT 50;
             ", [$user->id]);
+        } else if ($area == 'like') {
+            foreach(['updated_at', 'registered_at', 'is_blocked_by_vk', 'is_moderated', 'time_zone'] as $key) {
+                unset($user->$key);
+            }
         }
 
         $user->photos = UsersPhotos::getUserPhotos($user_id, 1, null, $user->sex);
