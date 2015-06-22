@@ -56,7 +56,7 @@ class ApiController extends BaseController {
         $sex = intval(\Request::get('sex'));
         $bdate = \Request::get('bdate');
         $about = strip_tags(\Request::get('about'));
-        $avatar_url = strip_tags(\Request::get('avatar_url'));
+        $avatar_url = '';
         $timezone = intval(\Request::get('timezone', 0));
 
         $data = [];

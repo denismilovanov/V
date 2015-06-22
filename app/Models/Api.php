@@ -34,6 +34,17 @@ class Api
                 ],
                 'method' => 'get',
             ],
+            'getMyMessages' => [
+                'fields' => [
+                ],
+                'method' => 'get',
+            ],
+            'getMessagesWithUser' => [
+                'fields' => [
+                    'user_id',
+                ],
+                'method' => 'get',
+            ],
 
         ];
     }
