@@ -63,6 +63,8 @@ class ApiController extends BaseController {
 
         $soft_version_int = Helper::softVersionFromStringToInt($soft_version);
 
+        ErrorCollector::addRequest(__METHOD__, null);
+
         if (! $soft_version_int) {
             $data['status'] = self::ERROR;
             return response()->json($data);
