@@ -137,6 +137,7 @@ class Pusher
                     $pusher->add($message);
 
                     if (APP_ENV != 'dev') {
+                        Helper::closeDBConnections();
                         $pusher->send();
                     } else {
                         \Log::info('Пропускаем (dev)');
@@ -153,6 +154,7 @@ class Pusher
                     $push = new GooglePushWrapper($devices, $message);
 
                     if (APP_ENV != 'dev') {
+                        Helper::closeDBConnections();
                         $pusher->add($push);
                         $pusher->push();
                     } else {
