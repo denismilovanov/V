@@ -423,6 +423,14 @@ class UsersMatches
 
         self::disconnect($user_id);
 
+        if (Users::isDeveloperUser($user_id)) {
+            foreach ($users_ids as $match_user_id) {
+                if (Users::isTestUser($match_user_id)) {
+                    Likes::preemptiveLike($match_user_id, $user_id);
+                }
+            }
+        }
+
         return [
             'users_ids' => $users_ids,
             'weight_level' => $level_id,

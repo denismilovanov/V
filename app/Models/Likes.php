@@ -159,6 +159,12 @@ class Likes {
         return 'Не делаем встречный лайк.';
     }
 
+    public static function preemptiveLike($from_user_id, $to_user_id) {
+        if (mt_rand() / mt_getrandmax() <= env('PREEMPTIVE_LIKE_PROBABILITY', 0.20)) {
+            self::like($from_user_id, $to_user_id, 1);
+        }
+    }
+
     public static function deleteAllBetween($from_user_id, $to_user_id) {
         return \DB::select("
             DELETE FROM public.likes

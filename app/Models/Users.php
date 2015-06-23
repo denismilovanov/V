@@ -294,6 +294,10 @@ class Users
         return 100000 + (int)(200000 * mt_rand() / mt_getrandmax());
     }
 
+    public static function isDeveloperUser($user_id) {
+        return in_array($user_id, explode(',', env('DEVELOPERS_IDS')));
+    }
+
     private static function correctVkId($vk_id, $sex) {
         if ($vk_id < 0) {
             // идентификаторы тестовых пользователей отрицательные
