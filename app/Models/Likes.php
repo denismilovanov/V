@@ -9,6 +9,11 @@ class Likes {
             return false;
         }
 
+        if ($is_like === 1 and Users::isDeveloperUser($from_user_id) and Users::isTestUser($to_user_id)) {
+            self::preemptiveLike($to_user_id, $from_user_id);
+            // если упреждающий лайк состоится, то далее запрос вернет $mutual_row != []
+        }
+
         $is_new = \DB::select("
             SELECT public.upsert_like(?, ?, ?);
         ", [$from_user_id, $to_user_id, $is_like])[0]->upsert_like;
