@@ -22,6 +22,8 @@ class Helper
     private static $genitivus = array(
         'саша' => 'Саши',
 
+        'aлександра' => 'Александры',
+        'алекса' => 'Алексы',
         'анастасия' => 'Анастасии',
         'юлия' => 'Юлии',
         'мария' => 'Марии',
@@ -63,6 +65,7 @@ class Helper
         'наталия' => 'Наталии',
         'натали' => 'Натали',
 
+        'aлександр' => 'Александра',
         'сергей' => 'Сергея',
         'дмитрий' => 'Дмитрия',
         'андрей' => 'Андрея',
@@ -98,6 +101,8 @@ class Helper
     private static $casusInstrumentalis = array(
         'саша' => 'Сашей',
 
+        'aлександра' => 'Александрой',
+        'aлекса' => 'Алексой',
         'анастасия' => 'Анастасией',
         'юлия' => 'Юлией',
         'мария' => 'Марией',
@@ -139,6 +144,7 @@ class Helper
         'наталия' => 'Наталией',
         'натали' => 'Натали',
 
+        'aлександр' => 'Александром',
         'сергей' => 'Сергеем',
         'дмитрий' => 'Дмитрием',
         'андрей' => 'Андреем',
@@ -173,17 +179,11 @@ class Helper
 
     public static function casusInstrumentalis($name, $sex) {
         $nameL = mb_strtolower($name);
-        if ($nameL == 'александр') {
-            return $sex == 1 ? 'александрой' : 'александром';
-        }
         return isset(self::$casusInstrumentalis[$nameL]) ? self::$casusInstrumentalis[$nameL] : $name;
     }
 
     public static function genitivus($name, $sex) {
         $nameL = mb_strtolower($name);
-        if ($nameL == 'александр') {
-            return $sex == 1 ? 'александра' : 'александры';
-        }
         return isset(self::$genitivus[$nameL]) ? self::$genitivus[$nameL] : $name;
     }
 
