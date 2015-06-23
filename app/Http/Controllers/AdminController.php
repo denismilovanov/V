@@ -102,6 +102,12 @@ class AdminController extends BaseController {
             } else if ($action == 'unblock') {
                 Users::unblock($user_id);
                 return redirect('/users/' . $user_id);
+            } else if ($action == 'remove') {
+                Users::removeProfile($user_id, true);
+                return redirect('/users/' . $user_id);
+            } else if ($action == 'unremove') {
+                Users::unremove($user_id);
+                return redirect('/users/' . $user_id);
             } else if ($action == 'remove_abuse') {
                 $abuse_id = intval(\Request::get('abuse_id'));
                 Abuses::remove($abuse_id);

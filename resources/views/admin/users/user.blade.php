@@ -65,6 +65,11 @@
                     @else
                         <button class="btn btn-danger" type="submit" name="action" value="block">Заблокировать</button>
                     @endif
+                    @if ($user->is_deleted)
+                        <button class="btn btn-success" type="submit" name="action" value="unremove">Восстановить</button>
+                    @else
+                        <button class="btn btn-danger" type="submit" name="action" value="remove">Удалить</button>
+                    @endif
                 </form>
             </div>
             <div class="col-md-6">
