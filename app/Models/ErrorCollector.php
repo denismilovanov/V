@@ -24,7 +24,7 @@ class ErrorCollector {
 
         return \DB::connection('logs')->select("
             SELECT logs.add_request(?, ?);
-        ", [json_encode($request), $user_id])[0]->add_request;
+        ", [json_encode($request, JSON_UNESCAPED_UNICODE), $user_id])[0]->add_request;
     }
 
     public static function addResponse($request_id, $response) {
@@ -32,7 +32,7 @@ class ErrorCollector {
             UPDATE logs.requests
                 SET response = ?
                 WHERE id = ?;
-        ", [json_encode($response), $request_id]);
+        ", [json_encode($response, JSON_UNESCAPED_UNICODE), $request_id]);
     }
 
 }

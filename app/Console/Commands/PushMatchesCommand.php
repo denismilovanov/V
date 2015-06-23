@@ -17,7 +17,7 @@ class PushMatchesCommand extends \LaravelSingleInstanceCommand\Command
 
         \Queue::subscribe('push_matches', $tag, function (RabbitMQJob $job) use (& $jobs, $tag) {
             $json = $job->getRawBody();
-            \Log::info($json);
+            \Log::info(json_encode(json_decode($json), JSON_UNESCAPED_UNICODE));
 
             $data = json_decode($json, 'assoc')['data'];
 

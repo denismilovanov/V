@@ -34,6 +34,8 @@ class VK
         $server_access_token = self::getAccessToken();
 
         try {
+            //GAUGE('checkVKAccessToken');
+
             $client = new \GuzzleHttp\Client();
             $response = $client->get('https://api.vk.com/method/secure.checkToken.json', [
                 'query' => [
@@ -56,7 +58,7 @@ class VK
                 ! isset($result_array['response']['success']) or
                 $result_array['response']['success'] != '1')
             {
-                throw new \Exception(json_encode($result_array));
+                throw new \Exception(json_encode($result_array, JSON_UNESCAPED_UNICODE));
             } else {
                 // проверим, что токен соответствует юзеру
                 return $result_array['response']['user_id'] === (int) $vk_id;

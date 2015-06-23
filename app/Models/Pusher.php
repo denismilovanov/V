@@ -166,7 +166,7 @@ class Pusher
                 ErrorCollector::addError(
                     'PUSH_LIKES_ERROR',
                     '',
-                    json_encode($e->getMessage())
+                    json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE)
                 );
             }
         }

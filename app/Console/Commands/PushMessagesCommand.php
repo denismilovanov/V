@@ -17,7 +17,7 @@ class PushMessagesCommand extends \LaravelSingleInstanceCommand\Command
 
         \Queue::subscribe('push_messages', $tag, function (RabbitMQJob $job) use (& $jobs, $tag) {
             $json = $job->getRawBody();
-            \Log::info($json);
+            \Log::info(json_encode(json_decode($json), JSON_UNESCAPED_UNICODE));
 
             $data = json_decode($json, 'assoc')['data'];
 
