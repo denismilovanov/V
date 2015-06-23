@@ -34,6 +34,12 @@ return [
                         'x-max-priority' => 255,
                     ],
                 ],
+                'push_matches' => [
+                    'prefetch_count' => 1,
+                ],
+                'push_messages' => [
+                    'prefetch_count' => 1,
+                ],
             ],
 
             'exchange_params' => [
