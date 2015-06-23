@@ -217,6 +217,16 @@ class Messages {
         return $chats;
     }
 
+    public static function getCountDialogsWithNewMessages($user_id) {
+        return \DB::select("
+            SELECT count(1) AS c
+                FROM public.messages_dialogs AS d
+                WHERE   d.me_id = ? AND
+                        NOT d.is_buddy_blocked AND
+                        d.is_new;
+        ", [$user_id])[0]->c;
+    }
+
     public static function blockDialog($me_id, $buddy_id) {
         \DB::select("
             UPDATE public.messages_dialogs

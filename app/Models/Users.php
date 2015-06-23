@@ -531,7 +531,7 @@ class Users
     }
 
     public static function getCountForBadge($user_id) {
-        return 1;
+        return Messages::getCountDialogsWithNewMessages($user_id);
     }
 
     public static function getUsersForAdmin($action, $limit, $offset) {

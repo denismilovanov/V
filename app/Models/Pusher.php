@@ -103,7 +103,7 @@ class Pusher
                 $text = $given_text;
             }
 
-            \Log::info($type . ': ' . $text . ' ' . $device->device_token);
+            \Log::info($type . ': ' . $text . ', token = ' . $device->device_token);
 
             if (Users::isTestUser($to_user->id)) {
                 \Log::info('Предназначено тестовому пользователю, пропускаем');
@@ -118,8 +118,10 @@ class Pusher
 
                     $message->setText($text);
                     $message->setExpiry(30);
-                    $message->setBadge(Users::getCountForBadge($to_user->id));
+                    $message->setBadge($badge = Users::getCountForBadge($to_user->id));
                     $message->setSound();
+
+                    \Log::info('badge = ' . $badge);
 
                     if (in_array($type, ['MATCH', 'MESSAGE'])) {
                         $message->setCustomProperty('userId', $from_user->id);
