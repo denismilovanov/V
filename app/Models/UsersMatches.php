@@ -8,6 +8,11 @@ class UsersMatches
         return \DB::connection('matches' . $num);
     }
 
+    // disconnect
+    private static function disconnect($user_id) {
+        self::getConnection($user_id)->disconnect();
+    }
+
     // create tables for "search index" ("current" and "fresh")
     public static function createMatchesTables($user_id) {
         self::getConnection($user_id)->select("
@@ -88,6 +93,8 @@ class UsersMatches
                 'match_user_id' => $match_user_id,
             ]);
         }
+
+        self::disconnect($user_id);
     }
 
     // enqueue job for rebuilding (filling up)
@@ -272,7 +279,7 @@ class UsersMatches
         FINISH();
         FINISH();
 
-        self::getConnection($user_id)->disconnect();
+        self::disconnect($user_id);
 
         return true;
     }
@@ -413,6 +420,8 @@ class UsersMatches
 
             FINISH();
         }
+
+        self::disconnect($user_id);
 
         return [
             'users_ids' => $users_ids,
