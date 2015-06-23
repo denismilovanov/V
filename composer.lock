@@ -68,12 +68,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/denismilovanov/LaravelSingleInstanceCommand.git",
-                "reference": "72b17a6038f4d8e5899f3098a8b8011eeaa2d3b9"
+                "reference": "6a783e1b504cfd8c8a90b3f497f2e9009cc42e28"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/denismilovanov/LaravelSingleInstanceCommand/zipball/72b17a6038f4d8e5899f3098a8b8011eeaa2d3b9",
-                "reference": "72b17a6038f4d8e5899f3098a8b8011eeaa2d3b9",
+                "url": "https://api.github.com/repos/denismilovanov/LaravelSingleInstanceCommand/zipball/6a783e1b504cfd8c8a90b3f497f2e9009cc42e28",
+                "reference": "6a783e1b504cfd8c8a90b3f497f2e9009cc42e28",
                 "shasum": ""
             },
             "require": {
@@ -113,7 +113,7 @@
                 "multiprocessing",
                 "pid"
             ],
-            "time": "2015-06-05 12:21:41"
+            "time": "2015-06-23 07:42:51"
         },
         {
             "name": "doctrine/inflector",
@@ -226,12 +226,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/denismilovanov/laravel-queue-rabbitmq.git",
-                "reference": "8a5d51cf66c56f22d4e41abb9bf6772d00548515"
+                "reference": "8e76e79ba68a46552171a6b761f4dfb9f9b1dade"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/8a5d51cf66c56f22d4e41abb9bf6772d00548515",
-                "reference": "8a5d51cf66c56f22d4e41abb9bf6772d00548515",
+                "url": "https://api.github.com/repos/denismilovanov/laravel-queue-rabbitmq/zipball/8e76e79ba68a46552171a6b761f4dfb9f9b1dade",
+                "reference": "8e76e79ba68a46552171a6b761f4dfb9f9b1dade",
                 "shasum": ""
             },
             "require": {
@@ -262,7 +262,7 @@
             "support": {
                 "source": "https://github.com/denismilovanov/laravel-queue-rabbitmq/tree/fork"
             },
-            "time": "2015-06-02 13:53:11"
+            "time": "2015-06-09 08:10:46"
         },
         {
             "name": "guzzlehttp/guzzle",
