@@ -179,16 +179,22 @@ class Messages {
                 -- с кем
                 d.buddy_id AS id,
                 --
-                public.format_date(d.created_at, ?) AS created_at,
+                public.format_date(d.created_at, :time_zone) AS created_at,
+                public.format_date(d.updated_at, :time_zone) AS last_message_added_at,
                 d.last_message,
                 d.is_new
 
                 FROM public.messages_dialogs AS d
-                WHERE   d.me_id = ? AND
+                WHERE   d.me_id = :user_id AND
                         NOT d.is_buddy_blocked
                 ORDER BY d.updated_at DESC
-                LIMIT ? OFFSET ?
-        ", [ApiController::$user->time_zone, $user_id, $limit, $offset]);
+                LIMIT :limit OFFSET :offset
+        ", [
+            'time_zone' => ApiController::$user->time_zone,
+            'user_id' => $user_id,
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
 
         // собираем айди
         $buddies_ids = [];
