@@ -118,7 +118,8 @@ class Pusher
 
                     $message->setText($text);
                     $message->setExpiry(30);
-                    $message->setBadge($badge = Users::getCountForBadge($to_user->id));
+                    $badge = Users::getCountForBadge($to_user->id);
+                    $message->setBadge((int)$badge);
                     $message->setSound();
 
                     \Log::info('badge = ' . $badge);
