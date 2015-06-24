@@ -65,7 +65,7 @@ namespace :deploy do
         # run "cd #{latest_release} && phpunit"
     end
     task :restart_crons do
-        run "cd #{latest_release} && php artisan stop_all"
+        run "cd #{latest_release} && php artisan pids:stop-all"
     end
     task :make_nginx_static_files do
         #run "cat -s #{latest_release}/protected/views/site/index.php | sed '/^[\t\s]*$/d' > #{shared_path}/system/_static_.html"

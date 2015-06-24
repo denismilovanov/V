@@ -80,16 +80,6 @@ BEGIN
     INSERT INTO stats.users_overall
         SELECT  i_id;
 
-    -- добавляем картинку
-    IF COALESCE(s_avatar_url, '') != '' THEN
-        PERFORM add_user_photo(
-            i_id,
-            1,
-            s_avatar_url,
-            NULL, NULL
-        );
-    END IF;
-
     RETURN i_id;
 
 END
