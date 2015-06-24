@@ -287,7 +287,7 @@ class Users
     }
 
     public static function isTestUser($user_id) {
-        return $user_id < self::getMinRealUserId();
+        return $user_id < self::getMinRealUserId() and $user_id >= 100000;
     }
 
     public static function getMinRealUserId() {
