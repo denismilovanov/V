@@ -89,7 +89,7 @@ class ApiController extends BaseController {
         }
 
         if (($device_type == 1 and $device_token !== null and strlen($device_token) != 64) or
-            ($device_type == 2 and $device_token !== null and strlen($device_token) != 162))
+            ($device_type == 2 and $device_token !== null and (strlen($device_token) < 140 or strlen($device_token) > 4096)))
         {
             $data['status'] = self::ERROR;
             $data['error'] = 'device_token_length';
