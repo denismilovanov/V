@@ -480,6 +480,7 @@ class Users
                         u.sex,
                         u.is_deleted,
                         u.is_blocked,
+                        u.about,
                         public.format_date(i.last_activity_at, :time_zone) AS last_activity_at,
                         icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
                         icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
