@@ -383,8 +383,8 @@ class Users
                 SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url, u.is_blocked,
                         extract('year' from age(u.bdate)) AS age,
                         public.format_date(i.last_activity_at, ?) AS last_activity_at,
-                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
-                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
+                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_groups_vk,
+                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
                         round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
                         public.get_weight_level(
                             icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
@@ -482,8 +482,8 @@ class Users
                         u.is_blocked,
                         u.about,
                         public.format_date(i.last_activity_at, :time_zone) AS last_activity_at,
-                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_friends_vk,
-                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_groups_vk,
+                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_groups_vk,
+                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
                         round(ST_Distance(i.geography, :geography)::decimal / 1000) AS distance,
                         :weight_level AS weight_level,
                         i.age
