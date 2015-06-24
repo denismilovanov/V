@@ -15,6 +15,8 @@ class MaintenanceCommand extends \LaravelSingleInstanceCommand\Command
     {
         $this->checkInstance($input);
 
+        GAUGE('fillMatches.enqueued', \Queue::getMessageCount('fill_matches'));
+
         $result = Users::removeOldKeys();
         foreach ($result as $user) {
             \Log::info('Сбросили key пользователю ' . $user->user_id);
