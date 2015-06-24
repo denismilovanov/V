@@ -12,7 +12,9 @@ class Abuses {
     }
 
     public static function abuse($from_user_id, $to_user_id, $text) {
-        if (! Users::findById($to_user_id)) {
+        if (! Users::findById($to_user_id) or
+            // нельзя послать абузу на тестового, если ты обычный пользователь
+            (! Users::isDeveloperOrTestUser($from_user_id) and Users::isTestUser($to_user_id))) {
             return false;
         }
 

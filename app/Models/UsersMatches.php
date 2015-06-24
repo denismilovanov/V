@@ -169,6 +169,10 @@ class UsersMatches
         $limit = env('WEIGHTS_PROCESSING_BATCH_SIZE');
         $users_max_id = Users::getMaxId();
 
+        // users with id < $users_min_id are for tests
+        // they do not match to real users, skip them
+        $users_min_id = Users::getMinId($user_id);
+
         $search_weights_params = Users::getMySearchWeightParams($user_id);
         $friends_vk_ids = $search_weights_params->friends_vk_ids;
         $groups_vk_ids = $search_weights_params->groups_vk_ids;
@@ -177,7 +181,7 @@ class UsersMatches
         // filter by region, age, sex, geography
         // calculate weights, group by them
         // do it in cycle
-        for ($i = 0; $i < ceil($users_max_id / $limit); $i ++) {
+        for ($i = (int)ceil($users_min_id / $limit); $i < ceil($users_max_id / $limit); $i ++) {
 
             // users I liked - remove them from index
             $liked_users = Likes::getLikedUsers($user_id, $i * $limit, ($i + 1) * $limit - 1);
@@ -388,7 +392,8 @@ class UsersMatches
                                     age BETWEEN :age_from AND :age_to AND
                                     sex IN ($sex) AND
                                     ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
-                                    user_id NOT IN (" . $liked_users . ")
+                                    user_id NOT IN (" . $liked_users . ") AND
+                                    user_id >= :min_user_id
                             ORDER BY ui.last_activity_at DESC
                             LIMIT :limit
                     ),
@@ -407,6 +412,9 @@ class UsersMatches
                     'geography' =>  $geography['geography'],
                     'region_id' => $geography['region_id'],
                     'limit' => min($limit, env('RESERVE_ALGORITHM_USERS_COUNT')),
+                    // will be 0 for user == developer
+                    // will be min real user id for others
+                    'min_user_id' => Users::getMinId($user_id),
                 ]);
 
                 $level_id = 0;

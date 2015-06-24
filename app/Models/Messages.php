@@ -23,7 +23,9 @@ class Messages {
     }
 
     public static function addMessage($from_user_id, $to_user_id, $text) {
-        if (! Users::findById($to_user_id)) {
+        if  (! Users::findById($to_user_id) or
+            // нельзя послать сообщение тестовому, если ты обычный пользователь
+            (! Users::isDeveloperOrTestUser($from_user_id) and Users::isTestUser($to_user_id))) {
             return [
                 'message_id' => '',
                 'added_at' => '',

@@ -149,7 +149,7 @@ class UsersPhotos {
             );
         }
 
-        if (Users::isTestUser($user_id)) {
+        if (Users::isTestUser($user_id) and ! $photos) {
             $rank = 0;
 
             foreach (self::getPhotosForTests($user_id, $sex) as $url) {

@@ -9,6 +9,11 @@ class Likes {
             return false;
         }
 
+        if (! Users::isDeveloperOrTestUser($from_user_id) and Users::isTestUser($to_user_id)) {
+            // не разработчик не может лайкнуть тестового
+            return false;
+        }
+
         if ($is_like === 1 and Users::isDeveloperUser($from_user_id) and Users::isTestUser($to_user_id)) {
             self::preemptiveLike($to_user_id, $from_user_id);
             // если упреждающий лайк состоится, то далее запрос вернет $mutual_row != []
@@ -203,7 +208,9 @@ class Likes {
     }
 
     public static function blockUser($from_user_id, $to_user_id) {
-        if (! Users::findById($to_user_id)) {
+        if (! Users::findById($to_user_id) or
+            // нельзя заблокировать тестового, если ты обычный пользователь
+            (! Users::isDeveloperOrTestUser($from_user_id) and Users::isTestUser($to_user_id))) {
             return false;
         }
 

@@ -287,15 +287,31 @@ class Users
     }
 
     public static function isTestUser($user_id) {
-        return $user_id >= 100000 and $user_id < 300000;
+        return $user_id < self::getMinRealUserId();
+    }
+
+    public static function getMinRealUserId() {
+        // у нас 200000к тестовых пользователей от 100000 до 299999
+        return 300000;
+    }
+
+    public static function getMinId($me_id) {
+        // разработчикам и тестовым пользователям видны все пользователи начиная с 0
+        // для всех остальных видны только настоящие пользователи
+        return self::isDeveloperOrTestUser($me_id) ? 0 : self::getMinRealUserId();
     }
 
     public static function getRandomTestUserId() {
-        return 100000 + (int)(200000 * mt_rand() / mt_getrandmax());
+        $magic_lower_limit = 100000;
+        return $magic_lower_limit + (int)((self::getMinRealUserId() - $magic_lower_limit) * mt_rand() / mt_getrandmax());
     }
 
     public static function isDeveloperUser($user_id) {
         return in_array($user_id, explode(',', env('DEVELOPERS_IDS')));
+    }
+
+    public static function isDeveloperOrTestUser($user_id) {
+        return self::isTestUser($user_id) or self::isDeveloperUser($user_id);
     }
 
     private static function correctVkId($vk_id, $sex) {
@@ -377,8 +393,14 @@ class Users
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
-                    WHERE u.id = ?;
-            ", [ApiController::$user->time_zone, ApiController::$user->geography, $user_id]);
+                    WHERE   u.id = ? AND
+                            u.id >= ?
+            ", [
+                ApiController::$user->time_zone,
+                ApiController::$user->geography,
+                $user_id,
+                self::getMinId(ApiController::$user->id),
+            ]);
         } else if ($area == 'admin') {
             $user = \DB::select("
                 SELECT  u.*,
@@ -467,11 +489,13 @@ class Users
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
                         ON i.user_id = u.id
-                    WHERE u.id IN (" . implode(', ', $users_ids) . ")
+                    WHERE   u.id IN (" . implode(', ', $users_ids) . ") AND
+                            u.id >= :max_user_id
             ", [
                 'time_zone' => ApiController::$user->time_zone,
                 'geography' => ApiController::$user->geography,
                 'weight_level' => $additional_data['weight_level'],
+                'max_user_id' => self::getMinId(ApiController::$user->id),
             ]);
         }
 
