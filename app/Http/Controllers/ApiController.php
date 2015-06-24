@@ -22,6 +22,8 @@ class ApiController extends BaseController {
 
     public static $user = null;
     private static $request_id = null;
+    private static $method = null;
+    private static $start_time = null;
 
     public function __construct() {
     }
@@ -37,13 +39,15 @@ class ApiController extends BaseController {
         $auth = self::$user !== null;
 
         self::$request_id = ErrorCollector::addRequest($method, $auth ? self::$user->id : null);
+        self::$method = $method;
+        self::$start_time = microtime(true);
 
         return $auth;
     }
 
     private function json($data) {
         if (self::$request_id) {
-            ErrorCollector::addResponse(self::$request_id, $data);
+            ErrorCollector::addResponse(self::$request_id, $data, self::$method, self::$start_time);
         }
         return response()->json($data);
     }

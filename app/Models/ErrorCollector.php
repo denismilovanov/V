@@ -27,12 +27,16 @@ class ErrorCollector {
         ", [json_encode($request, JSON_UNESCAPED_UNICODE), $user_id])[0]->add_request;
     }
 
-    public static function addResponse($request_id, $response) {
-        return \DB::connection('logs')->select("
+    public static function addResponse($request_id, $response, $method, $start_time) {
+        \DB::connection('logs')->select("
             UPDATE logs.requests
                 SET response = ?
                 WHERE id = ?;
         ", [json_encode($response, JSON_UNESCAPED_UNICODE), $request_id]);
+
+        $method = str_replace('App\Http\Controllers\ApiController::', '', $method);
+
+        TIMER('methods.' . $method, microtime(true) - $start_time);
     }
 
 }
