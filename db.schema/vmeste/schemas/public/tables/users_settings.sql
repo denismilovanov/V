@@ -2,7 +2,7 @@
 -- настройки поиска
 
 CREATE TABLE users_settings (
-    user_id integer NOT NULL PRIMARY KEY REFERENCES users(id),
+    user_id integer NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     radius integer,
     age_from integer,
     age_to integer,

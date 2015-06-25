@@ -2,7 +2,7 @@
 -- поисковый индекс
 
 CREATE TABLE public.users_index (
-    user_id integer NOT NULL PRIMARY KEY REFERENCES public.users (id),
+    user_id integer NOT NULL PRIMARY KEY REFERENCES public.users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     geography geography NULL,
     sex integer NOT NULL,
     friends_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
@@ -27,10 +27,6 @@ CREATE INDEX users_fetch_sex2
     USING btree(user_id, age)
     WHERE sex = 2;
 
-CREATE INDEX users_fetch_all
-    ON users_index
-    USING btree(user_id, region_id, age, sex);
-
 ALTER TABLE public.users_index
     ADD COLUMN city_id integer NULL,
     ADD COLUMN region_id integer NULL;
@@ -41,3 +37,7 @@ ALTER TABLE public.users_index
 
 ALTER TABLE public.users_index
     ADD COLUMN last_updated_at timestamp with time zone NOT NULL DEFAULT now();
+
+CREATE INDEX users_fetch_all
+    ON users_index
+    USING btree(user_id, region_id, age, sex);

@@ -5,7 +5,7 @@ CREATE TABLE public.users_photos (
     -- айди
     id integer NOT NULL PRIMARY KEY DEFAULT nextval('users_photos_id_seq'::regclass),
     -- пользователь
-    user_id integer NOT NULL REFERENCES users(id),
+    user_id integer NOT NULL REFERENCES public.users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     -- откуда фотография?
     source_id integer NOT NULL REFERENCES photos_sources (id) DEFERRABLE INITIALLY DEFERRED,
     -- полный урл, если фотография внешняя

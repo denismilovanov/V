@@ -3,7 +3,7 @@
 
 CREATE TABLE public.users_devices (
     id integer NOT NULL PRIMARY KEY DEFAULT nextval('users_devices_id_seq'::regclass),
-    user_id integer NOT NULL REFERENCES users(id),
+    user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     key character varying(40) NOT NULL UNIQUE,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,

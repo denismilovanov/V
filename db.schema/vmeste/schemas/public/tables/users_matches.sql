@@ -2,7 +2,7 @@
 --
 
 CREATE TABLE public.users_matches (
-    user_id integer NOT NULL PRIMARY KEY REFERENCES public.users (id),
+    user_id integer NOT NULL PRIMARY KEY REFERENCES public.users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     last_reindexed_at timestamp without time zone NOT NULL DEFAULT now()
 );
 

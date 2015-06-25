@@ -3,7 +3,7 @@
 
 CREATE TABLE public.users_profiles_vk (
     -- пользователь
-    user_id integer NOT NULL REFERENCES users(id),
+    user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     --
     occupation text NULL DEFAULT NULL,
     activities text NULL DEFAULT NULL,

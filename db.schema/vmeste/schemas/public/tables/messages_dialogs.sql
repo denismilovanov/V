@@ -2,8 +2,8 @@
 -- диалоги, на каждый диалог заводится пара записей
 
 CREATE TABLE public.messages_dialogs (
-    me_id integer NOT NULL REFERENCES public.users (id),
-    buddy_id integer NOT NULL REFERENCES public.users (id),
+    me_id integer NOT NULL REFERENCES public.users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    buddy_id integer NOT NULL REFERENCES public.users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     last_message text NOT NULL,
     last_message_i boolean NOT NULL,
     is_new boolean NOT NULL DEFAULT TRUE,
