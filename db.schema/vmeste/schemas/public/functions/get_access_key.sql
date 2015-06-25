@@ -17,7 +17,7 @@ BEGIN
         s_device_token := NULL;
     END IF;
 
-    s_key := substring(md5(random()::varchar) || md5(now()::varchar) || md5(random()::varchar) from 1 for 40);
+    s_key := encode(gen_random_bytes(20), 'hex');
 
     UPDATE public.users_devices
         SET key = s_key,
