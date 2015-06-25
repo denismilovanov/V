@@ -11,6 +11,7 @@ use App\Models\SoftVersions;
 
 class AdminController extends BaseController {
     public function __construct() {
+        \Illuminate\Support\Facades\View::share('base', env('ADMIN_RELATIVE_URL'));
     }
 
     public function beforeAction() {
@@ -19,7 +20,7 @@ class AdminController extends BaseController {
 
     public function index() {
         if (! \Auth::check()) {
-            return redirect('/login');
+            return redirect(env('ADMIN_RELATIVE_URL') . '/login');
         }
         return view('admin.index', [
 
@@ -32,7 +33,7 @@ class AdminController extends BaseController {
                 'email' => \Request::get('email'),
                 'password' => \Request::get('password'),
             ], true)) {
-                return redirect('/');
+                return redirect(env('ADMIN_RELATIVE_URL') . '/');
             };
         }
         return view('admin.login', [
@@ -43,7 +44,7 @@ class AdminController extends BaseController {
 
     public function logout() {
         \Auth::logout();
-        return redirect('/');
+        return redirect(env('ADMIN_RELATIVE_URL') . '/');
     }
 
     public function sendRequest() {
@@ -74,10 +75,10 @@ class AdminController extends BaseController {
             $vk_id = intval(\Request::get('vk_id'));
 
             if ($user_id and Users::findById($user_id)) {
-                return redirect('/users/' . $user_id);
+                return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user_id);
             }
             if ($vk_id and $user = Users::findByVkId($vk_id)) {
-                return redirect('/users/' . $user->id);
+                return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user->id);
             }
         }
 
@@ -98,16 +99,16 @@ class AdminController extends BaseController {
 
             if ($action == 'block') {
                 Users::block($user_id);
-                return redirect('/users/' . $user_id);
+                return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user_id);
             } else if ($action == 'unblock') {
                 Users::unblock($user_id);
-                return redirect('/users/' . $user_id);
+                return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user_id);
             } else if ($action == 'remove') {
                 Users::removeProfile($user_id, true);
-                return redirect('/users/' . $user_id);
+                return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user_id);
             } else if ($action == 'unremove') {
                 Users::unremove($user_id);
-                return redirect('/users/' . $user_id);
+                return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user_id);
             } else if ($action == 'remove_abuse') {
                 $abuse_id = intval(\Request::get('abuse_id'));
                 Abuses::remove($abuse_id);
@@ -176,7 +177,7 @@ class AdminController extends BaseController {
         if ($action == 'upsert') {
             $status = SoftVersions::upsert($id, $device_type, $description);
             if ($status) {
-                return redirect('/tools/softVersions');
+                return redirect(env('ADMIN_RELATIVE_URL') . '/tools/softVersions');
             }
         } else if ($action == 'make_actual') {
             if ($version) {

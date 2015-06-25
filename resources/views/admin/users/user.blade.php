@@ -105,7 +105,7 @@
         @foreach ($user->abuses as $abuse)
         <tr id="abuse{{ $abuse->id }}">
             <td>{{ $abuse->id }}</td>
-            <td><a href="/users/{{ $abuse->from_id }}">{{ $abuse->from_name }} ({{ $abuse->from_id }})</a></td>
+            <td><a href="{{ $base }}/users/{{ $abuse->from_id }}">{{ $abuse->from_name }} ({{ $abuse->from_id }})</a></td>
             <td>{{{ $abuse->message }}}</td>
             <td><button class="btn btn-xs btn-danger" type="button" onclick="userForm.removeAbuse({{ $abuse->id }});">Удалить</button></td>
         </tr>

@@ -53,7 +53,7 @@
         </tr>
         @foreach ($users as $user)
             <tr>
-                <td><a href="/users/{{ $user->id }}">{{ $user->id }}</a></td>
+                <td><a href="{{ $base }}/users/{{ $user->id }}">{{ $user->id }}</a></td>
                 <td>{{ $user->name }}</td>
                 <td>{{ $user->sex }}</td>
                 <td>{{ $user->age }}</td>

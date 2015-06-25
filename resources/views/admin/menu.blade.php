@@ -7,7 +7,7 @@
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-            <li><a href="/users/">Список и поиск</a></li>
+            <li><a href="{{ $base }}/users/">Список и поиск</a></li>
         </ul>
     </li>
 </ul>
@@ -19,7 +19,7 @@
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-            <li><a href="/stats/">Вся статистика</a></li>
+            <li><a href="{{ $base }}/stats/">Вся статистика</a></li>
         </ul>
     </li>
 </ul>
@@ -31,8 +31,8 @@
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-            <li><a href="/tools/push">Push</a></li>
-            <li><a href="/tools/softVersions">Версии приложений</a></li>
+            <li><a href="{{ $base }}/tools/push">Push</a></li>
+            <li><a href="{{ $base }}/tools/softVersions">Версии приложений</a></li>
         </ul>
     </li>
 </ul>
@@ -44,7 +44,7 @@
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-            <li><a href="/tests/sendRequest">Отправить запрос на апи</a></li>
+            <li><a href="{{ $base }}/tests/sendRequest">Отправить запрос на апи</a></li>
         </ul>
     </li>
 </ul>
@@ -56,7 +56,7 @@
         </a>
         <ul class="dropdown-menu" role="menu">
             <li>
-                <a href="/logout/">Выйти</a>
+                <a href="{{ $base }}/logout/">Выйти</a>
             </li>
         </ul>
     </li>

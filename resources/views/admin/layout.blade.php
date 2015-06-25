@@ -23,7 +23,7 @@
         <nav class="navbar navbar-default" role="navigation">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="/">
+                    <a class="navbar-brand" href="{{ $base }}">
                     <b>
                         Вместе
                     </b>

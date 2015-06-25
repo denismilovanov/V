@@ -50,7 +50,7 @@
         <label>Результат</label>
         <pre style="height: 500px;">{{ $result['response'] }}</pre>
         <br />
-        <a target="_blank" href="{{ $result['url'] }}">{{ $result['url'] }}</a>
+        <a target="_blank" href="{{ $base }}{{ $result['url'] }}">{{ $result['url'] }}</a>
     </div>
 </div>
 

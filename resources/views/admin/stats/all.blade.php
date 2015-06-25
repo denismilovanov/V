@@ -57,7 +57,7 @@
 
 <script>
 
-Request.request('GET', '/stats/', {
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'gender_data'
 }, function(data) {
     var highchartyw0 = new Highcharts.Chart({
@@ -107,7 +107,7 @@ Request.request('GET', '/stats/', {
     });
 });
 
-Request.request('GET', '/stats/', {
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'who_likes_who_data'
 }, function(data) {
     var highchartyw1 = new Highcharts.Chart({
@@ -168,7 +168,7 @@ Request.request('GET', '/stats/', {
 });
 
 
-Request.request('GET', '/stats/', {
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'get_ages_data'
 }, function(data) {
     var highchartyw2 = new Highcharts.Chart({
@@ -217,7 +217,7 @@ Request.request('GET', '/stats/', {
     });
 });
 
-Request.request('GET', '/stats/', {
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'get_registrations_data'
 }, function(data) {
     var r_chart = new Highcharts.Chart({
@@ -266,7 +266,7 @@ Request.request('GET', '/stats/', {
     });
 });
 
-Request.request('GET', '/stats/', {
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'likes_activity_data'
 }, function(data) {
     var highchartyw4 = new Highcharts.Chart({
@@ -328,7 +328,7 @@ Request.request('GET', '/stats/', {
     });
 });
 
-Request.request('GET', '/stats/', {
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'get_activity_data'
 }, function(data) {
     var highchartyw5 = new Highcharts.Chart({
