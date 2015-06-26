@@ -1,10 +1,7 @@
 create role vmeste with password '2gZ&K1_#8lJ' login;
 create database logs lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 create database vmeste lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
-
-
 create database gis lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
-
 create database matches0 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 create database matches1 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 create database matches2 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
@@ -16,64 +13,33 @@ create database matches7 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' templat
 create database matches8 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 create database matches9 lc_ctype='ru_RU.UTF-8' lc_collate='ru_RU.UTF-8' template=template0 owner vmeste;
 
+psql -p 5436 -U postgres -d matches0 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches0 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches0 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
+psql -p 5436 -U postgres -d matches1 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches1 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches0 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches2 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches2 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches1 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches1 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches3 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches3 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches2 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches2 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches4 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches4 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches3 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches3 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches5 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches5 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches4 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches4 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches6 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches6 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches5 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches5 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches7 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches7 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches6 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches6 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches8 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches8 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches7 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches7 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
+psql -p 5436 -U postgres -d matches9 -c '\i /home/pg/code/db.schema/matches/queries_before/00_extensions.sql'
+psql -p 5436 -U vmeste -d matches9 -h localhost -c '\i /home/pg/code/db.schema/matches/queries_before/01_create_all.sql'
 
-\c matches8 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches8 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql
-
-\c matches9 postgres
-\i ~/work/v/db.schema/matches/queries_before/00_extensions.sql
-\c matches9 vmeste
-\i ~/work/v/db.schema/matches/queries_before/01_create_all.sql
-\i ~/work/v/db.schema/matches/functions/get_weight_level.sql

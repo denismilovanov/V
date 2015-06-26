@@ -7,9 +7,10 @@ SELECT public.add_user(
     ('1985-01-01'::date + interval '1 year' * (random() * 10)::integer)::date,
     ('Тестовый #' || id::varchar)::varchar,
     (-id)::varchar,
-    ''
+    '',
+    +3
 )
-    FROM generate_series(170001, 199999) AS id; -- 199999
+    FROM generate_series(100000, 199999) AS id; -- 199999
 
 SELECT public.add_user(
     id,
@@ -18,9 +19,10 @@ SELECT public.add_user(
     ('1985-01-01'::date + interval '1 year' * (random() * 10)::integer)::date,
     ('Тестовый #' || id::varchar)::varchar,
     (-id)::varchar,
-    ''
+    '',
+    +3
 )
-    FROM generate_series(270001, 299999) AS id; -- 299999
+    FROM generate_series(200000, 270000) AS id; -- 299999
 
 ALTER SEQUENCE users_id_seq RESTART WITH 300000;
 
@@ -57,7 +59,9 @@ update users_index  set
 SELECT public.checkin(
     id,
     59.7 + 0.4 * random(),
-    30.1 + 0.4 * random()
+    30.1 + 0.4 * random(),
+    -421007,
+    -176095
 )
     FROM users
     WHERE id BETWEEN 100000 and 299999;
