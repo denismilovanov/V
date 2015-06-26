@@ -59,6 +59,8 @@ class Bootstrap {
         curl_setopt(self::$curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt(self::$curl, CURLOPT_HEADER, false);
         curl_setopt(self::$curl, CURLOPT_USERAGENT, 'https://vmeste-app.ru;+unit-tests');
+        curl_setopt(self::$curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt(self::$curl, CURLOPT_SSL_VERIFYHOST, false);
         return self::$curl;
     }
 
