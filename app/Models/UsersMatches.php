@@ -111,7 +111,7 @@ class UsersMatches
     }
 
     // the heart of the system - the formula for ranging users
-    private static function weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) {
+    public static function weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) {
         return "
         (
             " . env('WEIGHT_GROUPS_VK') . " * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) +

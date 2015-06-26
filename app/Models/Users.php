@@ -375,6 +375,7 @@ class Users
             ", [$user_id]);
         } else if ($area == 'getUserProfile') {
             $search_weights_params = Users::getMySearchWeightParams(ApiController::$user->id);
+            $my_settings = self::getMySettings(ApiController::$user->id);
 
             $friends_vk_ids = $search_weights_params->friends_vk_ids;
             $groups_vk_ids = $search_weights_params->groups_vk_ids;
@@ -382,24 +383,24 @@ class Users
             $user = \DB::select("
                 SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url, u.is_blocked,
                         extract('year' from age(u.bdate)) AS age,
-                        public.format_date(i.last_activity_at, ?) AS last_activity_at,
-                        icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_groups_vk,
-                        icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
-                        round(ST_Distance(i.geography, ?)::decimal / 1000) AS distance,
-                        public.get_weight_level(
-                            icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]),
-                            icount(i.friends_vk_ids & array[$friends_vk_ids]::int[])
-                        ) AS weight_level
+                        public.format_date(ui.last_activity_at, :time_zone) AS last_activity_at,
+                        icount(ui.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_groups_vk,
+                        icount(ui.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
+                        round(ST_Distance(ui.geography, :geography)::decimal / 1000) AS distance,
+
+                        " . UsersMatches::weightFormula($groups_vk_ids, $friends_vk_ids, '0') . " AS weight_level
+
                     FROM public.users AS u
-                    INNER JOIN public.users_index AS i
-                        ON i.user_id = u.id
-                    WHERE   u.id = ? AND
-                            u.id >= ?
+                    INNER JOIN public.users_index AS ui
+                        ON ui.user_id = u.id
+                    WHERE   u.id = :user_id AND
+                            u.id >= :min_user_id
             ", [
-                ApiController::$user->time_zone,
-                ApiController::$user->geography,
-                $user_id,
-                self::getMinId(ApiController::$user->id),
+                'time_zone' => ApiController::$user->time_zone,
+                'geography' => ApiController::$user->geography,
+                'radius' => $my_settings->radius,
+                'user_id' => $user_id,
+                'min_user_id' => self::getMinId(ApiController::$user->id),
             ]);
         } else if ($area == 'admin') {
             $user = \DB::select("
