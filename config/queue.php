@@ -1,5 +1,7 @@
 <?php
 
+$prefix = env('APP_ENV') === 'test' ? '__test_' : '';
+
 return [
     'default' => 'rabbitmq',
     'connections' => [
@@ -22,6 +24,8 @@ return [
                 'auto_delete' => env('RABBITMQ_QUEUE_AUTODELETE', false),
             ],
 
+            'prefix' => $prefix,
+
             'queues_params'   => [
                 'fill_matches' => [
                     'arguments' => [
@@ -29,15 +33,24 @@ return [
                     ],
                     'prefetch_count' => 1,
                 ],
-                'test_priority' => [
+                'test_fill_matches' => [
                     'arguments' => [
-                        'x-max-priority' => 255,
+                        'x-max-priority' => 255
                     ],
+                    'prefetch_count' => 1,
                 ],
+
                 'push_matches' => [
                     'prefetch_count' => 1,
                 ],
+                'test_push_matches' => [
+                    'prefetch_count' => 1,
+                ],
+
                 'push_messages' => [
+                    'prefetch_count' => 1,
+                ],
+                'test_push_messages' => [
                     'prefetch_count' => 1,
                 ],
             ],
