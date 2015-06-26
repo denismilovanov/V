@@ -62,6 +62,7 @@ class Api
             'query' => $params + [
                 'key' => $key,
             ],
+            'verify' => false,
         ]);
 
         $url = $response->getEffectiveUrl();
