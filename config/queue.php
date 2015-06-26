@@ -29,13 +29,13 @@ return [
             'queues_params'   => [
                 'fill_matches' => [
                     'arguments' => [
-                        'x-max-priority' => 255
+                        'x-max-priority' => 255,
                     ],
                     'prefetch_count' => 1,
                 ],
-                'test_fill_matches' => [
+                '__test_fill_matches' => [
                     'arguments' => [
-                        'x-max-priority' => 255
+                        'x-max-priority' => 255,
                     ],
                     'prefetch_count' => 1,
                 ],
@@ -43,14 +43,14 @@ return [
                 'push_matches' => [
                     'prefetch_count' => 1,
                 ],
-                'test_push_matches' => [
+                '__test_push_matches' => [
                     'prefetch_count' => 1,
                 ],
 
                 'push_messages' => [
                     'prefetch_count' => 1,
                 ],
-                'test_push_messages' => [
+                '__test_push_messages' => [
                     'prefetch_count' => 1,
                 ],
             ],
