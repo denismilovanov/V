@@ -119,23 +119,16 @@
 <script src="/js/jquery.bxslider.min.js"></script>
 <script src="/js/scrollIt.min.js"></script>
 <script>
-
-
     $(function(){
-
         $('.bx-slider').bxSlider({
-            mode:'fade',
-            auto:true,
-            pause:4000,
-            pager:false,
-            speed:1000
+            mode: 'fade',
+            auto: true,
+            pause: 3000,
+            pager: false,
+            speed: 1000,
+            controls: null
         });
-
     });
-
-
-
-
 </script>
 </body>
 </html>
