@@ -26,7 +26,7 @@ class Pusher
             return self::$apple_pusher;
         }
 
-        if (APP_ENV == 'dev' or APP_ENV == 'test' or APP_ENV == 'production') {
+        if (APP_ENV == 'dev' or APP_ENV == 'test') {
             $pusher = new \ApnsPHP_Push(
                 \ApnsPHP_Abstract::ENVIRONMENT_SANDBOX,
                 env('APP_PATH') . '/config/ck_develop.pem'
@@ -37,7 +37,7 @@ class Pusher
                 \ApnsPHP_Abstract::ENVIRONMENT_PRODUCTION,
                 env('APP_PATH') . '/config/ck_production.pem'
             );
-            $pusher->setProviderCertificatePassphrase('');
+            $pusher->setProviderCertificatePassphrase('dvtcnt');
         }
 
         $pusher->connect();
