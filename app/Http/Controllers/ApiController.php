@@ -121,6 +121,19 @@ class ApiController extends BaseController {
         $data['latest_soft_version'] = Helper::softVersionFromIntToString($soft->version);
         $data['latest_soft_description'] = $soft->description;
 
+        // спецоперация
+        if (! $data['is_new'] and ! Users::isDeveloperOrTestUser($data['user_id'])) {
+            $flag = \DB::select("SELECT coalesce((params->'flag'), '0') AS flag FROM users WHERE id = ?;",
+                [$user->user_id])[0]->flag;
+
+            if (! $flag) {
+                \DB::select("UPDATE users SET params = params || 'flag => 1' WHERE id = ?;",
+                    [$user->user_id]);
+                $data['is_new'] = 1;
+            }
+        }
+        // конец спецоперации
+
         return self::json($data);
     }
 
