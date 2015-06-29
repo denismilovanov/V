@@ -393,7 +393,8 @@ class UsersMatches
                                     sex IN ($sex) AND
                                     ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
                                     user_id NOT IN (" . $liked_users . ") AND
-                                    user_id >= :min_user_id
+                                    user_id >= :min_user_id AND
+                                    user_id != :user_id
                             ORDER BY ui.last_activity_at DESC
                             LIMIT :limit
                     ),
