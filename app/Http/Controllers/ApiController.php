@@ -127,8 +127,8 @@ class ApiController extends BaseController {
                 [$user->user_id])[0]->flag;
 
             if (! $flag) {
-                \DB::select("UPDATE users SET params = params || 'flag => 1' WHERE id = ?;",
-                    [$user->user_id]);
+                \DB::select("UPDATE users SET about = ?, params = params || 'flag => 1' WHERE id = ?;",
+                    [$about, $user->user_id]);
                 $data['is_new'] = 1;
             }
         }
