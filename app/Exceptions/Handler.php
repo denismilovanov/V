@@ -25,17 +25,25 @@ class Handler extends ExceptionHandler {
     public function report(Exception $e)
     {
         $type = '';
+        $message = '';
+
         if ($e instanceof \Illuminate\Database\QueryException) {
             $type = 'SQL_ERROR';
+            $message = $e->getMessage() . "\n\n" . $e->getTraceAsString();
         } else if ($e instanceof \ErrorException) {
             $type = 'PHP_ERROR';
+            $message = $e->getMessage() . "\n\n" . $e->getTraceAsString();
+        }
+
+        if (isset($_SERVER)) {
+            $message .= "\n\n" . print_r($_SERVER, true);
         }
 
         if ($type) {
             \App\Models\ErrorCollector::addError(
                 $type,
                 $e->getFile() . ':' . $e->getLine(),
-                $e->getMessage()
+                $message
             );
         }
         return parent::report($e);
