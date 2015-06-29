@@ -26,7 +26,7 @@ class Pusher
             return self::$apple_pusher;
         }
 
-        if (APP_ENV == 'dev' or APP_ENV == 'test') {
+        if (APP_ENV == 'dev' or APP_ENV == 'test' or APP_ENV == 'production') {
             $pusher = new \ApnsPHP_Push(
                 \ApnsPHP_Abstract::ENVIRONMENT_SANDBOX,
                 env('APP_PATH') . '/config/ck_develop.pem'
