@@ -35,7 +35,7 @@ class Pusher
         } else if (APP_ENV == 'production') {
             $pusher = new \ApnsPHP_Push(
                 \ApnsPHP_Abstract::ENVIRONMENT_PRODUCTION,
-                env('APP_PATH') . '/config/ck_production.pem'
+                env('APP_PATH') . '/config/ck_prod.pem'
             );
             $pusher->setProviderCertificatePassphrase('dvtcnt');
         }
