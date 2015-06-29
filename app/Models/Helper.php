@@ -96,6 +96,8 @@ class Helper
         'егор' => 'Егора',
         'стас' => 'Стаса',
         'станислав' => 'Станислава',
+        'паша' => 'Паши',
+        'виктор' => 'Виктора',
     );
 
     private static $casusInstrumentalis = array(
@@ -175,6 +177,8 @@ class Helper
         'егор' => 'Егором',
         'стас' => 'Стасом',
         'станислав' => 'Станиславом',
+        'паша' => 'Пашей',
+        'виктор' => 'Виктором',
     );
 
     public static function casusInstrumentalis($name, $sex) {
