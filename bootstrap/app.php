@@ -96,6 +96,9 @@ require __DIR__.'/../app/Http/routes.php';
 if (! function_exists('START')) {
     $timers = [];
 
+    define('STATSD_PORT', '8125');
+    define('STATSD_HOST', '127.0.0.1');
+
     function START($operation) {
         global $timers;
         array_push($timers, [
@@ -115,21 +118,25 @@ if (! function_exists('START')) {
     }
 
     function STATSD_SOCKET() {
-        return @ fsockopen("udp://localhost", '8125', $errno, $errstr);
+        return socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
     }
 
     function TIMER($operation, $value) {
-        if ($fp = STATSD_SOCKET()) {
+        if ($sock = STATSD_SOCKET()) {
             \Log::info('Timer '  . $operation . ' = ' . $value . 's');
-            fwrite($fp, $operation . ":$value|ms|@0.1");
-            fclose($fp);
+            $msg = $operation . ":$value|ms|@0.1";
+            $len = strlen($msg);
+            socket_sendto($sock, $msg, $len, 0, STATSD_HOST, STATSD_PORT);
+            socket_close($sock);
         }
     }
 
     function GAUGE($name, $value) {
-        if ($fp = STATSD_SOCKET()) {
-            fwrite($fp, $name . ":$value|g");
-            fclose($fp);
+        if ($sock = STATSD_SOCKET()) {
+            $msg = $name . ":$value|g";
+            $len = strlen($msg);
+            socket_sendto($sock, $msg, $len, 0, STATSD_HOST, STATSD_PORT);
+            socket_close($sock);
         }
     }
 }
