@@ -21,11 +21,11 @@ BEGIN
 
     UPDATE public.users_devices
         SET key = s_key,
-            device_type = i_device_type,
+            device_token = s_device_token,
             soft_version = i_soft_version,
             updated_at = now()
         WHERE   user_id = i_user_id AND
-                device_token IS NOT DISTINCT FROM s_device_token;
+                device_type = i_device_type;
 
 
     IF NOT FOUND THEN
