@@ -45,6 +45,18 @@ class Api
                 ],
                 'method' => 'get',
             ],
+            'getMySettings' => [
+                'fields' => [
+                ],
+                'method' => 'get',
+            ],
+            'setMySettings' => [
+                'fields' => [
+                    'sex', 'age_from', 'age_to', 'radius', 'is_show_male', 'is_show_female',
+                    'is_notification', 'is_notification_likes', 'is_notification_messages',
+                ],
+                'method' => 'get',
+            ],
 
         ];
     }
