@@ -3,8 +3,8 @@
 
 CREATE TABLE likes (
     id integer NOT NULL PRIMARY KEY DEFAULT nextval('likes_id_seq'::regclass),
-    user1_id integer NOT NULL,
-    user2_id integer NOT NULL,
+    user1_id integer NOT NULL REFERENCES public.users (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    user2_id integer NOT NULL REFERENCES public.users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     liked_at timestamp with time zone DEFAULT now(),
     is_liked boolean,
     is_send boolean,
