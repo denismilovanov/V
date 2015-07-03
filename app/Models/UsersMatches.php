@@ -137,6 +137,22 @@ class UsersMatches
         return implode(", ", $sex);
     }
 
+    private static function additionalGenderCondition($sex) {
+        // is matching user looking for me?
+        $additional_gender_condition = '';
+
+        // i am female, is matching user looking for females?
+        if ($sex == 1) {
+            $additional_gender_condition = 'is_show_female AND ';
+        }
+        // i am male, is matching user looking for males?
+        else if ($sex == 2) {
+            $additional_gender_condition = 'is_show_male AND ';
+        }
+
+        return $additional_gender_condition;
+    }
+
     // rebuilding algorithm (fill up fresh index and rotate)
     public static function fillMatchesInUsersMatches($user_id, $enqueued_at) {
         TIMER('fillMatches.awaiting', microtime(true) - $enqueued_at);
@@ -145,11 +161,14 @@ class UsersMatches
 
         $settings = Users::getMySettings($user_id);
         $geography = Users::getMyGeography($user_id);
+        $user = Users::findById($user_id);
 
         $sex = self::aggregateSexIds($settings);
         if (! $sex) {
             return true;
         }
+
+        $additional_gender_condition = self::additionalGenderCondition($user->sex);
 
         START('fillMatches.main');
 
@@ -211,6 +230,7 @@ class UsersMatches
                                 region_id = :region_id AND
                                 age BETWEEN :age_from AND :age_to AND
                                 sex IN ($sex) AND
+                                $additional_gender_condition
                                 ST_DWithin(geography, (:geography)::geography, :radius * 1000)
                 ),
                 levels AS (
@@ -368,8 +388,10 @@ class UsersMatches
 
             $settings = Users::getMySettings($user_id);
             $geography = Users::getMyGeography($user_id);
-
+            $user = Users::findById($user_id);
             $sex = self::aggregateSexIds($settings);
+
+            $additional_gender_condition = self::additionalGenderCondition($user->sex);
 
             if ($sex) {
                 $search_weights_params = Users::getMySearchWeightParams($user_id);
@@ -391,6 +413,7 @@ class UsersMatches
                             WHERE   region_id = :region_id AND
                                     age BETWEEN :age_from AND :age_to AND
                                     sex IN ($sex) AND
+                                    $additional_gender_condition
                                     ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
                                     user_id NOT IN (" . $liked_users . ") AND
                                     user_id >= :min_user_id AND

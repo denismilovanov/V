@@ -26,3 +26,7 @@ ALTER FOREIGN TABLE public.users_index
     ADD COLUMN friendliness numeric(3, 2) NOT NULL DEFAULT 0.50,
     ADD COLUMN popularity numeric(3, 2) NOT NULL DEFAULT 0.50;
 
+ALTER FOREIGN TABLE public.users_index
+    ADD COLUMN is_show_male boolean NOT NULL DEFAULT FALSE,
+    ADD COLUMN is_show_female boolean NOT NULL DEFAULT FALSE;
+

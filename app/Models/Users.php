@@ -178,20 +178,22 @@ class Users
                 WHERE id = ?;
 
             UPDATE public.users_index
-                SET sex = ?
+                SET sex = ?,
+                    is_show_male = ?, is_show_female = ?
                 WHERE user_id = ?;
-            ", [
-                $radius, $age_from, $age_to, $is_show_male,
-                $is_show_female, $is_notification,
-                $is_notification_likes, $is_notification_messages,
-                $user_id,
+        ", [
+            $radius, $age_from, $age_to,
+            $is_show_male, $is_show_female,
+            $is_notification, $is_notification_likes, $is_notification_messages,
+            $user_id,
 
-                $sex,
-                $user_id,
+            $sex,
+            $user_id,
 
-                $sex,
-                $user_id
-            ]);
+            $sex,
+            $is_show_female, $is_show_female,
+            $user_id,
+        ]);
 
         // надо пересчитать подходящих?
         if ($old_settings['sex'] != $sex or

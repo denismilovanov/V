@@ -41,3 +41,9 @@ ALTER TABLE public.users_index
 CREATE INDEX users_fetch_all
     ON users_index
     USING btree(user_id, region_id, age, sex);
+
+--
+ALTER TABLE public.users_index
+    ADD COLUMN is_show_male boolean NOT NULL DEFAULT FALSE,
+    ADD COLUMN is_show_female boolean NOT NULL DEFAULT FALSE;
+
