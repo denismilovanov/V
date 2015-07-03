@@ -191,7 +191,7 @@ class Users
             $user_id,
 
             $sex,
-            $is_show_female, $is_show_female,
+            $is_show_male, $is_show_female,
             $user_id,
         ]);
 
