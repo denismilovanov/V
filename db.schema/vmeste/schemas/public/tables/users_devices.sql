@@ -8,7 +8,7 @@ CREATE TABLE public.users_devices (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     device_token character varying(255),
-    device_type integer
+    device_type integer NOT NULL
 );
 
 ALTER TABLE public.users_devices
@@ -35,3 +35,7 @@ ALTER TABLE public.users_devices
 
 ALTER TABLE public.users_devices
     ALTER COLUMN device_type SET NOT NULL;
+
+CREATE UNIQUE INDEX users_devices_device_udx
+    ON public.users_devices
+    USING btree(user_id, device_type);

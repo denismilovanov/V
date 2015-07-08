@@ -29,16 +29,26 @@ BEGIN
 
 
     IF NOT FOUND THEN
-        INSERT INTO public.users_devices
-            (user_id, key, created_at, updated_at, device_token, device_type, soft_version)
-            VALUES (
-                i_user_id,
-                s_key,
-                now(), now(),
-                s_device_token,
-                i_device_type,
-                i_soft_version
-            );
+        BEGIN
+            INSERT INTO public.users_devices
+                (user_id, key, created_at, updated_at, device_token, device_type, soft_version)
+                VALUES (
+                    i_user_id,
+                    s_key,
+                    now(), now(),
+                    s_device_token,
+                    i_device_type,
+                    i_soft_version
+                );
+        EXCEPTION WHEN unique_violation THEN
+            UPDATE public.users_devices
+                SET key = s_key,
+                    device_token = s_device_token,
+                    soft_version = i_soft_version,
+                    updated_at = now()
+                WHERE   user_id = i_user_id AND
+                        device_type = i_device_type;
+        END;
     END IF;
 
     RETURN s_key;
