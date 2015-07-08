@@ -321,9 +321,10 @@ class ApiController extends BaseController {
         $age_to = intval(\Request::get('age_to'));
         $is_show_male = \Request::get('is_show_male');
         $is_show_female = \Request::get('is_show_female');
-        $is_notification = \Request::get('is_notification');
         $is_notification_likes = \Request::get('is_notification_likes');
         $is_notification_messages = \Request::get('is_notification_messages');
+
+        $is_notification = (bool)$is_notification_likes or (bool)$is_notification_messages;
 
         if (($sex != 1 and $sex != 2) or $age_from < 18 or $age_to > 80) {
             $result = false;
