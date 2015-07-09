@@ -45,15 +45,16 @@ class Pusher
     }
 
     public static function getGooglePusher() {
-        $env = null;
-
-        if (APP_ENV == 'dev' or APP_ENV == 'test') {
-            $env = PushManager::ENVIRONMENT_DEV;
-        } else if (APP_ENV == 'production') {
-            $env = PushManager::ENVIRONMENT_PROD;
-        }
-
         if (! GooglePushWrapper::$gcmAdapter) {
+            /*
+            $env = null;
+
+            if (APP_ENV == 'dev' or APP_ENV == 'test') {
+                $env = PushManager::ENVIRONMENT_DEV;
+            } else if (APP_ENV == 'production') {
+                $env = PushManager::ENVIRONMENT_PROD;
+            }
+            */
             GooglePushWrapper::$gcmAdapter = new GcmAdapter([
                 'apiKey' => env('GOOGLE_PUSH_API_KEY'),
             ]);
