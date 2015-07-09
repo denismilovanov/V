@@ -151,7 +151,11 @@ class Pusher
                         'type' => strtolower($type),
                     ];
                     if (in_array($type, ['MATCH', 'MESSAGE'])) {
-                        $bag['userId'] = $from_user->id;
+                        $bag['user'] = [
+                            'id' => $from_user->id,
+                            'name' => $from_user->name,
+                            'avatar_url' => $from_user->avatar_url
+                        ];
                     }
 
                     $pusher = self::getGooglePusher();
