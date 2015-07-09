@@ -53,11 +53,13 @@ class Pusher
             $env = PushManager::ENVIRONMENT_PROD;
         }
 
-        $pusher = new PushManager();
-        GooglePushWrapper::$gcmAdapter = new GcmAdapter([
-            'apiKey' => env('GOOGLE_PUSH_API_KEY'),
-        ]);
+        if (! GooglePushWrapper::$gcmAdapter) {
+            GooglePushWrapper::$gcmAdapter = new GcmAdapter([
+                'apiKey' => env('GOOGLE_PUSH_API_KEY'),
+            ]);
+        }
 
+        $pusher = new PushManager();
         return $pusher;
     }
 
