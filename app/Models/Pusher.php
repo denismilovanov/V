@@ -126,8 +126,6 @@ class Pusher
 
                     if (in_array($type, ['MATCH', 'MESSAGE'])) {
                         $message->setCustomProperty('userId', $from_user->id);
-                        //$message->setCustomProperty('name', $from_user->name);
-                        //$message->setCustomProperty('avatar_url', $from_user->avatar_url);
                     }
 
                     $message->setCustomProperty('type', strtolower($type));
@@ -148,9 +146,17 @@ class Pusher
 
                 } else if ($device->device_type == 2) {
 
+                    $bag = [
+                        'message' => $text,
+                        'type' => strtolower($type),
+                    ];
+                    if (in_array($type, ['MATCH', 'MESSAGE'])) {
+                        $bag['userId'] = $from_user->id;
+                    }
+
                     $pusher = self::getGooglePusher();
                     $devices = new DeviceCollection([new Device($device->device_token)]);
-                    $message = new Message($text);
+                    $message = new Message(json_encode($bag));
                     $push = new GooglePushWrapper($devices, $message);
 
                     if (APP_ENV != 'dev') {
