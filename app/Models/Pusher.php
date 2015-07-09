@@ -19,7 +19,6 @@ class GooglePushWrapper extends Push
 class Pusher
 {
     private static $apple_pusher = null;
-    private static $google_pusher = null;
 
     public static function getApplePusher() {
         if (self::$apple_pusher) {
@@ -46,10 +45,6 @@ class Pusher
     }
 
     public static function getGooglePusher() {
-        if (self::$google_pusher) {
-            return self::$google_pusher;
-        }
-
         $env = null;
 
         if (APP_ENV == 'dev' or APP_ENV == 'test') {
@@ -63,7 +58,7 @@ class Pusher
             'apiKey' => env('GOOGLE_PUSH_API_KEY'),
         ]);
 
-        return self::$google_pusher = $pusher;
+        return $pusher;
     }
 
     public static function disconnect() {
@@ -173,6 +168,8 @@ class Pusher
 
                     \Log::info('Отправлено Google');
                     $sent = true;
+
+                    unset($pusher);
 
                 }
 
