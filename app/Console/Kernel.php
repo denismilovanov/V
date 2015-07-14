@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PushMessagesCommand',
         'App\Console\Commands\PushSystemMessagesCommand',
         'App\Console\Commands\CreateMassPushCommand',
+        'App\Console\Commands\PushFeedbackCommand',
         //
         'App\Console\Commands\FillMatchesCommand',
         'App\Console\Commands\CleanIndexesFromDeletedUsersCommand',

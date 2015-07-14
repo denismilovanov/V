@@ -188,4 +188,26 @@ class Pusher
 
         return $sent;
     }
+
+    public static function pushFeedbackApple() {
+        if (APP_ENV == 'dev' or APP_ENV == 'test') {
+            $feedback = new \ApnsPHP_Feedback(
+                \ApnsPHP_Abstract::ENVIRONMENT_SANDBOX,
+                env('APP_PATH') . '/config/ck_develop.pem'
+            );
+            $feedback->setProviderCertificatePassphrase('qwerty');
+        } else if (APP_ENV == 'production') {
+            $feedback = new \ApnsPHP_Feedback(
+                \ApnsPHP_Abstract::ENVIRONMENT_PRODUCTION,
+                env('APP_PATH') . '/config/ck_prod.pem'
+            );
+            $feedback->setProviderCertificatePassphrase('dvtcnt');
+        }
+
+        $feedback->connect();
+
+        $device_tokens = $feedback->receive();
+
+        \Log::info('Токенов: ' . sizeof($device_tokens));
+    }
 }
