@@ -293,6 +293,7 @@ class ApiController extends BaseController {
 
         return self::json([
             'status' => $result ? self::SUCCESS : self::ERROR,
+            'geography' => $result ? $result['geography'] : null,
         ]);
     }
 

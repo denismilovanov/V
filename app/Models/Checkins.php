@@ -25,7 +25,10 @@ class Checkins {
             UsersMatches::enqueueFillMatchesJob($user_id);
         }
 
-        return $result;
+        return [
+            'result' => $result,
+            'geography' => $geography,
+        ];
     }
 
 }

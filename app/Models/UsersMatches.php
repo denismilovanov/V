@@ -137,8 +137,8 @@ class UsersMatches
         return implode(", ", $sex);
     }
 
+    // is matching user looking for me?
     private static function additionalGenderCondition($sex) {
-        // is matching user looking for me?
         $additional_gender_condition = '';
 
         // i am female, is matching user looking for females?
@@ -151,6 +151,19 @@ class UsersMatches
         }
 
         return $additional_gender_condition;
+    }
+
+    // have we detected region by coordinates?
+    private static function additionalRegionCondition($region_id) {
+        if ($region_id) {
+            // yes, it will help us to speed up the search
+            $additional_region_condition = 'region_id = ' . intval($region_id) . ' AND ';
+        } else {
+            // no, we will relay on coordinates only
+            $additional_region_condition = '';
+        }
+
+        return $additional_region_condition;
     }
 
     // rebuilding algorithm (fill up fresh index and rotate)
@@ -169,6 +182,7 @@ class UsersMatches
         }
 
         $additional_gender_condition = self::additionalGenderCondition($user->sex);
+        $additional_region_condition = self::additionalRegionCondition($geography['region_id']);
 
         START('fillMatches.main');
 
@@ -227,7 +241,7 @@ class UsersMatches
 
                         WHERE   user_id BETWEEN $i * $limit AND ($i + 1) * $limit - 1 AND
                                 user_id NOT IN (" . $liked_users . ") AND
-                                region_id = :region_id AND
+                                $additional_region_condition
                                 age BETWEEN :age_from AND :age_to AND
                                 sex IN ($sex) AND
                                 $additional_gender_condition
@@ -257,7 +271,6 @@ class UsersMatches
                 'age_to' => $settings->age_to ? : env('MAX_AGE'),
                 'radius' => $settings->radius,
                 'geography' =>  $geography['geography'],
-                'region_id' => $geography['region_id'],
                 'weights_levels' => env('WEIGHTS_LEVELS'),
             ]);
 
@@ -392,6 +405,7 @@ class UsersMatches
             $sex = self::aggregateSexIds($settings);
 
             $additional_gender_condition = self::additionalGenderCondition($user->sex);
+            $additional_region_condition = self::additionalRegionCondition($geography['region_id']);
 
             if ($sex) {
                 $search_weights_params = Users::getMySearchWeightParams($user_id);
@@ -410,7 +424,7 @@ class UsersMatches
                                 " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS weight_level
 
                             FROM public.users_index AS ui
-                            WHERE   region_id = :region_id AND
+                            WHERE   $additional_region_condition
                                     age BETWEEN :age_from AND :age_to AND
                                     sex IN ($sex) AND
                                     $additional_gender_condition
@@ -434,7 +448,6 @@ class UsersMatches
                     'age_to' => $settings->age_to ? : env('MAX_AGE'),
                     'radius' => $settings->radius,
                     'geography' =>  $geography['geography'],
-                    'region_id' => $geography['region_id'],
                     'limit' => min($limit, env('RESERVE_ALGORITHM_USERS_COUNT')),
                     // will be 0 for user == developer
                     // will be min real user id for others
