@@ -9,6 +9,7 @@ DECLARE
     r_region record;
     g_geo geometry;
     r_result public.t_geography;
+    g_way geometry;
 BEGIN
 
     g_geo := ST_GeometryFromText('POINT(' || d_longitude::varchar || ' ' || d_latitide::varchar || ')', 4326);
@@ -26,17 +27,26 @@ BEGIN
 
     IF FOUND THEN
 
-        WITH way AS (
-            SELECT way
-                FROM planet_osm_polygon
-                WHERE osm_id = r_city.osm_id
-                LIMIT 1
-        )
+        SELECT way INTO g_way
+            FROM planet_osm_polygon
+            WHERE osm_id = r_city.osm_id
+            LIMIT 1;
+
+        FOR r_region IN SELECT *
+                            FROM planet_osm_polygon
+                            WHERE   way && g_way AND
+                                    admin_level = '4'
+                            ORDER BY way_area DESC
+        LOOP
+            r_region.way := NULL;
+            RAISE NOTICE 'candidate region = %', r_region;
+        END LOOP;
+
         SELECT * INTO r_region
             FROM planet_osm_polygon
-            WHERE   way && (SELECT way FROM way) AND
+            WHERE   way && g_way AND
                     admin_level = '4'
-            ORDER BY name
+            ORDER BY way_area DESC
             LIMIT 1;
 
         r_region.way := NULL;
@@ -45,11 +55,22 @@ BEGIN
 
     ELSE
 
+        FOR r_region IN SELECT *
+                            FROM planet_osm_polygon
+                            WHERE   ST_Within(g_geo, way) AND
+                                    admin_level = '4'
+                            ORDER BY way_area DESC
+        LOOP
+            r_region.way := NULL;
+            RAISE NOTICE 'candidate region = %', r_region;
+        END LOOP;
+
+
         SELECT * INTO r_region
             FROM planet_osm_polygon
             WHERE   ST_Within(g_geo, way) AND
                     admin_level = '4'
-            ORDER BY name
+            ORDER BY way_area DESC
             LIMIT 1;
 
         r_region.way := NULL;
