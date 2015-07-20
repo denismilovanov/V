@@ -1,8 +1,18 @@
 # coding: utf-8
 
+test = 0
+
+if test == 1
+    set :app_dir, '/home/test-vmeste/vmeste-app/'
+    set :user, 'test-vmeste'
+    e = `cat ./.env.test`
+else
+    set :app_dir, '/home/vmeste/vmeste-app/'
+    set :user, 'vmeste'
+    e = `cat ./.env.prod`
+end
+
 set :application, "vmeste-app.ru"
-set :app_dir, '/home/test-vmeste/vmeste-app/'
-# set :app_dir, '/home/sites/vmeste-app' # Для теста настроек
 
 set :deploy_to, "#{app_dir}"
 
@@ -20,17 +30,16 @@ set :copy_via, :scp
 
 set :keep_releases, 10
 
-set :user, 'test-vmeste'
 # set :user, 'sites' # Для теста настроек
 set :use_sudo, false
 set :normalize_asset_timestamps, false
 default_run_options[:pty] = true
 ssh_options[:forward_agent] = true
 
-role :web, "81.177.48.78"                          # Your HTTP server, Apache/etc
-role :app, "81.177.48.78"                          # This may be the same as your `Web` server
-role :db,  "81.177.48.78", :primary => true # This is where Rails migrations will run
-role :db,  "81.177.48.78"
+role :web, "95.213.161.74"                          # Your HTTP server, Apache/etc
+role :app, "95.213.161.74"                          # This may be the same as your `Web` server
+role :db,  "95.213.161.74", :primary => true # This is where Rails migrations will run
+role :db,  "95.213.161.74"
 
 before 'deploy:finalize_update', 'deploy:composer'
 after 'deploy:finalize_update', 'deploy:make_runtime_link'
@@ -46,7 +55,6 @@ namespace :deploy do
         run "sudo service php5-fpm reload"
     end
     task :composer do
-        e = `cat ./.env.test`
         run "echo '#{e}' > #{latest_release}/.env_with_slashes"
         # эта штука добавит слеш в конце каждой строки, выкидываем
         run "cat #{latest_release}/.env_with_slashes | sed -e 's/\\\\$/ /' > #{latest_release}/.env"
