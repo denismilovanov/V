@@ -406,7 +406,10 @@ class UsersMatches
 
         $users_ids_at_levels_reindexed = [];
         foreach ($users_ids_at_levels as $user) {
-            $users_ids_at_levels_reindexed[$user->user_id] = $user;
+            // prevent overwriting (user may come from both indexes)
+            if (! isset($users_ids_at_levels_reindexed[$user->user_id])) {
+                $users_ids_at_levels_reindexed[$user->user_id] = $user;
+            }
         }
 
         return $users_ids_at_levels_reindexed;

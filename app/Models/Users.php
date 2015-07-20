@@ -474,7 +474,6 @@ class Users
 
             $friends_vk_ids = $search_weights_params->friends_vk_ids;
             $groups_vk_ids = $search_weights_params->groups_vk_ids;
-
             $users = \DB::select("
                 SELECT  u.id,
                         u.name,
@@ -501,9 +500,25 @@ class Users
             ]);
         }
 
+        // увы, IN не гарантирует порядок, поэтому проведем спецоперацию
+        // для начала заиндексируем пользователей
+        $users_indexed = [];
+        foreach ($users as $user) {
+            $users_indexed[$user->id] = $user;
+        }
+        $users = $users_indexed;
+
+        // результат
         $result = [];
 
-        foreach ($users as $user) {
+        // проходим в заданном порядке
+        foreach ($users_ids as $user_id) {
+            if (! isset($users[$user_id])) {
+                continue;
+            }
+
+            $user = $users[$user_id];
+
             $user->avatar_url = UsersPhotos::correctAvatar($user->avatar_url, $user->id, $user->sex);
             $user->vk_id = self::correctVkId($user->vk_id, $user->sex);
 
