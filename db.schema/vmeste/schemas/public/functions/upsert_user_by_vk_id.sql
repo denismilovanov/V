@@ -15,9 +15,10 @@ $BODY$
 DECLARE
     r_user record;
     i_id integer;
+    d_current_bdate date;
 BEGIN
 
-    SELECT id AS user_id, 0 AS is_new  INTO r_user
+    SELECT id AS user_id, 0 AS is_new INTO r_user
         FROM public.users
         WHERE vk_id = s_vk_id::integer -- uniq
         LIMIT 1;
@@ -29,7 +30,14 @@ BEGIN
                 sex = i_sex,
                 time_zone = i_time_zone,
                 is_deleted = 'f'
-            WHERE id = r_user.user_id;
+            WHERE id = r_user.user_id
+            RETURNING bdate INTO d_current_bdate;
+
+        IF d_current_bdate IS NULL AND d_bdate IS NOT NULL THEN
+            UPDATE public.users
+                SET bdate = d_bdate
+                WHERE id = r_user.user_id;
+        END IF;
 
     ELSE
 

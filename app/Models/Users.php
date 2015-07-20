@@ -7,6 +7,12 @@ use App\Models\UsersIndex;
 class Users
 {
     public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone) {
+        $date = @ strtotime($bdate);
+        $years = floor((time() - $date) / (60 * 60 * 24 * 365));
+        if (! $date or $years <= 1 or $years >= 100) {
+            $bdate = null;
+        }
+
         $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
         $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone])[0];
         $user_record = self::findById($user->user_id);
