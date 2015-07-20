@@ -77,7 +77,7 @@
                 </tr>
                 @foreach ($versions[2] as $version)
                 <tr>
-                    <td><a href="?id={{ $version->id }}&device_type=1">{{ $version->id }}</a></td>
+                    <td><a href="?id={{ $version->id }}&device_type=2">{{ $version->id }}</a></td>
                     <td>
                         @if ($version->is_actual) Актуальна @endif
                     </td>
