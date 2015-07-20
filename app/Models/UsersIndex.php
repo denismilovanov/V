@@ -24,13 +24,15 @@ class UsersIndex {
                 SET last_updated_at = now(),
                     popularity = uo.liked_count::numeric / (uo.liked_count + uo.disliked_count + 1),
                     friendliness = uo.likes_count::numeric / (uo.likes_count + uo.dislikes_count + 1),
-                    age = extract('year' from age(u.bdate))
+                    age = COALESCE(extract('year' from age(u.bdate)), :default_ages)
                 FROM    stats.users_overall AS uo,
                         users AS u
                 WHERE   i.user_id IN ($users_ids) AND
                         uo.user_id = i.user_id AND
                         u.id = uo.user_id;
-        ");
+        ", [
+            'default_ages' => 25,
+        ]);
 
         return $users_ids;
     }
