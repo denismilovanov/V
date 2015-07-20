@@ -323,80 +323,24 @@ class UsersMatches
 
     //
     public static function getMatches($user_id, $limit) {
-        START('getMatches');
-
         self::checkIfNeedRebuilding($user_id);
 
         self::createMatchesTables($user_id);
 
-        $users_ids = [];
-        $iterations = 0;
-        $level_id = null;
+        START('getMatches.readFromIndex');
 
-        // we need to perform some iterations, because we gonna
-        // read from both indexes (current and fresh)
-        do {
-            $iterations ++;
-
-            // read the highest levels from current and fresh
-            $max_levels_ids = self::getConnection($user_id)->select("
-                SELECT  COALESCE((
-                            SELECT level_id
-                                FROM public.matching_levels_$user_id
-                                WHERE icount(users_ids) > 0
-                                ORDER BY level_id DESC
-                                LIMIT 1
-                            ), -1
-                        ) AS current_level_id,
-                        COALESCE((
-                            SELECT level_id
-                                FROM public.matching_levels_fresh_$user_id
-                                WHERE icount(users_ids) > 0
-                                ORDER BY level_id DESC
-                                LIMIT 1
-                            ), -1
-                        ) AS fresh_level_id;
-            ")[0];
-
-            // compare them
-            $max_current_level_id = $max_levels_ids->current_level_id;
-            $max_fresh_level_id = $max_levels_ids->fresh_level_id;
-
-            if ($max_fresh_level_id >= $max_current_level_id and $max_fresh_level_id >= 0) {
-                // we need to read from fresh
-                $table = 'fresh_';
-                $level_id = $max_fresh_level_id;
-            } else if ($max_current_level_id >= $max_fresh_level_id and $max_current_level_id >= 0) {
-                // we need to read from current
-                $table = '';
-                $level_id = $max_current_level_id;
-            } else {
-                // both indexes are empty
-                break;
-            }
-
-            // read users at level
-            $users_ids = self::getConnection($user_id)->select("
-                SELECT array_to_string(subarray(users_ids, 0, $limit), ',') AS users_ids
-                    FROM public.matching_levels_{$table}{$user_id}
-                    WHERE level_id = ?;
-            ", [$level_id]);
-
-            // there is time lag between reading level and reading users
-            // it is possible fresh index to be truncated between these moments of time
-            // the actual data is now in current index
-            if (sizeof($users_ids) and $users_ids[0]->users_ids) {
-                $users_ids = explode(',', $users_ids[0]->users_ids);
-            }
-            // so $users_ids can be still empty and we need to take another iteration
-
-        // it is unbelievable 5 iterations take place :)
-        } while (! $users_ids and $iterations < 5);
+        // read top users
+        $users_ids_at_levels = self::getConnection($user_id)->select("
+            SELECT * FROM public.get_matching_users_ids(:user_id, :limit) AS t(level_id integer, user_id integer);
+        ", [
+            'user_id' => $user_id,
+            'limit' => $limit,
+        ]);
 
         FINISH();
 
         // indexes are empty, we need to find matching users right now!
-        if (! sizeof($users_ids)) {
+        if (! sizeof($users_ids_at_levels)) {
             START('getMatches.reserveAlgorithm');
 
             $settings = Users::getMySettings($user_id);
@@ -417,11 +361,11 @@ class UsersMatches
 
                 // heavy query without any guarantee to get the most relative users
                 // they will be simply matching by geo, age and sex
-                $users_ids = \DB::select("
+                $users_ids_at_levels = \DB::select("
                     WITH matches AS (
-                        SELECT  ui.user_id AS match_user_id,
+                        SELECT  ui.user_id AS user_id,
 
-                                " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS weight_level
+                                " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS level_id
 
                             FROM public.users_index AS ui
                             WHERE   $additional_region_condition
@@ -436,11 +380,11 @@ class UsersMatches
                             LIMIT :limit
                     ),
                     matches_ordered AS (
-                        SELECT match_user_id
+                        SELECT user_id, level_id
                             FROM matches
-                            ORDER BY weight_level DESC
+                            ORDER BY level_id DESC
                     )
-                    SELECT string_agg(m.match_user_id::varchar, ',') AS users_ids
+                    SELECT level_id, user_id
                         FROM matches_ordered AS m;
                 ", [
                     'user_id' => $user_id,
@@ -453,14 +397,6 @@ class UsersMatches
                     // will be min real user id for others
                     'min_user_id' => Users::getMinId($user_id),
                 ]);
-
-                $level_id = 0;
-                if (sizeof($users_ids) and $users_ids[0]->users_ids) {
-                    $users_ids = explode(',', $users_ids[0]->users_ids);
-                } else {
-                    // there are no mathing users at all
-                    $users_ids = '';
-                }
             }
 
             FINISH();
@@ -468,10 +404,12 @@ class UsersMatches
 
         self::disconnect($user_id);
 
-        return [
-            'users_ids' => $users_ids,
-            'weight_level' => $level_id,
-        ];
+        $users_ids_at_levels_reindexed = [];
+        foreach ($users_ids_at_levels as $user) {
+            $users_ids_at_levels_reindexed[$user->user_id] = $user;
+        }
+
+        return $users_ids_at_levels_reindexed;
     }
 
     // take users with old current index and enqueue rebuild job

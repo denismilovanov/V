@@ -488,7 +488,6 @@ class Users
                         icount(i.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_groups_vk,
                         icount(i.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
                         round(ST_Distance(i.geography, :geography)::decimal / 1000) AS distance,
-                        :weight_level AS weight_level,
                         i.age
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
@@ -498,7 +497,6 @@ class Users
             ", [
                 'time_zone' => ApiController::$user->time_zone,
                 'geography' => ApiController::$user->geography,
-                'weight_level' => $additional_data['weight_level'],
                 'max_user_id' => self::getMinId(ApiController::$user->id),
             ]);
         }
@@ -555,10 +553,13 @@ class Users
 
     public static function searchAround($me_id, $limit) {
         $users = UsersMatches::getMatches($me_id, $limit);
-        $users_all = self::findByIds($users['users_ids'], 'searchAround', [
-            'weight_level' => $users['weight_level'],
+        $users_ids = array_keys($users);
+        $users_all = self::findByIds($users_ids, 'searchAround', [
             'for_user_id' => $me_id,
         ]);
+        foreach ($users_all as $user) {
+            $user->weight_level = $users[$user->id]->level_id;
+        }
         return array_values($users_all);
     }
 
