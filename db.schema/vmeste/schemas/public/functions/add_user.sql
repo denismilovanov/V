@@ -62,7 +62,7 @@ BEGIN
         VALUES (
             i_id,
             i_sex,
-            extract('year' from age(d_bdate))
+            COALESCE(extract('year' from age(d_bdate)), 25)
         );
 
     INSERT INTO users_matches
