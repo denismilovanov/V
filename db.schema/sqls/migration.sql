@@ -168,3 +168,56 @@ BEGIN
 END;$$;
 
 update users_index  set last_updated_at = now() - interval '1 minute' * (random() * 500);
+
+
+insert into likes
+    select  nextval('likes_id_seq'::regclass),
+            user1_id + 300000,
+            user2_id + 300000,
+            liked_at,
+            is_liked,
+            is_send,
+            is_blocked,
+            reason,
+            is_new
+        from old_likes
+        where   exists (select 1 from users as u where u.id = user1_id + 300000) and
+                exists (select 1 from users as u where u.id = user2_id + 300000);
+
+insert into messages_new
+    select  nextval('messages_id_seq'::regclass),
+            from_user_id + 300000,
+            to_user_id + 300000,
+            message,
+            't',
+            'f',
+            created_at
+        from old_messages
+        where   exists (select 1 from users as u where u.id = from_user_id + 300000) and
+                exists (select 1 from users as u where u.id = to_user_id + 300000);
+
+
+insert into messages_new
+    select  nextval('messages_id_seq'::regclass),
+            to_user_id + 300000,
+            from_user_id + 300000,
+            message,
+            'f',
+            'f',
+            created_at
+        from old_messages
+        where   exists (select 1 from users as u where u.id = from_user_id + 300000) and
+                exists (select 1 from users as u where u.id = to_user_id + 300000);
+
+
+insert into messages_dialogs
+    select  me_id,
+            buddy_id,
+            coalesce((select message from messages_new AS mn where mn.me_id = m.me_id and mn.buddy_id = m.buddy_id order by created_at desc limit 1), ''),
+            'f',
+            'f',
+            coalesce((select min(created_at) from messages_new as mn where mn.me_id = m.me_id and mn.buddy_id = m.buddy_id), now()),
+            coalesce((select max(created_at) from messages_new as mn where mn.me_id = m.me_id and mn.buddy_id = m.buddy_id), now()),
+            exists (select 1 from likes as l where l.user1_id = m.me_id and l.user2_id = m.buddy_id and is_blocked)
+        from messages_new as m
+        group by me_id, buddy_id;
