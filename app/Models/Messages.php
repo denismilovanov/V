@@ -154,7 +154,7 @@ class Messages {
         }
 
         $sql .= "
-            ORDER BY id DESC
+            ORDER BY created_at DESC
             LIMIT 50;
         ";
 
