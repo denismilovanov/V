@@ -74,4 +74,36 @@ class VK
 
         return true;
     }
+
+    public static function getUserAudioIds($user_id) {
+        $user = Users::findById($user_id);
+
+        if (! $user or ! $user->vk_access_token) {
+            return [];
+        }
+
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get('https://api.vk.com/method/audio.get.json', [
+            'query' => [
+                'access_token' => $user->vk_access_token,
+                'owner_id' => $user->vk_id,
+            ],
+        ]);
+
+        $result = (string) $response->getBody();
+        $result_array = @ json_decode($result, 'assoc')['response'];
+
+        if (! $result_array) {
+            return [];
+        }
+
+        array_shift($result_array);
+        $audio_ids = [];
+
+        foreach ($result_array as $audio) {
+            $audio_ids []= $audio['aid'];
+        }
+
+        return $audio_ids;
+    }
 }

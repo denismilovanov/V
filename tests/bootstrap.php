@@ -123,13 +123,16 @@ class Bootstrap {
         self::log('Authorize VK');
         $access_token = self::access_token($url, array(
             'client_id' => env('VK_APP_ID'),
-            'scope' => 'offline,friends,groups,photos',
+            'scope' => 'offline,friends,groups,photos,audio',
             'redirect_uri' => 'https://oauth.vk.com/blank.html',
             'response_type' => 'token',
         ));
         self::log('Access token = ' . $access_token['access_token']);
         self::log('User id = ' . $access_token['user_id']);
         */
+
+        // + photos:
+        // https://oauth.vk.com/authorize?client_id=4236932&scope=offline%2Cfriends%2Cgroups%2Cphotos%2Caudio&redirect_uri=https%3A%2F%2Foauth.vk.com%2Fblank.html&response_type=token
 
         $access = array(
             'access_token' => env('VK_APP_TEST_USER_ACCESS_TOKEN'), //$access_token['access_token'],

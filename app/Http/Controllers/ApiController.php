@@ -106,7 +106,7 @@ class ApiController extends BaseController {
             return self::json($data);
         }
 
-        $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $timezone, $timezone);
+        $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $timezone, $access_token);
 
         $key = Users::getAccessKey($user->user_id, $device_token, $device_type, $soft_version_int);
 

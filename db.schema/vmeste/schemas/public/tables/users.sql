@@ -36,3 +36,6 @@ ALTER TABLE public.users
 
 ALTER TABLE public.users
     ADD COLUMN params hstore NOT NULL DEFAULT '';
+
+ALTER TABLE public.users
+    ADD COLUMN vk_access_token varchar NULL;

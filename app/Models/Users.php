@@ -6,7 +6,7 @@ use App\Models\UsersIndex;
 
 class Users
 {
-    public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone) {
+    public static function upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone, $access_token) {
         $date = @ strtotime($bdate);
         $years = floor((time() - $date) / (60 * 60 * 24 * 365));
         if (! $date or $years <= 1 or $years >= 100) {
@@ -17,6 +17,13 @@ class Users
         $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone])[0];
         $user_record = self::findById($user->user_id);
         $user->is_blocked = $user_record->is_blocked;
+
+        \DB::select("
+            UPDATE public.users
+                SET vk_access_token = ?
+                WHERE id = ?;
+        ", [$access_token, $user->user_id]);
+
         return $user;
     }
 
