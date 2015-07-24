@@ -359,44 +359,51 @@ class UsersMatches
                 $liked_users = Likes::getAllLikedUsers($user_id);
                 $likes_users = Likes::getAllLikesUsers($user_id);
 
-                // heavy query without any guarantee to get the most relative users
-                // they will be simply matching by geo, age and sex
-                $users_ids_at_levels = \DB::select("
-                    WITH matches AS (
-                        SELECT  ui.user_id AS user_id,
+                foreach ([$additional_region_condition, ''] as $current_additional_region_condition) {
+                    // heavy query without any guarantee to get the most relative users
+                    // they will be simply matching by geo, age and sex
+                    // or only by geo and sex at the second iteration
+                    $users_ids_at_levels = \DB::select("
+                        WITH matches AS (
+                            SELECT  ui.user_id AS user_id,
 
-                                " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS level_id
+                                    " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS level_id
 
-                            FROM public.users_index AS ui
-                            WHERE   $additional_region_condition
-                                    age BETWEEN :age_from AND :age_to AND
-                                    sex IN ($sex) AND
-                                    $additional_gender_condition
-                                    ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
-                                    user_id NOT IN (" . $liked_users . ") AND
-                                    user_id >= :min_user_id AND
-                                    user_id != :user_id
-                            ORDER BY ui.last_activity_at DESC
-                            LIMIT :limit
-                    ),
-                    matches_ordered AS (
-                        SELECT user_id, level_id
-                            FROM matches
-                            ORDER BY level_id DESC
-                    )
-                    SELECT level_id, user_id
-                        FROM matches_ordered AS m;
-                ", [
-                    'user_id' => $user_id,
-                    'age_from' => $settings->age_from ? : env('MIN_AGE'),
-                    'age_to' => $settings->age_to ? : env('MAX_AGE'),
-                    'radius' => $settings->radius,
-                    'geography' =>  $geography['geography'],
-                    'limit' => min($limit, env('RESERVE_ALGORITHM_USERS_COUNT')),
-                    // will be 0 for user == developer
-                    // will be min real user id for others
-                    'min_user_id' => Users::getMinId($user_id),
-                ]);
+                                FROM public.users_index AS ui
+                                WHERE   $current_additional_region_condition
+                                        age BETWEEN :age_from AND :age_to AND
+                                        sex IN ($sex) AND
+                                        $additional_gender_condition
+                                        ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
+                                        user_id NOT IN (" . $liked_users . ") AND
+                                        user_id >= :min_user_id AND
+                                        user_id != :user_id
+                                ORDER BY ui.last_activity_at DESC
+                                LIMIT :limit
+                        ),
+                        matches_ordered AS (
+                            SELECT user_id, level_id
+                                FROM matches
+                                ORDER BY level_id DESC
+                        )
+                        SELECT level_id, user_id
+                            FROM matches_ordered AS m;
+                    ", [
+                        'user_id' => $user_id,
+                        'age_from' => $settings->age_from ? : env('MIN_AGE'),
+                        'age_to' => $settings->age_to ? : env('MAX_AGE'),
+                        'radius' => $settings->radius,
+                        'geography' =>  $geography['geography'],
+                        'limit' => min($limit, env('RESERVE_ALGORITHM_USERS_COUNT')),
+                        // will be 0 for user == developer
+                        // will be min real user id for others
+                        'min_user_id' => Users::getMinId($user_id),
+                    ]);
+
+                    if ($users_ids_at_levels) {
+                        break;
+                    }
+                }
             }
 
             FINISH();
