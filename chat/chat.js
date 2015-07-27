@@ -3,7 +3,8 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 5000;
-var redis = require('socket.io-redis');
+var redis_socket_io = require('socket.io-redis');
+var redis = require('redis');
 var pg = require('pg');
 
 server.listen(port, function () {
@@ -11,6 +12,8 @@ server.listen(port, function () {
 });
 
 app.use(express.static(__dirname + '/'));
+
+redis_client = redis.createClient();
 
 var client = new pg.Client({
     'port': process.env.DB_PORT || 5432,
@@ -49,6 +52,7 @@ Chat = {
             'user_id': user_id
         };
         Chat.users_ids_to_socket_ids[user_id] = socket.id;
+        redis_client.hset('users_ids_to_socket_ids', user_id, socket.id);
     },
 
     get_socket_info_by_socket_id: function(id) {
@@ -218,6 +222,7 @@ Chat = {
     }
 }
 
+io.adapter(redis_socket_io({ host: 'localhost', port: 6379 }));
 
 io.on('connection', function (socket) {
     //console.log(socket.id)

@@ -191,5 +191,14 @@ return [
     ],
     'migrations' => 'migrations',
 
+    'redis' => [
+        'cluster' => false,
+        'default' => [
+            'host'     => '127.0.0.1',
+            'port'     => 6379,
+            'database' => 0,
+        ],
+    ],
+
     'images_storage_path' => env('ROOT_PATH', '') . env('PHOTOS_PATH', ''),
 ];
