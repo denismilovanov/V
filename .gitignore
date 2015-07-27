@@ -1,7 +1,6 @@
+/chat/node_modules/*
+cr.txt
 /lumen.log
 /vendor
-.env
-.env.test
-.env.production
 /photos
 /storage
