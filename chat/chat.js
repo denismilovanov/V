@@ -13,19 +13,6 @@ server.listen(port, function () {
 
 app.use(express.static(__dirname + '/'));
 
-redis_client = redis.createClient();
-
-var client = new pg.Client({
-    'port': process.env.DB_PORT || 5432,
-    'user': process.env.DB_USER || 'vmeste',
-    'password': process.env.DB_PASS || 'vmeste',
-    'database': process.env.DB_NAME || 'vmeste'
-});
-
-client.connect(function(err) {
-    console.log('DB ERR', err);
-});
-
 Chat = {
     NEED_AUTHORIZE: 2,
     SUCCESS: 1,
@@ -33,6 +20,24 @@ Chat = {
 
     sockets_info: {},
     users_ids_to_socket_ids: {},
+
+    redis_client: null,
+    pg_client: null,
+
+    init: function() {
+        Chat.redis_client = redis.createClient();
+
+        Chat.pg_client = new pg.Client({
+            'port': process.env.DB_PORT || 5432,
+            'user': process.env.DB_USER || 'vmeste',
+            'password': process.env.DB_PASS || 'vmeste',
+            'database': process.env.DB_NAME || 'vmeste'
+        });
+
+        Chat.pg_client.connect(function(err) {
+            console.log('DB ERR', err);
+        });
+    },
 
     emit: function (socket, type, data) {
         if (socket) {
@@ -52,7 +57,7 @@ Chat = {
             'user_id': user_id
         };
         Chat.users_ids_to_socket_ids[user_id] = socket.id;
-        redis_client.hset('users_ids_to_socket_ids', user_id, socket.id);
+        Chat.redis_client.hset('users_ids_to_socket_ids', user_id, socket.id);
     },
 
     get_socket_info_by_socket_id: function(id) {
@@ -77,7 +82,7 @@ Chat = {
     authorize: function(data, socket, on_authorize) {
         var key = data['key'];
 
-        client.query('SELECT user_id FROM users_devices WHERE key = $1::varchar;', [key], function(err, result) {
+        Chat.pg_client.query('SELECT user_id FROM users_devices WHERE key = $1::varchar;', [key], function(err, result) {
             var user_id = null;
             try {
                 user_id = result.rows[0].user_id;
@@ -90,7 +95,7 @@ Chat = {
     },
 
     get_like: function(from_user_id, to_user_id, f) {
-        client.query("SELECT 1 AS c, coalesce(is_blocked, false) AS is_blocked FROM public.likes WHERE user1_id = $1::int AND user2_id = $2::int LIMIT 1;",
+        Chat.pg_client.query("SELECT 1 AS c, coalesce(is_blocked, false) AS is_blocked FROM public.likes WHERE user1_id = $1::int AND user2_id = $2::int LIMIT 1;",
             [to_user_id, from_user_id],
             function(err, result) {
 
@@ -108,7 +113,7 @@ Chat = {
     },
 
     add_message: function(from_user_id, to_user_id, message, i, f) {
-        client.query("SELECT public.add_message($1::int, $2::int, $3::varchar, $4::boolean) AS message_id",
+        Chat.pg_client.query("SELECT public.add_message($1::int, $2::int, $3::varchar, $4::boolean) AS message_id",
             [from_user_id, to_user_id, message, i],
             function(err, result) {
                 var message_id = null;
@@ -221,6 +226,8 @@ Chat = {
         }
     }
 }
+
+Chat.init();
 
 io.adapter(redis_socket_io({ host: 'localhost', port: 6379 }));
 
