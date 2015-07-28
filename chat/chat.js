@@ -234,8 +234,9 @@ Chat = {
     disconnect: function(socket) {
         var s = Chat.get_socket_info_by_socket_id(socket.id);
         if (s) {
-            console.log('DISCONNECT SOCKET:', socket.id);
+            console.log('DISCONNECT SOCKET:', socket.id, s.user_id);
             delete Chat.sockets_info[socket.id];
+            Chat.redis_client.hdel('users_ids_to_socket_ids', s.user_id);
         }
     }
 }
