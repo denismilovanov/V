@@ -19,7 +19,6 @@ Chat = {
     ERROR: 0,
 
     sockets_info: {},
-    users_ids_to_socket_ids: {},
 
     redis_client: null,
     pg_client: null,
@@ -67,27 +66,30 @@ Chat = {
             'socket': socket,
             'user_id': user_id
         };
-        Chat.users_ids_to_socket_ids[user_id] = socket.id;
         Chat.redis_client.hset('users_ids_to_socket_ids', user_id, socket.id);
     },
 
     get_socket_info_by_socket_id: function(id) {
-        var s = Chat.sockets_info[id];
-        if (s) {
-            console.log('GOT SOCKET:', s.socket.id, s.user_id, s.key)
+        var socket_info = Chat.sockets_info[id];
+        if (socket_info) {
+            console.log('GOT SOCKET:', socket_info.socket.id, socket_info.user_id, socket_info.key)
         } else {
             console.log('THERE IS NO SOCKET WITH ID:', id)
+            return null;
         }
-        return s;
+        return socket_info;
     },
 
-    get_socket_by_user_id: function(user_id) {
-        var socket_id = Chat.users_ids_to_socket_ids[user_id];
-        if (socket_id) {
-            return Chat.get_socket_info_by_socket_id(socket_id).socket;
-        }
-        console.log('THERE IS NO SOCKET FOR USER WITH ID:', user_id)
-        return null;
+    get_socket_by_user_id: function(user_id, on_get_socket) {
+        Chat.redis_client.hget('users_ids_to_socket_ids', user_id, function(err, socket_id) {
+            if (socket_id) {
+                var socket_info = Chat.get_socket_info_by_socket_id(socket_id);
+                on_get_socket(socket_info ? socket_info.socket : null);
+                return;
+            }
+            console.log('THERE IS NO SOCKET FOR USER WITH ID:', user_id)
+            on_get_socket(null);
+        });
     },
 
     authorize: function(data, socket, on_authorize) {
@@ -105,7 +107,7 @@ Chat = {
         });
     },
 
-    get_like: function(from_user_id, to_user_id, f) {
+    get_like: function(from_user_id, to_user_id, on_get_like) {
         Chat.pg_query("SELECT 1 AS c, coalesce(is_blocked, false) AS is_blocked FROM public.likes WHERE user1_id = $1::int AND user2_id = $2::int LIMIT 1;",
             [to_user_id, from_user_id],
             function(result) {
@@ -118,12 +120,12 @@ Chat = {
                     ;
                 }
 
-                f(is_liked, is_blocked);
+                on_get_like(is_liked, is_blocked);
 
             });
     },
 
-    add_message: function(from_user_id, to_user_id, message, i, f) {
+    add_message: function(from_user_id, to_user_id, message, i, on_add_message) {
         Chat.pg_query("SELECT public.add_message($1::int, $2::int, $3::varchar, $4::boolean) AS message_id",
             [from_user_id, to_user_id, message, i],
             function(result) {
@@ -133,7 +135,7 @@ Chat = {
                 } catch (e) {
                     ;
                 }
-                f(message_id);
+                on_add_message(message_id);
             });
     },
 
@@ -186,7 +188,6 @@ Chat = {
         var key = data['key'];
         var user_id = data['user_id'];
         var message = data['message'];
-        var destination_socket = Chat.get_socket_by_user_id(user_id);
         var s = Chat.get_socket_info_by_socket_id(socket.id);
 
         if (! s) {
@@ -197,10 +198,12 @@ Chat = {
 
         var me_id = s['user_id']
 
-        // save message to db
-        Chat.save_message(me_id, user_id, message, function(message_id, destination_message_id, status) {
-            // send ack and message in Chat.sockets_info
-            on_save_message(destination_socket, message_id, destination_message_id, me_id, status);
+        Chat.get_socket_by_user_id(user_id, function(destination_socket) {
+            // save message to db
+            Chat.save_message(me_id, user_id, message, function(message_id, destination_message_id, status) {
+                // send ack and message in Chat.sockets_info
+                on_save_message(destination_socket, message_id, destination_message_id, me_id, status);
+            });
         });
     },
 
@@ -232,7 +235,6 @@ Chat = {
         var s = Chat.get_socket_info_by_socket_id(socket.id);
         if (s) {
             console.log('DISCONNECT SOCKET:', socket.id);
-            delete Chat.users_ids_to_socket_ids[s.user_id];
             delete Chat.sockets_info[socket.id];
         }
     }
