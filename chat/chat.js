@@ -39,6 +39,17 @@ Chat = {
         });
     },
 
+    pg_query: function(query, data, success, error) {
+        error = error || function(err) {};
+        Chat.pg_client.query(query, data, function(err, result) {
+            if (err) {
+                error(err);
+            } else {
+                success(result);
+            }
+        });
+    },
+
     emit: function (socket, type, data) {
         if (socket) {
             console.log('EMIT:', type, socket.id, data);
@@ -82,7 +93,7 @@ Chat = {
     authorize: function(data, socket, on_authorize) {
         var key = data['key'];
 
-        Chat.pg_client.query('SELECT user_id FROM users_devices WHERE key = $1::varchar;', [key], function(err, result) {
+        Chat.pg_query('SELECT user_id FROM users_devices WHERE key = $1::varchar;', [key], function(result) {
             var user_id = null;
             try {
                 user_id = result.rows[0].user_id;
@@ -95,9 +106,9 @@ Chat = {
     },
 
     get_like: function(from_user_id, to_user_id, f) {
-        Chat.pg_client.query("SELECT 1 AS c, coalesce(is_blocked, false) AS is_blocked FROM public.likes WHERE user1_id = $1::int AND user2_id = $2::int LIMIT 1;",
+        Chat.pg_query("SELECT 1 AS c, coalesce(is_blocked, false) AS is_blocked FROM public.likes WHERE user1_id = $1::int AND user2_id = $2::int LIMIT 1;",
             [to_user_id, from_user_id],
-            function(err, result) {
+            function(result) {
 
                 var is_blocked = true, is_liked = false;
                 try {
@@ -113,9 +124,9 @@ Chat = {
     },
 
     add_message: function(from_user_id, to_user_id, message, i, f) {
-        Chat.pg_client.query("SELECT public.add_message($1::int, $2::int, $3::varchar, $4::boolean) AS message_id",
+        Chat.pg_query("SELECT public.add_message($1::int, $2::int, $3::varchar, $4::boolean) AS message_id",
             [from_user_id, to_user_id, message, i],
-            function(err, result) {
+            function(result) {
                 var message_id = null;
                 try {
                     message_id = result.rows[0].message_id
