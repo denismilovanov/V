@@ -297,7 +297,8 @@ class Users
     public static function getMySearchWeightParams($user_id) {
         $user_weight_params = \DB::select("
             SELECT  array_to_string(groups_vk_ids, ',') AS groups_vk_ids,
-                    array_to_string(friends_vk_ids, ',') AS friends_vk_ids
+                    array_to_string(friends_vk_ids, ',') AS friends_vk_ids,
+                    array_to_string(audio_vk_ids, ',') AS audio_vk_ids
                 FROM public.users_index
                 WHERE user_id = ?;
         ", [$user_id]);

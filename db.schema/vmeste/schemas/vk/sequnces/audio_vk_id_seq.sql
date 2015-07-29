@@ -1,4 +1,4 @@
-CREATE SEQUENCE vk.artists_vk_id_seq
+CREATE SEQUENCE vk.audio_vk_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE

@@ -111,11 +111,12 @@ class UsersMatches
     }
 
     // the heart of the system - the formula for ranging users
-    public static function weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) {
+    public static function weightFormula($groups_vk_ids, $friends_vk_ids, $audio_vk_ids, $likes_users) {
         return "
         (
             " . env('WEIGHT_GROUPS_VK') . " * icount(groups_vk_ids & array[$groups_vk_ids]::int[]) +
             " . env('WEIGHT_FRIENDS_VK') . " * icount(friends_vk_ids & array[$friends_vk_ids]::int[]) +
+            " . env('WEIGHT_AUDIO_VK') . " * icount(audio_vk_ids & array[$audio_vk_ids]::int[]) +
             " . env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
             " . env('WEIGHT_POPULARITY') . " * popularity +
             " . env('WEIGHT_FRIENDLINESS') . " * friendliness +
@@ -209,6 +210,7 @@ class UsersMatches
         $search_weights_params = Users::getMySearchWeightParams($user_id);
         $friends_vk_ids = $search_weights_params->friends_vk_ids;
         $groups_vk_ids = $search_weights_params->groups_vk_ids;
+        $audio_vk_ids = $search_weights_params->audio_vk_ids;
 
         // take WEIGHTS_PROCESSING_BATCH_SIZE users from foreign table public.users_index
         // filter by region, age, sex, geography
@@ -234,7 +236,7 @@ class UsersMatches
                 WITH all_users AS (
                     SELECT  ui.user_id AS match_user_id,
 
-                            " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . "
+                            " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $audio_vk_ids, $likes_users) . "
                             AS matching_level
 
                         FROM public.users_index AS ui
@@ -355,6 +357,7 @@ class UsersMatches
                 $search_weights_params = Users::getMySearchWeightParams($user_id);
                 $friends_vk_ids = $search_weights_params->friends_vk_ids;
                 $groups_vk_ids = $search_weights_params->groups_vk_ids;
+                $audio_vk_ids = $search_weights_params->audio_vk_ids;
 
                 $liked_users = Likes::getAllLikedUsers($user_id);
                 $likes_users = Likes::getAllLikesUsers($user_id);
@@ -367,7 +370,7 @@ class UsersMatches
                         WITH matches AS (
                             SELECT  ui.user_id AS user_id,
 
-                                    " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $likes_users) . " AS level_id
+                                    " . self::weightFormula($groups_vk_ids, $friends_vk_ids, $audio_vk_ids, $likes_users) . " AS level_id
 
                                 FROM public.users_index AS ui
                                 WHERE   $current_additional_region_condition
