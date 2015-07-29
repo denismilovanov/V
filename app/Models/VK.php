@@ -98,12 +98,70 @@ class VK
         }
 
         array_shift($result_array);
-        $audio_ids = [];
 
+        // будем действовать совсем уж напролом!
+        // оптимизацию оставим на потом
+
+        // сначала вставим всех исполнителей, про которых мы ничего не знаем
         foreach ($result_array as $audio) {
-            $audio_ids []= $audio['aid'];
+            \DB::select("
+                INSERT INTO vk.audio_artists_vk
+                    (name)
+                    SELECT :artist
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                                FROM vk.audio_artists_vk
+                                WHERE vk.prepare(name) = vk.prepare(:artist)
+                        );
+            ", [
+                'artist' => $audio['artist'],
+            ]);
         }
 
+        // теперь вставим новые композиции
+        foreach ($result_array as $audio) {
+            \DB::select("
+                WITH artist_id AS (
+                    SELECT id
+                        FROM vk.audio_artists_vk
+                        WHERE vk.prepare(name) = vk.prepare(:artist) --uniq
+                )
+                INSERT INTO vk.audio_vk
+                    (artist_id, name)
+                    SELECT artist_id.id, :name
+                        FROM artist_id
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                                FROM vk.audio_vk AS a
+                                WHERE   a.artist_id = artist_id.id AND
+                                        vk.prepare(a.name) = vk.prepare(:name)
+                        )
+                    RETURNING id;
+            ", [
+                'artist' => $audio['artist'],
+                'name' => $audio['title'],
+            ]);
+        }
+
+        // теперь извлечем композии для текущего пользователя
+        foreach ($result_array as $audio) {
+            $audio_ids []= \DB::select("
+                WITH artist_id AS (
+                    SELECT id
+                        FROM vk.audio_artists_vk
+                        WHERE vk.prepare(name) = vk.prepare(:artist) --uniq
+                )
+                SELECT a.id
+                    FROM vk.audio_vk AS a, artist_id
+                    WHERE   a.artist_id = artist_id.id AND
+                            vk.prepare(a.name) = vk.prepare(:name);
+            ", [
+                'artist' => $audio['artist'],
+                'name' => $audio['title'],
+            ])[0]->id;
+        }
+
+        // все ок
         return $audio_ids;
     }
 }
