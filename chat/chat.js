@@ -6,6 +6,7 @@ var port = process.env.PORT || 5000;
 var redis_socket_io = require('socket.io-redis');
 var redis = require('redis');
 var pg = require('pg');
+var amqp = require('amqp');
 
 server.listen(port, function () {
     console.log('Server listening at port %d', port);
@@ -14,6 +15,8 @@ server.listen(port, function () {
 app.use(express.static(__dirname + '/'));
 
 Chat = {
+    env: process.env.ENV || 'dev',
+
     NEED_AUTHORIZE: 2,
     SUCCESS: 1,
     ERROR: 0,
@@ -22,6 +25,9 @@ Chat = {
 
     redis_client: null,
     pg_client: null,
+    rabbit_client: null,
+
+    push_queue_name: 'push_messages',
 
     init: function() {
         Chat.redis_client = redis.createClient();
@@ -34,8 +40,22 @@ Chat = {
         });
 
         Chat.pg_client.connect(function(err) {
-            console.log('DB ERR', err);
+            if (! err) {
+                console.log('DB READY');
+            } else {
+                console.log('DB ERR', err);
+            }
         });
+
+        Chat.rabbit_client = amqp.createConnection();
+
+        Chat.rabbit_client.on('ready', function () {
+            console.log('RABBIT READY');
+        });
+
+        if (Chat.env == 'test') {
+            Chat.push_queue_name = '__test_push_messages';
+        }
     },
 
     pg_query: function(query, data, success, error) {
@@ -162,6 +182,7 @@ Chat = {
 
                             // add second message in pair
                             Chat.add_message(to_user_id, from_user_id, message, false, function(destination_message_id) {
+
                                 // all conditions are met
                                 on_save_message(message_id, destination_message_id, Chat.SUCCESS);
                             });
@@ -184,6 +205,15 @@ Chat = {
 
     },
 
+    send_push: function(me_id, user_id, message) {
+        console.log('PUSH:', Chat.push_queue_name, me_id, user_id, message);
+        Chat.rabbit_client.publish(Chat.push_queue_name, {
+            'from_user_id': me_id,
+            'to_user_id': user_id,
+            'message': message
+        });
+    },
+
     message: function(data, socket, on_save_message) {
         var key = data['key'];
         var user_id = data['user_id'];
@@ -201,34 +231,63 @@ Chat = {
         Chat.get_socket_by_user_id(user_id, function(destination_socket) {
             // save message to db
             Chat.save_message(me_id, user_id, message, function(message_id, destination_message_id, status) {
+                // for push notification
+                Chat.send_push(me_id, user_id, message);
+
                 // send ack and message in Chat.sockets_info
                 on_save_message(destination_socket, message_id, destination_message_id, me_id, status);
             });
         });
     },
 
-    start_writing: function(data, socket, f) {
-        var user_id = data['user_id'];
-        var my_socket = Chat.get_socket_info_by_socket_id(socket.id);
-        var to_socket = Chat.get_socket_by_user_id(user_id);
+    read: function(data, socket) {
+        var s = Chat.get_socket_info_by_socket_id(socket.id);
 
-        if (! my_socket || ! to_socket) {
+        if (! s) {
             return;
         }
 
-        f(my_socket.user_id, to_socket);
+        var user_id = data['user_id'];
+
+        console.log('READ:', s.user_id, user_id);
+
+        Chat.pg_query("UPDATE public.messages_new SET is_new = FALSE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
+            [s.user_id, user_id],
+            function(result) {
+
+                Chat.pg_query("UPDATE public.messages_dialogs SET is_new = FALSE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
+                    [s.user_id, user_id],
+                    function(result) {
+
+
+                });
+        });
+    },
+
+    start_writing: function(data, socket, f) {
+        var user_id = data['user_id'];
+        var my_socket = Chat.get_socket_info_by_socket_id(socket.id);
+
+        Chat.get_socket_by_user_id(user_id, function (to_socket) {
+            if (! my_socket || ! to_socket) {
+                return;
+            }
+
+            f(my_socket.user_id, to_socket);
+        });
     },
 
     stop_writing: function(data, socket, f) {
         var user_id = data['user_id'];
         var my_socket = Chat.get_socket_info_by_socket_id(socket.id);
-        var to_socket = Chat.get_socket_by_user_id(user_id);
 
-        if (! my_socket || ! to_socket) {
-            return;
-        }
+        Chat.get_socket_by_user_id(user_id, function (to_socket) {
+            if (! my_socket || ! to_socket) {
+                return;
+            }
 
-        f(my_socket.user_id, to_socket);
+            f(my_socket.user_id, to_socket);
+        });
     },
 
     disconnect: function(socket) {
@@ -271,6 +330,10 @@ io.on('connection', function (socket) {
                 });
             }
         });
+    });
+
+    socket.on('read', function (data) {
+        Chat.read(data, socket);
     });
 
     socket.on('start_writing', function (data) {
