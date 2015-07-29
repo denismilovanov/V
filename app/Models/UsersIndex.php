@@ -45,4 +45,20 @@ class UsersIndex {
         ", [$user_id]);
     }
 
+    public static function updateAudioVkIds($user_id) {
+        $audio_ids = implode(", ", VK::getUserAudioIds($user_id));
+
+        if (! $audio_ids) {
+            return $audio_ids;
+        }
+
+        \DB::select("
+            UPDATE public.users_index
+                SET audio_vk_ids = array[$audio_ids]::integer[]
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        return true;
+    }
+
 }

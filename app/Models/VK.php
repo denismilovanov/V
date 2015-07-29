@@ -79,7 +79,7 @@ class VK
         $user = Users::findById($user_id);
 
         if (! $user or ! $user->vk_access_token) {
-            return [];
+            return false;
         }
 
         $client = new \GuzzleHttp\Client();
@@ -94,7 +94,7 @@ class VK
         $result_array = @ json_decode($result, 'assoc')['response'];
 
         if (! $result_array) {
-            return [];
+            return false;
         }
 
         array_shift($result_array);

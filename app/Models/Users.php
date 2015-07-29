@@ -24,6 +24,10 @@ class Users
                 WHERE id = ?;
         ", [$access_token, $user->user_id]);
 
+        if ($user->is_new) {
+            \Queue::push('get_audio_vk', ['user_id' => $user->user_id], 'get_audio_vk');
+        }
+
         return $user;
     }
 
