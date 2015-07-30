@@ -46,11 +46,18 @@ class UsersIndex {
     }
 
     public static function updateAudioVkIds($user_id) {
-        $audio_ids = implode(", ", VK::getUserAudioIds($user_id));
+        \DB::select("
+            UPDATE public.users_profiles_vk
+                SET last_audio_processed_at = now()
+                WHERE user_id = ?;
+        ", [$user_id]);
 
-        if (! $audio_ids) {
-            return $audio_ids;
+        $audio = VK::getUserAudioIds($user_id);
+        if (! $audio) {
+            return $audio;
         }
+
+        $audio_ids = implode(", ", $audio);
 
         \DB::select("
             UPDATE public.users_index

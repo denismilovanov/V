@@ -19,3 +19,6 @@ CREATE TABLE public.users_profiles_vk (
     quotes text NULL DEFAULT NULL,
     personal jsonb NULL DEFAULT NULL
 );
+
+ALTER TABLE public.users_profiles_vk
+    ADD COLUMN last_audio_processed_at timestamptz NOT NULL DEFAULT now();
