@@ -399,6 +399,7 @@ class Users
 
             $friends_vk_ids = $search_weights_params->friends_vk_ids;
             $groups_vk_ids = $search_weights_params->groups_vk_ids;
+            $audio_vk_ids = $search_weights_params->audio_vk_ids;
 
             $user = \DB::select("
                 SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url, u.is_blocked,
@@ -408,7 +409,7 @@ class Users
                         icount(ui.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
                         round(ST_Distance(ui.geography, :geography)::decimal / 1000) AS distance,
 
-                        " . UsersMatches::weightFormula($groups_vk_ids, $friends_vk_ids, '0') . " AS weight_level
+                        " . UsersMatches::weightFormula($groups_vk_ids, $friends_vk_ids, $audio_vk_ids, '0') . " AS weight_level
 
                     FROM public.users AS u
                     INNER JOIN public.users_index AS ui
