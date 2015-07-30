@@ -148,6 +148,17 @@ class Messages {
     }
 
     public static function deleteMessagesWithUser($me_id, $buddy_id) {
+        $dialog = \DB::select("
+            SELECT count(1) AS c
+                FROM public.messages_dialogs
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+        ", [$me_id, $buddy_id]) > 0;
+
+        if (! $dialog) {
+            return false;
+        }
+
         $messages = \DB::select("
             UPDATE public.messages_new
                 SET is_deleted = TRUE
@@ -161,7 +172,7 @@ class Messages {
             self::correctLastMessageinDialogs($me_id, $buddy_id);
         }
 
-        return (bool)$messages;
+        return true;
     }
 
     public static function createDialog($from_user_id, $to_user_id) {
