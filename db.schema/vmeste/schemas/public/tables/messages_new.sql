@@ -18,3 +18,6 @@ CREATE INDEX messages_new_pair_idx
 CREATE INDEX messages_new_reverse_idx
     ON public.messages_new
     USING btree (buddy_id, me_id);
+
+ALTER TABLE public.messages_new
+    ADD COLUMN is_deleted boolean NOT NULL DEFAULT FALSE;

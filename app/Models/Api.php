@@ -28,14 +28,21 @@ class Api
                 ],
                 'method' => 'get',
             ],
+
+            'getMyMessages' => [
+                'fields' => [
+                ],
+                'method' => 'get',
+            ],
             'sendMessageToUser' => [
                 'fields' => [
                     'user_id', 'text',
                 ],
                 'method' => 'get',
             ],
-            'getMyMessages' => [
+            'deleteMessage' => [
                 'fields' => [
+                    'message_id',
                 ],
                 'method' => 'get',
             ],
@@ -45,6 +52,13 @@ class Api
                 ],
                 'method' => 'get',
             ],
+            'deleteMessagesWithUser' => [
+                'fields' => [
+                    'user_id',
+                ],
+                'method' => 'get',
+            ],
+
             'getMySettings' => [
                 'fields' => [
                 ],

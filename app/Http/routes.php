@@ -48,7 +48,9 @@ $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function
 
     $app->get('getMyMessages', ['uses' => 'ApiController@getMyMessages']);
     $app->get('sendMessageToUser', ['uses' => 'ApiController@sendMessageToUser']);
+    $app->get('deleteMessage', ['uses' => 'ApiController@deleteMessage']);
     $app->get('getMessagesWithUser', ['uses' => 'ApiController@getMessagesWithUser']);
+    $app->get('deleteMessagesWithUser', ['uses' => 'ApiController@deleteMessagesWithUser']);
 
     $app->get('setDeviceToken', ['uses' => 'ApiController@setDeviceToken']);
     $app->get('logout', ['uses' => 'ApiController@logout']);

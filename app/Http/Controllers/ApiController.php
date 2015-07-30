@@ -375,8 +375,6 @@ class ApiController extends BaseController {
         ]);
     }
 
-
-
     public function searchAround() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
@@ -556,6 +554,21 @@ class ApiController extends BaseController {
         ]);
     }
 
+    public function deleteMessage() {
+        if (! $this->beforeAction(__METHOD__)) {
+            $data['status'] = self::ERROR_KEY;
+            return self::json($data);
+        }
+
+        $message_id = intval(\Request::get('message_id'));
+
+        $result = Messages::deleteMessage(self::$user->id, $message_id);
+
+        return self::json([
+            'status' => $result ? self::SUCCESS : self::ERROR,
+        ]);
+    }
+
     public function getMessagesWithUser() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
@@ -571,6 +584,21 @@ class ApiController extends BaseController {
         return self::json([
             'status' => self::SUCCESS,
             'messages' => $messages,
+        ]);
+    }
+
+    public function deleteMessagesWithUser() {
+        if (! $this->beforeAction(__METHOD__)) {
+            $data['status'] = self::ERROR_KEY;
+            return self::json($data);
+        }
+
+        $user_id = intval(\Request::get('user_id'));
+
+        $result = Messages::deleteMessagesWithUser(self::$user->id, $user_id);
+
+        return self::json([
+            'status' => $result ? self::SUCCESS : self::ERROR,
         ]);
     }
 }

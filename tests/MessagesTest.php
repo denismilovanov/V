@@ -111,6 +111,50 @@ class MessagesTest extends TestCase {
         $this->assertEquals($result['status'], 1);
         $this->assertTrue(sizeof($result['messages']) == 2);
 
+        $messages = $result['messages'];
+
+        // парень удаляет сообщение
+
+        $result = Bootstrap::getFromApi('deleteMessage', array(
+            'key' => $male_key,
+            'message_id' => $messages[0]['id'],
+        ));
+        $this->assertEquals($result['status'], 1);
+
+        // парень удаляет чужое сообщение
+
+        $result = Bootstrap::getFromApi('deleteMessage', array(
+            'key' => $male_key,
+            'message_id' => $messages[0]['id'] + 1,
+        ));
+        $this->assertEquals($result['status'], 0);
+
+        // снова список сообщений в чате парня
+
+        $result = Bootstrap::getFromApi('getMessagesWithUser', array(
+            'key' => $male_key,
+            'user_id' => $test_female_id,
+        ));
+        $this->assertEquals($result['status'], 1);
+        $this->assertTrue(sizeof($result['messages']) == 1);
+
+        // панель удаляет всю переписку с девушкой
+
+        $result = Bootstrap::getFromApi('deleteMessagesWithUser', array(
+            'key' => $male_key,
+            'user_id' => $test_female_id,
+        ));
+        $this->assertEquals($result['status'], 1);
+
+        // снова список сообщений в чате парня
+
+        $result = Bootstrap::getFromApi('getMessagesWithUser', array(
+            'key' => $male_key,
+            'user_id' => $test_female_id,
+        ));
+        $this->assertEquals($result['status'], 1);
+        $this->assertTrue(sizeof($result['messages']) == 0);
+
     }
 
 }

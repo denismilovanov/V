@@ -66,7 +66,12 @@ class Messages {
             }
 
             // открыт ли сокет?
-            $socket_id = app('redis')->hget('users_ids_to_socket_ids', $to_user_id);
+            $socket_id = null;
+            try {
+                $socket_id = app('redis')->hget('users_ids_to_socket_ids', $to_user_id);
+            } catch (\Exception $e) {
+                ;
+            }
 
             // надо забросить в сокет
             if ($socket_id) {
@@ -84,7 +89,11 @@ class Messages {
                 ]]);
 
 
-                app('redis')->publish('socket.io#emitter', $msg);
+                try {
+                    app('redis')->publish('socket.io#emitter', $msg);
+                } catch (\Exception $e) {
+                    ;
+                }
             }
         }
 
@@ -99,6 +108,60 @@ class Messages {
             'message_id' => $message_id,
             'added_at' => $added_at,
         ];
+    }
+
+    private static function correctLastMessageinDialogs($me_id, $buddy_id) {
+        \DB::select("
+            UPDATE public.messages_dialogs
+                SET last_message = COALESCE((
+                        SELECT message
+                            FROM public.messages_new
+                            WHERE   me_id = :me_id AND
+                                    buddy_id = :buddy_id AND
+                                    NOT is_deleted
+                            ORDER BY created_at DESC
+                            LIMIT 1
+                    ), '')
+                WHERE   me_id = :me_id AND
+                        buddy_id = :buddy_id;
+        ", [
+            'me_id' => $me_id,
+            'buddy_id' => $buddy_id,
+        ]);
+    }
+
+    public static function deleteMessage($user_id, $message_id) {
+        $message = \DB::select("
+            UPDATE public.messages_new
+                SET is_deleted = TRUE
+                WHERE   id = ? AND
+                        me_id = ? AND
+                        NOT is_deleted
+                RETURNING buddy_id;
+        ", [$message_id, $user_id]);
+
+        if ($message) {
+            self::correctLastMessageinDialogs($user_id, $message[0]->buddy_id);
+        }
+
+        return (bool)$message;
+    }
+
+    public static function deleteMessagesWithUser($me_id, $buddy_id) {
+        $messages = \DB::select("
+            UPDATE public.messages_new
+                SET is_deleted = TRUE
+                WHERE   me_id = ? AND
+                        buddy_id = ? AND
+                        NOT is_deleted
+                RETURNING id
+        ", [$me_id, $buddy_id]);
+
+        if ($messages) {
+            self::correctLastMessageinDialogs($me_id, $buddy_id);
+        }
+
+        return (bool)$messages;
     }
 
     public static function createDialog($from_user_id, $to_user_id) {
@@ -158,7 +221,8 @@ class Messages {
                     CASE WHEN i THEN 2 ELSE 1 END AS direction
                 FROM public.messages_new
                 WHERE   me_id = :me_id AND
-                        buddy_id = :buddy_id";
+                        buddy_id = :buddy_id AND
+                        NOT is_deleted ";
 
         $data = [
             'me_id' => $me_id,
