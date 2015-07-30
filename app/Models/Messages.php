@@ -153,7 +153,7 @@ class Messages {
                 FROM public.messages_dialogs
                 WHERE   me_id = ? AND
                         buddy_id = ?;
-        ", [$me_id, $buddy_id]) > 0;
+        ", [$me_id, $buddy_id])[0]->c > 0;
 
         if (! $dialog) {
             return false;
