@@ -22,3 +22,6 @@ CREATE TABLE public.users_profiles_vk (
 
 ALTER TABLE public.users_profiles_vk
     ADD COLUMN last_audio_processed_at timestamptz NOT NULL DEFAULT now();
+
+ALTER TABLE public.users_profiles_vk
+    ADD COLUMN last_profile_processed_at timestamptz NOT NULL DEFAULT now();

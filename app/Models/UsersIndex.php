@@ -68,4 +68,27 @@ class UsersIndex {
         return true;
     }
 
+    public static function updateProfileVk($user_id) {
+        \DB::select("
+            UPDATE public.users_profiles_vk
+                SET last_profile_processed_at = now()
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        $profile = VK::getProfile($user_id);
+        if (! $profile) {
+            return $profile;
+        }
+
+        $universities_ids = implode(", ", $profile['universities_ids']);
+
+        \DB::select("
+            UPDATE public.users_index
+                SET universities_vk_ids = array[$universities_ids]::integer[]
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        return true;
+    }
+
 }

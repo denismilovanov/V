@@ -30,3 +30,8 @@ ALTER FOREIGN TABLE public.users_index
     ADD COLUMN is_show_male boolean NOT NULL DEFAULT FALSE,
     ADD COLUMN is_show_female boolean NOT NULL DEFAULT FALSE;
 
+ALTER TABLE public.users_index
+    ADD COLUMN audio_vk_ids integer[] NOT NULL DEFAULT array[]::integer[];
+
+ALTER TABLE public.users_index
+    ADD COLUMN universities_vk_ids integer[] NOT NULL DEFAULT array[]::integer[];

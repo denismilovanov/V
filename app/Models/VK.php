@@ -75,7 +75,7 @@ class VK
         return true;
     }
 
-    public static function getUserAudioIds($user_id) {
+    private static function getDataFromVK($user_id, $method, $query = []) {
         $user = Users::findById($user_id);
 
         if (! $user or ! $user->vk_access_token) {
@@ -83,17 +83,49 @@ class VK
         }
 
         $client = new \GuzzleHttp\Client();
-        $response = $client->get('https://api.vk.com/method/audio.get.json', [
+        $response = $client->get('https://api.vk.com/method/' . $method . '.json', [
             'query' => [
                 'access_token' => $user->vk_access_token,
                 'owner_id' => $user->vk_id,
-            ],
+            ] + $query,
         ]);
 
         $result = (string) $response->getBody();
         $result_array = @ json_decode($result, 'assoc')['response'];
 
         if (! $result_array) {
+            return false;
+        }
+
+        return $result_array;
+    }
+
+    public static function getProfile($user_id) {
+        $result_array = self::getDataFromVK($user_id, 'users.get', [
+            'fields' => 'universities',
+        ]);
+
+        if ($result_array === false) {
+            return false;
+        }
+
+        $result_array = @ $result_array[0];
+
+        $result = [
+            'universities_ids' => [],
+        ];
+
+        foreach ($result_array['universities'] as $u) {
+            $result['universities_ids'] []= $u['id'];
+        }
+
+        return $result;
+    }
+
+    public static function getUserAudioIds($user_id) {
+        $result_array = self::getDataFromVK($user_id, 'audio.get');
+
+        if ($result_array === false) {
             return false;
         }
 

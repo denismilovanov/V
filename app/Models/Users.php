@@ -25,7 +25,7 @@ class Users
         ", [$access_token, $user->user_id]);
 
         if ($user->is_new) {
-            \Queue::push('get_audio_vk', ['user_id' => $user->user_id], 'get_audio_vk');
+            \Queue::push('get_profile_vk', ['user_id' => $user->user_id], 'get_profile_vk');
         }
 
         return $user;
@@ -298,7 +298,8 @@ class Users
         $user_weight_params = \DB::select("
             SELECT  array_to_string(groups_vk_ids, ',') AS groups_vk_ids,
                     array_to_string(friends_vk_ids, ',') AS friends_vk_ids,
-                    array_to_string(audio_vk_ids, ',') AS audio_vk_ids
+                    array_to_string(audio_vk_ids, ',') AS audio_vk_ids,
+                    array_to_string(universities_vk_ids, ',') AS universities_vk_ids
                 FROM public.users_index
                 WHERE user_id = ?;
         ", [$user_id]);
@@ -394,22 +395,18 @@ class Users
                     WHERE id = ?;
             ", [$user_id]);
         } else if ($area == 'getUserProfile') {
-            $search_weights_params = Users::getMySearchWeightParams(ApiController::$user->id);
+            $w = Users::getMySearchWeightParams(ApiController::$user->id);
             $my_settings = self::getMySettings(ApiController::$user->id);
-
-            $friends_vk_ids = $search_weights_params->friends_vk_ids;
-            $groups_vk_ids = $search_weights_params->groups_vk_ids;
-            $audio_vk_ids = $search_weights_params->audio_vk_ids;
 
             $user = \DB::select("
                 SELECT  u.id, u.vk_id, u.name, u.sex, u.about, u.is_deleted, u.avatar_url, u.is_blocked,
                         extract('year' from age(u.bdate)) AS age,
                         public.format_date(ui.last_activity_at, :time_zone) AS last_activity_at,
-                        icount(ui.groups_vk_ids & array[$groups_vk_ids]::int[]) AS common_groups_vk,
-                        icount(ui.friends_vk_ids & array[$friends_vk_ids]::int[]) AS common_friends_vk,
+                        icount(ui.groups_vk_ids & array[" . $w->groups_vk_ids . "]::int[]) AS common_groups_vk,
+                        icount(ui.friends_vk_ids & array[" . $w->friends_vk_ids . "]::int[]) AS common_friends_vk,
                         round(ST_Distance(ui.geography, :geography)::decimal / 1000) AS distance,
 
-                        " . UsersMatches::weightFormula($groups_vk_ids, $friends_vk_ids, $audio_vk_ids, '0') . " AS weight_level
+                        " . UsersMatches::weightFormula($w, '0') . " AS weight_level
 
                     FROM public.users AS u
                     INNER JOIN public.users_index AS ui

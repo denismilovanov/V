@@ -50,3 +50,6 @@ ALTER TABLE public.users_index
 --
 ALTER TABLE public.users_index
     ADD COLUMN audio_vk_ids integer[] NOT NULL DEFAULT array[]::integer[];
+
+ALTER TABLE public.users_index
+    ADD COLUMN universities_vk_ids integer[] NOT NULL DEFAULT array[]::integer[];
