@@ -121,6 +121,11 @@ class ApiController extends BaseController {
         $data['latest_soft_version'] = Helper::softVersionFromIntToString($soft->version);
         $data['latest_soft_description'] = $soft->description;
 
+        // версия приложения старше, чем последняя актуальная
+        if ($soft_version_int > $soft->version) {
+            $data['latest_soft_version'] = Helper::softVersionFromIntToString($soft_version_int);
+        }
+
         // спецоперация
         if (! $data['is_new'] and ! Users::isDeveloperOrTestUser($data['user_id'])) {
             $flag = \DB::select("SELECT coalesce((params->'flag'), '0') AS flag FROM users WHERE id = ?;",
