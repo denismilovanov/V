@@ -118,6 +118,12 @@ class UsersMatches
             " . env('WEIGHT_FRIENDS_VK') . " * icount(friends_vk_ids & array[" . $w->friends_vk_ids . "]::int[]) +
             " . env('WEIGHT_AUDIO_VK') . " * icount(audio_vk_ids & array[" . $w->audio_vk_ids . "]::int[]) +
             " . env('WEIGHT_UNIVERSITIES_VK') . " * icount(universities_vk_ids & array[" . $w->universities_vk_ids . "]::int[]) +
+            " . env('WEIGHT_ACTIVITIES_VK') . " * icount(activities_vk_ids & array[" . $w->activities_vk_ids . "]::int[]) +
+            " . env('WEIGHT_INTERESTS_VK') . " * icount(interests_vk_ids & array[" . $w->interests_vk_ids . "]::int[]) +
+            " . env('WEIGHT_BOOKS_VK') . " * icount(books_vk_ids & array[" . $w->books_vk_ids . "]::int[]) +
+            " . env('WEIGHT_GAMES_VK') . " * icount(games_vk_ids & array[" . $w->games_vk_ids . "]::int[]) +
+            " . env('WEIGHT_MOVIES_VK') . " * icount(movies_vk_ids & array[" . $w->movies_vk_ids . "]::int[]) +
+            " . env('WEIGHT_MUSIC_VK') . " * icount(music_vk_ids & array[" . $w->music_vk_ids . "]::int[]) +
             " . env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
             " . env('WEIGHT_POPULARITY') . " * popularity +
             " . env('WEIGHT_FRIENDLINESS') . " * friendliness +

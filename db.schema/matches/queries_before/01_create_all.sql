@@ -35,3 +35,11 @@ ALTER TABLE public.users_index
 
 ALTER TABLE public.users_index
     ADD COLUMN universities_vk_ids integer[] NOT NULL DEFAULT array[]::integer[];
+
+ALTER FOREIGN TABLE public.users_index
+    ADD COLUMN activities_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
+    ADD COLUMN interests_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
+    ADD COLUMN books_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
+    ADD COLUMN games_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
+    ADD COLUMN movies_vk_ids integer[] NOT NULL DEFAULT array[]::integer[],
+    ADD COLUMN music_vk_ids integer[] NOT NULL DEFAULT array[]::integer[];

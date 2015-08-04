@@ -301,7 +301,13 @@ class Users
             SELECT  array_to_string(groups_vk_ids, ',') AS groups_vk_ids,
                     array_to_string(friends_vk_ids, ',') AS friends_vk_ids,
                     array_to_string(audio_vk_ids, ',') AS audio_vk_ids,
-                    array_to_string(universities_vk_ids, ',') AS universities_vk_ids
+                    array_to_string(universities_vk_ids, ',') AS universities_vk_ids,
+                    array_to_string(activities_vk_ids, ',') AS activities_vk_ids,
+                    array_to_string(interests_vk_ids, ',') AS interests_vk_ids,
+                    array_to_string(books_vk_ids, ',') AS books_vk_ids,
+                    array_to_string(games_vk_ids, ',') AS games_vk_ids,
+                    array_to_string(movies_vk_ids, ',') AS movies_vk_ids,
+                    array_to_string(music_vk_ids, ',') AS music_vk_ids
                 FROM public.users_index
                 WHERE user_id = ?;
         ", [$user_id]);

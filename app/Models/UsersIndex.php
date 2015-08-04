@@ -80,11 +80,19 @@ class UsersIndex {
             return $profile;
         }
 
-        $universities_ids = implode(", ", $profile['universities_ids']);
+        foreach (['universities_ids', 'activities_ids', 'interests_ids', 'books_ids', 'games_ids', 'movies_ids', 'music_ids'] as $key) {
+            $$key = implode(", ", $profile[$key]);
+        }
 
         \DB::select("
             UPDATE public.users_index
-                SET universities_vk_ids = array[$universities_ids]::integer[]
+                SET universities_vk_ids = array[$universities_ids]::integer[],
+                    activities_vk_ids= array[$activities_ids]::integer[],
+                    interests_vk_ids= array[$interests_ids]::integer[],
+                    books_vk_ids= array[$books_ids]::integer[],
+                    games_vk_ids= array[$games_ids]::integer[],
+                    movies_vk_ids= array[$movies_ids]::integer[],
+                    music_vk_ids= array[$music_ids]::integer[]
                 WHERE user_id = ?;
         ", [$user_id]);
 
