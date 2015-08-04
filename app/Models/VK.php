@@ -161,7 +161,9 @@ class VK
         $profile = $profile[0];
         $profile->universities = $universities;
 
-        $result = [];
+        $result = [
+            'universities_ids' => [],
+        ];
 
         foreach ($profile->universities as $u) {
             $result['universities_ids'] []= $u['id'];
