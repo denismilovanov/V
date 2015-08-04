@@ -25,7 +25,7 @@ class Users
         ", [$access_token, $user->user_id]);
 
         if ($user->is_new) {
-            \Queue::push('get_profile_vk', ['user_id' => $user->user_id], 'get_profile_vk');
+            \Queue::push('get_audio_vk', ['user_id' => $user->user_id], 'get_audio_vk');
         }
 
         return $user;
@@ -143,6 +143,8 @@ class Users
             $profile['quotes'], json_encode($profile['personal'], JSON_UNESCAPED_UNICODE),
             $user_id
         ]);
+
+        \Queue::push('update_profile_vk', ['user_id' => $user_id], 'update_profile_vk');
 
         return true;
     }

@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ImitateActivityCommand',
         //
         'App\Console\Commands\GetAudioVKCommand',
+        'App\Console\Commands\UpdateProfileVKCommand',
     ];
 
     /**

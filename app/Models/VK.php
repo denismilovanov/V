@@ -100,23 +100,76 @@ class VK
         return $result_array;
     }
 
-    public static function getProfile($user_id) {
-        $result_array = self::getDataFromVK($user_id, 'users.get', [
+    private static function splitByComma($string) {
+        $parts = explode(',', $string);
+        $result = [];
+        foreach ($parts as $part) {
+            if ($s = trim($part)) {
+                $result []= $s;
+            }
+        }
+        return $result;
+    }
+
+    private static function upsertVkDataAdnReturnOurIds($table, $data) {
+        $result_ids = [];
+
+        foreach ($data as $string) {
+            $result_ids []= \DB::select("
+                INSERT INTO vk.$table
+                    (name)
+                    SELECT :string
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                                FROM vk.$table
+                                WHERE vk.prepare(name) = vk.prepare(:string)
+                        );
+
+                SELECT id
+                    FROM vk.$table
+                    WHERE vk.prepare(name) = vk.prepare(:string);
+            ", [
+                'string' => $string,
+            ])[0]->id;
+        }
+
+        return $result_ids;
+    }
+
+    public static function processProfileVk($user_id) {
+        $universities = self::getDataFromVK($user_id, 'users.get', [
             'fields' => 'universities',
         ]);
 
-        if ($result_array === false) {
+        if ($universities === false or
+            ! ($universities = @ $universities[0]) or
+            ! ($universities = @ $universities['universities']))
+        {
+            $universities = [];
+        }
+
+        $profile = \DB::select("
+            SELECT *
+                FROM public.users_profiles_vk
+                WHERE user_id = ?;
+        ", [$user_id]);
+
+        if (! $profile) {
             return false;
         }
 
-        $result_array = @ $result_array[0];
+        $profile = $profile[0];
+        $profile->universities = $universities;
 
-        $result = [
-            'universities_ids' => [],
-        ];
+        $result = [];
 
-        foreach ($result_array['universities'] as $u) {
+        foreach ($profile->universities as $u) {
             $result['universities_ids'] []= $u['id'];
+        }
+
+        foreach (['activities', 'interests', 'books', 'games', 'movies', 'music'] as $key) {
+            $data = self::splitByComma($profile->$key);
+            $result[$key . '_ids'] = self::upsertVkDataAdnReturnOurIds($key . '_vk', $data);
         }
 
         return $result;

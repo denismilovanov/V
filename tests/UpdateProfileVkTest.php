@@ -6,7 +6,7 @@ use \App\Models\VK;
 use \App\Models\UsersIndex;
 
 
-class GetProfileTest extends TestCase {
+class UpdateProfileVkTest extends TestCase {
 
     public function test1() {
 

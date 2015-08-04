@@ -75,7 +75,7 @@ class UsersIndex {
                 WHERE user_id = ?;
         ", [$user_id]);
 
-        $profile = VK::getProfile($user_id);
+        $profile = VK::processProfileVk($user_id);
         if (! $profile) {
             return $profile;
         }
