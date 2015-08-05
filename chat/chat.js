@@ -166,7 +166,7 @@ Chat = {
         Chat.get_like(from_user_id, to_user_id, function(is_liked1, is_blocked1) {
             if (! is_liked1) {
                 // there is no like
-                on_save_message(message_id, destination_message_id, Chat.ERROR);
+                on_save_message(null, null, Chat.ERROR);
                 return;
             }
 
@@ -198,7 +198,7 @@ Chat = {
 
                 } else {
                     // there is no mutual like
-                    on_save_message(message_id, destination_message_id, Chat.ERROR);
+                    on_save_message(null, null, Chat.ERROR);
                 }
             });
         });
