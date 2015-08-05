@@ -69,6 +69,7 @@ class AdminController extends BaseController {
 
     public function users() {
         $action = \Request::get('action', 'all');
+        $ajax = \Request::get('ajax');
 
         if ($action == 'search') {
             $user_id = intval(\Request::get('user_id'));
@@ -81,15 +82,18 @@ class AdminController extends BaseController {
                 return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user->id);
             }
         }
-
-        $limit = env('STD_PAGING_COUNT', 50);
-        $page = \Request::get('page', 0);
-
-        $offset = $limit * $page;
+        if ($action == 'all' and $ajax) {
+            $page = \Request::get('page', 0);
+            $users = Users::getUsersForAdmin($action, $page, 0);
+            return response()->json($users);
+        }
+        if ($action == 'search_with_abuses' and $ajax) {
+            $users = Users::getUsersForAdmin($action, 1000, 0);
+            return response()->json($users);
+        }
 
         return view('admin.users.users', [
-            'users' => Users::getUsersForAdmin($action, $limit, $offset),
-            'page' => $page,
+            'action' => $action,
         ]);
     }
 

@@ -610,12 +610,15 @@ class Users
         $users = [];
 
         if ($action == 'all') {
+            $page = $limit;
             $users = \DB::select("
                 SELECT u.id
                     FROM public.users AS u
-                    ORDER BY u.id DESC
-                    LIMIT ? OFFSET ?
-            ", [$limit, $offset]);
+                    WHERE date(registered_at) = (current_date - :days * interval '1 day')::date
+                    ORDER BY u.id DESC;
+            ", [
+                'days' => $page,
+            ]);
         } else if ($action == 'search_with_abuses') {
             $users = \DB::select("
                 WITH a AS (
@@ -631,12 +634,15 @@ class Users
             ", [$limit, $offset]);
         }
 
+        $result = [];
         foreach ($users as $user) {
             $user = self::findById($user->id, 'admin');
             if ($user) {
-                yield $user;
+                $result []= $user;
             }
         }
+
+        return $result;
     }
 
     public static function removeOldKeys() {

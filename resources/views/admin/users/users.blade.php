@@ -39,7 +39,7 @@
         <button class="btn btn-success btn-xs pull-right" type="submit">Показать всех</button>
         <button class="btn btn-warning btn-xs pull-right" type="submit" name="action" value="search_with_abuses">Показать незаблокированных с жалобами</button>
     </div>
-    <table class="table">
+    <table class="table" id="users">
         <tr>
             <th>ID</th>
             <th>Имя</th>
@@ -51,41 +51,57 @@
             <th>Регистрация</th>
             <th>Число жалоб</th>
         </tr>
-        @foreach ($users as $user)
-            <tr>
-                <td><a href="{{ $base }}/users/{{ $user->id }}">{{ $user->id }}</a></td>
-                <td>{{ $user->name }}</td>
-                <td>{{ $user->sex }}</td>
-                <td>{{ $user->age }}</td>
-                <td><a href="https://vk.com/id{{ $user->vk_id }}">{{ $user->vk_id }}</a></td>
-                <td>@if ($user->is_blocked) Да @else Нет @endif</td>
-                <td>@if ($user->is_blocked_by_vk) Да @else Нет @endif</td>
-                <td>{{ $user->registered_at }}</td>
-                <td>{{ $user->abuses_count }}</td>
-            </tr>
-        @endforeach
     </table>
-
-    <nav align="center">
-        <ul class="pagination">
-        <li>
-            <a href="?page={{ $page > 1 ? $page - 1 : 0 }}" aria-label="<">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
-        <li>
-            <a href="?page={{ $page + 1 }}" aria-label=">">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-        </ul>
-    </nav>
-
+    @if ($action != 'search_with_abuses')
+        <center>
+            <button class="btn btn-success" type="button" onclick="UsersForm.loadUsers(UsersForm.page);">Показать еще</button>
+        </center>
+    @endif
+    <br />
 </div>
 
 </form>
 
 <script>
+
+    UsersForm = {
+        page: 0,
+
+        loadUsers: function(page) {
+            Request.request('GET', '{{ $base }}/users/', {
+                action: '{{ $action }}',
+                ajax: true,
+                page: page
+            }, function(data) {
+                if ('{{ $action }}' != 'search_with_abuses') {
+                    $('#users').append(
+                        '<tr><td colspan="9" style="height: 10px;">' + UsersForm.page + ' д. назад</td></tr>'
+                    );
+                }
+
+                for (var k in data) {
+                    var user = data[k];
+                    $('#users').append(
+                        '<tr>' +
+                            '<td><a href="{{ $base }}/users/' + user['id'] + '">' + user['id'] + '</a></td>' +
+                            '<td>' + user['name'] + '</td>' +
+                            '<td>' + user['sex'] + '</td>' +
+                            '<td>' + user['age'] + '</td>' +
+                            '<td><a href="https://vk.com/id' + user['vk_id'] + '">' + user['vk_id'] + '</a></td>' +
+                            '<td>' + (user['is_blocked'] ? 'Да' : 'Нет') + '</td>' +
+                            '<td>' + (user['is_blocked_by_vk'] ? 'Да' : 'Нет') + '</td>' +
+                            '<td>' + user['registered_at'] + '</td>' +
+                            '<td>' + user['abuses_count'] + '</td>' +
+                        '</tr>'
+                    );
+                }
+                UsersForm.page += 1;
+            });
+        }
+    };
+
+    UsersForm.loadUsers(UsersForm.page);
+
 
 </script>
 
