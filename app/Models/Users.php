@@ -91,6 +91,10 @@ class Users
             $groups
         );
 
+        // друзья были переданы ранее
+        // пересчитаем индекс
+        UsersMatches::enqueueFillMatchesJob($user_id);
+
         return true;
     }
 
