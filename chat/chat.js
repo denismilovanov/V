@@ -7,15 +7,17 @@ var redis_socket_io = require('socket.io-redis');
 var redis = require('redis');
 var pg = require('pg');
 var amqp = require('amqp');
+var log4js = require('log4js');
 
 server.listen(port, function () {
-    console.log('Server listening at port %d', port);
+    Chat.logger.info('Server listening at port', port);
 });
 
 app.use(express.static(__dirname + '/'));
 
 Chat = {
     env: process.env.ENV || 'dev',
+    logger: log4js.getLogger(),
 
     NEED_AUTHORIZE: 2,
     SUCCESS: 1,
@@ -41,16 +43,16 @@ Chat = {
 
         Chat.pg_client.connect(function(err) {
             if (! err) {
-                console.log('DB READY');
+                Chat.logger.info('DB READY');
             } else {
-                console.log('DB ERR', err);
+                Chat.logger.info('DB ERR', err);
             }
         });
 
         Chat.rabbit_client = amqp.createConnection();
 
         Chat.rabbit_client.on('ready', function () {
-            console.log('RABBIT READY');
+            Chat.logger.info('RABBIT READY');
         });
 
         if (Chat.env == 'test') {
@@ -71,15 +73,15 @@ Chat = {
 
     emit: function (socket, type, data) {
         if (socket) {
-            console.log('EMIT:', type, socket.id, data);
+            Chat.logger.info('EMIT:', type, socket.id, data);
             socket.emit(type, data);
         } else {
-            console.log('TRYING TO SEND TO ABSENT SOCKET:', type, data)
+            Chat.logger.info('TRYING TO SEND TO ABSENT SOCKET:', type, data)
         }
     },
 
     save_socket: function (socket, key, user_id) {
-        console.log('SAVING SOCKET:', socket.id, key);
+        Chat.logger.info('SAVING SOCKET:', socket.id, key);
         Chat.sockets_info[socket.id] = {
             'key': key,
             'is_authorized': true,
@@ -92,9 +94,9 @@ Chat = {
     get_socket_info_by_socket_id: function(id) {
         var socket_info = Chat.sockets_info[id];
         if (socket_info) {
-            console.log('GOT SOCKET:', socket_info.socket.id, socket_info.user_id, socket_info.key)
+            Chat.logger.info('GOT SOCKET:', socket_info.socket.id, socket_info.user_id, socket_info.key)
         } else {
-            console.log('THERE IS NO SOCKET WITH ID:', id)
+            Chat.logger.info('THERE IS NO SOCKET WITH ID:', id)
             return null;
         }
         return socket_info;
@@ -107,7 +109,7 @@ Chat = {
                 on_get_socket(socket_info ? socket_info.socket : null);
                 return;
             }
-            console.log('THERE IS NO SOCKET FOR USER WITH ID:', user_id)
+            Chat.logger.info('THERE IS NO SOCKET FOR USER WITH ID:', user_id)
             on_get_socket(null);
         });
     },
@@ -160,7 +162,7 @@ Chat = {
     },
 
     save_message: function(from_user_id, to_user_id, message, on_save_message) {
-        console.log('SAVE MESSAGE:', from_user_id, to_user_id, message);
+        Chat.logger.info('SAVE MESSAGE:', from_user_id, to_user_id, message);
 
         // check if like exists
         Chat.get_like(from_user_id, to_user_id, function(is_liked1, is_blocked1) {
@@ -206,7 +208,7 @@ Chat = {
     },
 
     send_push: function(me_id, user_id, message) {
-        console.log('PUSH:', Chat.push_queue_name, me_id, user_id, message);
+        Chat.logger.info('PUSH:', Chat.push_queue_name, me_id, user_id, message);
         Chat.rabbit_client.publish(Chat.push_queue_name, {
             'from_user_id': me_id,
             'to_user_id': user_id,
@@ -250,7 +252,7 @@ Chat = {
         var user_id = data['user_id'];
         var message_id = data['message_id'];
 
-        console.log('READ:', s.user_id, user_id);
+        Chat.logger.info('READ:', s.user_id, user_id);
 
         Chat.pg_query("UPDATE public.messages_new SET is_new = FALSE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
             [s.user_id, user_id],
@@ -300,7 +302,7 @@ Chat = {
     disconnect: function(socket) {
         var s = Chat.get_socket_info_by_socket_id(socket.id);
         if (s) {
-            console.log('DISCONNECT SOCKET:', socket.id, s.user_id);
+            Chat.logger.info('DISCONNECT SOCKET:', socket.id, s.user_id);
             delete Chat.sockets_info[socket.id];
             Chat.redis_client.hdel('users_ids_to_socket_ids', s.user_id);
         }
@@ -312,7 +314,7 @@ Chat.init();
 io.adapter(redis_socket_io({ host: 'localhost', port: 6379 }));
 
 io.on('connection', function (socket) {
-    //console.log(socket.id)
+    //Chat.logger.info(socket.id)
     socket.on('authorize', function (data) {
         Chat.authorize(data, socket, function(user_id) {
             status = user_id != null ? Chat.SUCCESS : Chat.ERROR;
