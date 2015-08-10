@@ -81,6 +81,8 @@ class AdminController extends BaseController {
             if ($vk_id and $user = Users::findByVkId($vk_id)) {
                 return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user->id);
             }
+
+            return redirect(env('ADMIN_RELATIVE_URL') . '/users/?not_found');
         }
         if ($action == 'all' and $ajax) {
             $page = \Request::get('page', 0);
