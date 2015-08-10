@@ -240,7 +240,7 @@ Chat = {
         });
     },
 
-    read: function(data, socket) {
+    read: function(data, socket, on_read) {
         var s = Chat.get_socket_info_by_socket_id(socket.id);
 
         if (! s) {
@@ -248,6 +248,7 @@ Chat = {
         }
 
         var user_id = data['user_id'];
+        var message_id = data['message_id'];
 
         console.log('READ:', s.user_id, user_id);
 
@@ -259,7 +260,13 @@ Chat = {
                     [s.user_id, user_id],
                     function(result) {
 
+                        Chat.get_socket_by_user_id(user_id, function (to_socket) {
+                            if (! to_socket) {
+                                return;
+                            }
 
+                            on_read(s.user_id, message_id, to_socket);
+                        });
                 });
         });
     },
@@ -333,26 +340,27 @@ io.on('connection', function (socket) {
     });
 
     socket.on('read', function (data) {
-        Chat.read(data, socket);
+        Chat.read(data, socket, function(me_id, message_id, destination_socket) {
+            Chat.emit(destination_socket, 'read', {
+                user_id: me_id,
+                message_id: message_id
+            });
+        });
     });
 
     socket.on('start_writing', function (data) {
         Chat.start_writing(data, socket, function(me_id, destination_socket) {
-            if (destination_socket) {
-                Chat.emit(destination_socket, 'start_writing', {
-                    user_id: me_id
-                });
-            }
+            Chat.emit(destination_socket, 'start_writing', {
+                user_id: me_id
+            });
         });
     });
 
     socket.on('stop_writing', function (data) {
         Chat.stop_writing(data, socket, function(me_id, destination_socket) {
-            if (destination_socket) {
-                Chat.emit(destination_socket, 'stop_writing', {
-                    user_id: me_id
-                });
-            }
+            Chat.emit(destination_socket, 'stop_writing', {
+                user_id: me_id
+            });
         });
     });
 
