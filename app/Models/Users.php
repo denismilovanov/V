@@ -656,18 +656,20 @@ class Users
         ");
     }
 
-    public static function block($user_id) {
+    public static function block($user_id, $reason) {
         return \DB::select("
             UPDATE public.users
-                SET is_blocked = 't'
+                SET is_blocked = 't',
+                    block_reason = ?
                 WHERE id = ?;
-        ", [$user_id]);
+        ", [$reason, $user_id]);
     }
 
     public static function unblock($user_id) {
         return \DB::select("
             UPDATE public.users
-                SET is_blocked = 'f'
+                SET is_blocked = 'f',
+                    block_reason = NULL
                 WHERE id = ?;
         ", [$user_id]);
     }

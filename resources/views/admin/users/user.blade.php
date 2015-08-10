@@ -28,7 +28,7 @@
                     </tr>
                     <tr>
                         <td>Заблокирован нами?</td>
-                        <td>@if ($user->is_blocked) Да @else Нет @endif</a></td>
+                        <td>@if ($user->is_blocked) Да ({{ $user->block_reason }}) @else Нет @endif</a></td>
                     </tr>
                     <tr>
                         <td>Заблокирован VK?</td>
@@ -64,6 +64,8 @@
                         <button class="btn btn-success" type="submit" name="action" value="unblock">Разблокировать</button>
                     @else
                         <button class="btn btn-danger" type="submit" name="action" value="block">Заблокировать</button>
+                        <input type="text" name="reason" value="" placeholder="Причина блокировки" id="reason" style="width:100%;" />
+                        <br /><br />
                     @endif
                     @if ($user->is_deleted)
                         <button class="btn btn-success" type="submit" name="action" value="unremove">Восстановить</button>

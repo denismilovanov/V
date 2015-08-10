@@ -102,7 +102,7 @@ class AdminController extends BaseController {
             $action = \Request::get('action');
 
             if ($action == 'block') {
-                Users::block($user_id);
+                Users::block($user_id, strip_tags(\Request::get('reason')));
                 return redirect(env('ADMIN_RELATIVE_URL') . '/users/' . $user_id);
             } else if ($action == 'unblock') {
                 Users::unblock($user_id);
