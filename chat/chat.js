@@ -210,9 +210,11 @@ Chat = {
     send_push: function(me_id, user_id, message) {
         Chat.logger.info('PUSH:', Chat.push_queue_name, me_id, user_id, message);
         Chat.rabbit_client.publish(Chat.push_queue_name, {
-            'from_user_id': me_id,
-            'to_user_id': user_id,
-            'message': message
+            'data': {
+                'from_user_id': me_id,
+                'to_user_id': user_id,
+                'message': message
+            }
         });
     },
 
