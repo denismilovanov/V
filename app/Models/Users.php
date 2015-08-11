@@ -329,6 +329,9 @@ class Users
     }
 
     public static function getMinId($me_id) {
+        if (env('APP_ENV') == 'test') {
+            return 0;
+        }
         // разработчикам и тестовым пользователям видны все пользователи начиная с 0
         // для всех остальных видны только настоящие пользователи
         return self::isDeveloperOrTestUser($me_id) ? 0 : self::getMinRealUserId();
