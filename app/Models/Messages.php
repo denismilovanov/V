@@ -260,11 +260,9 @@ class Messages {
         $messages = \DB::select($sql, $data);
 
         // после того как сообщения выданы в устройство считаем их старыми
-        // и прочитанными
         \DB::select("
             UPDATE public.messages_new
-                SET is_new = 'f',
-                    is_read = 't'
+                SET is_new = 'f'
                 WHERE   me_id = ? AND
                         buddy_id = ?;
             UPDATE public.messages_dialogs
