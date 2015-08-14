@@ -20,9 +20,10 @@ class Users
 
         \DB::select("
             UPDATE public.users
-                SET vk_access_token = ?
+                SET vk_access_token = ?,
+                    avatar_url = ?
                 WHERE id = ?;
-        ", [$access_token, $user->user_id]);
+        ", [$access_token, $avatar_url, $user->user_id]);
 
         if ($user->is_new) {
             \Queue::push('get_audio_vk', ['user_id' => $user->user_id], 'get_audio_vk');
