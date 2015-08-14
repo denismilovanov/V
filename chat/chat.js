@@ -254,23 +254,34 @@ Chat = {
         var user_id = data['user_id'];
         var message_id = data['message_id'];
 
-        Chat.logger.info('READ:', s.user_id, user_id);
+        Chat.logger.info('READ:', s.user_id, ' has read messages from ', user_id);
 
-        Chat.pg_query("UPDATE public.messages_new SET is_new = FALSE, is_read = TRUE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
+        // s.user_id - я прочитал сообщения от user_id
+        Chat.pg_query(
+            // я (s.user_id) прочитал сообщения от user_id
+            "UPDATE public.messages_new SET is_new = FALSE, is_read = TRUE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
             [s.user_id, user_id],
             function(result) {
 
-                Chat.pg_query("UPDATE public.messages_dialogs SET is_new = FALSE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
-                    [s.user_id, user_id],
-                    function(result) {
+                // мое (user_id) сообщение прочитано пользователем s.user_id
+                Chat.pg_query(
+                "UPDATE public.messages_new SET is_read = TRUE WHERE me_id = $1::int AND buddy_id = $2::int AND NOT is_read;",
+                [user_id, s.user_id],
+                function(result) {
 
-                        Chat.get_socket_by_user_id(user_id, function (to_socket) {
-                            if (! to_socket) {
-                                return;
-                            }
+                    Chat.pg_query("UPDATE public.messages_dialogs SET is_new = FALSE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
+                        [s.user_id, user_id],
+                        function(result) {
 
-                            on_read(s.user_id, message_id, to_socket);
-                        });
+                            Chat.get_socket_by_user_id(user_id, function (to_socket) {
+                                if (! to_socket) {
+                                    return;
+                                }
+
+                                on_read(s.user_id, message_id, to_socket);
+                            });
+                    });
+
                 });
         });
     },
