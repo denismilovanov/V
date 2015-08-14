@@ -256,7 +256,7 @@ Chat = {
 
         Chat.logger.info('READ:', s.user_id, user_id);
 
-        Chat.pg_query("UPDATE public.messages_new SET is_new = FALSE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
+        Chat.pg_query("UPDATE public.messages_new SET is_new = FALSE, is_read = TRUE WHERE me_id = $1::int AND buddy_id = $2::int AND is_new;",
             [s.user_id, user_id],
             function(result) {
 

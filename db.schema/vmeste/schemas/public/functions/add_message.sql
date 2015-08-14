@@ -11,13 +11,14 @@ DECLARE
 BEGIN
 
     INSERT INTO public.messages_new
-        (me_id, buddy_id, message, i, is_new)
+        (me_id, buddy_id, message, i, is_new, is_read)
         VALUES (
             i_me_id,
             i_buddy_id,
             t_text,
             b_i,
-            NOT b_i -- если не я написал, то сообщение новое
+            NOT b_i, -- если не я написал, то сообщение новое
+            b_i -- если я писал, то сообщение мною "прочитано"
         )
         RETURNING id INTO i_id;
 

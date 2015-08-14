@@ -21,3 +21,6 @@ CREATE INDEX messages_new_reverse_idx
 
 ALTER TABLE public.messages_new
     ADD COLUMN is_deleted boolean NOT NULL DEFAULT FALSE;
+
+ALTER TABLE public.messages_new
+    ADD COLUMN is_read boolean NOT NULL DEFAULT FALSE;

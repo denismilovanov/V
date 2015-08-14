@@ -229,7 +229,8 @@ class Messages {
             SELECT  id,
                     public.format_date(created_at, :time_zone) AS added_at,
                     message,
-                    CASE WHEN i THEN 2 ELSE 1 END AS direction
+                    CASE WHEN i THEN 2 ELSE 1 END AS direction,
+                    is_read
                 FROM public.messages_new
                 WHERE   me_id = :me_id AND
                         buddy_id = :buddy_id AND
@@ -259,9 +260,11 @@ class Messages {
         $messages = \DB::select($sql, $data);
 
         // после того как сообщения выданы в устройство считаем их старыми
+        // и прочитанными
         \DB::select("
             UPDATE public.messages_new
-                SET is_new = 'f'
+                SET is_new = 'f',
+                    is_read = 't'
                 WHERE   me_id = ? AND
                         buddy_id = ?;
             UPDATE public.messages_dialogs
