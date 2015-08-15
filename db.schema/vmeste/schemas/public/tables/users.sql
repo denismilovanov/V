@@ -39,3 +39,6 @@ ALTER TABLE public.users
 
 ALTER TABLE public.users
     ADD COLUMN vk_access_token varchar NULL;
+
+ALTER TABLE public.users
+    ADD COLUMN block_reason text NULL;
