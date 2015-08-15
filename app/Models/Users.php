@@ -3,6 +3,8 @@
 use \App\Http\Controllers\ApiController;
 use App\Models\UsersMatches;
 use App\Models\UsersIndex;
+use App\Models\Likes;
+
 
 class Users
 {
@@ -473,6 +475,8 @@ class Users
                     ORDER BY a.created_at DESC
                     LIMIT 50;
             ", [$user->id]);
+
+            $user->blocks = Likes::getBlockedUsers($user->id);
         } else if ($area == 'like') {
             foreach(['updated_at', 'registered_at', 'is_blocked_by_vk', 'is_moderated', 'time_zone'] as $key) {
                 unset($user->$key);

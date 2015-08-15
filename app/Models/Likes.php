@@ -146,6 +146,19 @@ class Likes {
         return $result[0]->result;
     }
 
+    // кого я заблокировал
+    public static function getBlockedUsers($user_id) {
+        return \DB::select("
+            SELECT u.name, l.user2_id AS user_id
+                FROM public.likes AS l
+                INNER JOIN public.users AS u
+                    ON l.user2_id = u.id
+                WHERE   l.user1_id = ? AND
+                        l.is_blocked
+                ORDER BY user2_id;
+        ", [$user_id]);
+    }
+
     public static function echoLike($data) {
         if (mt_rand() / mt_getrandmax() <= env('ECHO_LIKE_PROBABILITY', 0.20)) {
             $to_user_id = $data['from_user_id'];
@@ -219,6 +232,24 @@ class Likes {
         return sizeof(\DB::select("
             UPDATE public.likes
                 SET is_blocked = 't'
+                WHERE   user1_id = ? AND
+                        user2_id = ?
+                RETURNING *;
+        ", [$from_user_id, $to_user_id])) > 0;
+    }
+
+    public static function unblockUser($from_user_id, $to_user_id) {
+        if (! Users::findById($to_user_id) or
+            // нельзя разблокировать тестового, если ты обычный пользователь
+            (! Users::isDeveloperOrTestUser($from_user_id) and Users::isTestUser($to_user_id))) {
+            return false;
+        }
+
+        Messages::unblockDialog($from_user_id, $to_user_id);
+
+        return sizeof(\DB::select("
+            UPDATE public.likes
+                SET is_blocked = 'f'
                 WHERE   user1_id = ? AND
                         user2_id = ?
                 RETURNING *;

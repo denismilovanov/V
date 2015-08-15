@@ -343,6 +343,15 @@ class Messages {
         ", [$me_id, $buddy_id]);
     }
 
+    public static function unblockDialog($me_id, $buddy_id) {
+        \DB::select("
+            UPDATE public.messages_dialogs
+                SET is_buddy_blocked = 'f'
+                WHERE   me_id = ? AND
+                        buddy_id = ?;
+        ", [$me_id, $buddy_id]);
+    }
+
     private static function packForSocketIo($input) {
         static $bigendian;
         if (!isset($bigendian)) $bigendian = (pack('S', 1) == pack('n', 1));

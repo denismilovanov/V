@@ -7,6 +7,7 @@ use App\Models\Abuses;
 use App\Models\Stats;
 use App\Models\Queues;
 use App\Models\SoftVersions;
+use App\Models\Likes;
 
 
 class AdminController extends BaseController {
@@ -118,6 +119,11 @@ class AdminController extends BaseController {
             } else if ($action == 'remove_abuse') {
                 $abuse_id = intval(\Request::get('abuse_id'));
                 Abuses::remove($abuse_id);
+                return response()->json(['status' => 1]);
+            } else if ($action == 'unblock_like') {
+                $user_id = intval(\Request::get('user_id'));
+                $blocked_user_id = intval(\Request::get('blocked_user_id'));
+                Likes::unblockUser($user_id, $blocked_user_id);
                 return response()->json(['status' => 1]);
             } else if ($action == 'remove_all_abuses') {
                 Abuses::removeAllByToUserId($user_id);

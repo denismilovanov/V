@@ -115,7 +115,29 @@
     </table>
 </div>
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Блокировки
+    </div>
+    <table class="table" id="abuses">
+        <tr>
+            <th>Кого заблокировал?</th>
+            <th></th>
+            <th></th>
+        </tr>
+        @foreach ($user->blocks as $block)
+        <tr id="block{{ $block->user_id }}">
+            <td><a href="{{ $base }}/users/{{ $block->user_id }}">{{ $block->user_id }}</a></td>
+            <td>{{ $block->name }}</td>
+            <td><button class="btn btn-xs btn-info" type="button" onclick="userForm.unblock({{ $block->user_id }});">Разблокировать</button></td>
+        </tr>
+        @endforeach
+    </table>
+</div>
+
 <script>
+
+var user_id = {{ $user->id }};
 
 var userForm = {
     removeAbuse: function(abuse_id) {
@@ -133,6 +155,16 @@ var userForm = {
             action: 'remove_all_abuses'
         }, function() {
             $('#abuses').remove();
+        });
+    },
+
+    unblock: function(blocked_user_id) {
+        Request.request('POST', '?', {
+            user_id: user_id,
+            blocked_user_id: blocked_user_id,
+            action: 'unblock_like'
+        }, function() {
+            $('#block' + blocked_user_id).remove();
         });
     }
 }

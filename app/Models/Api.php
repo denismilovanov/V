@@ -28,6 +28,12 @@ class Api
                 ],
                 'method' => 'get',
             ],
+            'blockUser' => [
+                'fields' => [
+                    'user_id',
+                ],
+                'method' => 'get',
+            ],
 
             'getMyMessages' => [
                 'fields' => [
