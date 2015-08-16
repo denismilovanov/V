@@ -169,14 +169,52 @@ class UsersPhotos {
     }
 
     public static function setPhotosVK($user_id, $photos) {
+        // придет массив фотографий, у каждой указан rank - порядок в списке
+        // проблема в том, что фотография в списке может дублироваться
+        // в этом случае требуется поменять rank на rank удаленной
+        // если дублей нет, то все будет ок
         $added = false;
 
         $photos_ids = [0];
+
+        // запросим фотографии
+        $photos_now = self::getUserPhotos($user_id, 1);
+        $removed_photos = [];
+        foreach ($photos_now as $photo) {
+            $removed_photos[$photo['url']] = $photo;
+        }
+
+        // выкинем фотографии, которые остались
+        foreach ($photos as $photo) {
+            if (isset($removed_photos[$photo['url']])) {
+                unset($removed_photos[$photo['url']]);
+            }
+        }
+        // теперь в pn фотографии, которые исчезли
+
+        // берем одну, так как приложение не удаляет по две
+        $removed = array_pop($removed_photos);
+        $rank_for_repeat = 0;
+        if ($removed) {
+            // ранк удаленной фотографии
+            $rank_for_repeat = $removed['rank'];
+        }
+
+        $already_upserted = [];
+        $repeat = false;
+        $repeat_exists = false;
 
         foreach ($photos as $photo) {
             if (isset($photo['url'], $photo['rank'])) {
                 $url = $photo['url'];
                 $rank = intval($photo['rank']);
+
+                $repeat = in_array($url, $already_upserted);
+                $repeat_exists = $repeat_exists || $repeat;
+                if ($rank_for_repeat and $repeat) {
+                    // фотография повторяется
+                    $rank = $rank_for_repeat;
+                }
 
                 $photo_id = \DB::select("
                     SELECT public.upsert_photo_vk(?, ?, ?);
@@ -185,6 +223,8 @@ class UsersPhotos {
                 $photos_ids []= $photo_id;
 
                 $added = true;
+
+                $already_upserted []= $url;
             }
         }
 
@@ -195,6 +235,28 @@ class UsersPhotos {
                         source_id = 1 AND -- vk
                         id NOT IN (" . implode(', ', $photos_ids) . ")
         ", [$user_id]);
+
+        // требуется перенумеровать
+        if ($repeat_exists) {
+            \DB::select("
+                DO $$
+                DECLARE
+                    i_id bigint;
+                    i_rank integer := 1;
+                BEGIN
+
+                    FOR i_id IN SELECT * FROM public.users_photos WHERE user_id = ? ORDER BY rank
+                    LOOP
+                        UPDATE public.users_photos
+                            SET rank = i_rank
+                            WHERE id = i_id;
+
+                        i_rank := i_rank + 1;
+                    END LOOP;
+
+                END;$$;
+            ", [$user_id]);
+        }
 
         return $added;
     }
