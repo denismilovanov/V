@@ -15,9 +15,11 @@ class Checkins {
             $region_id = $geography[0]->region_id;
         }
 
-        $result = \DB::select("
-            SELECT public.checkin(?, ?, ?, ?, ?);
-        ", [$user_id, $latitude, $longitude, $city_id, $region_id]);
+        if ($latitude and $longitude) {
+            $result = \DB::select("
+                SELECT public.checkin(?, ?, ?, ?, ?);
+            ", [$user_id, $latitude, $longitude, $city_id, $region_id]);
+        }
 
         // важно было записать географию в базу прежде, чем создавать этот джоб
         // чтобы он получил новую географию
