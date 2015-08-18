@@ -14,6 +14,9 @@ class Users
         if (! $date or $years <= 1 or $years >= 100) {
             $bdate = null;
         }
+        if ($bdate == '1970-01-01') {
+            $bdate = null;
+        }
 
         $sql = "SELECT * FROM public.upsert_user_by_vk_id(?, ?, ?, ?, ?, ?, ?) AS t(user_id integer, is_new integer);";
         $user = \DB::select($sql, [$vk_id, $sex, $name, $bdate, $about, $avatar_url, $time_zone])[0];
