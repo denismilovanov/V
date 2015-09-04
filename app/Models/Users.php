@@ -409,7 +409,7 @@ class Users
     }
 
     public static function findById($user_id, $area = '') {
-        if (! $area or $area == 'like') {
+        if (! $area or $area == 'like' or $area == 'only_user') {
             $user = \DB::select("
                 SELECT *
                     FROM public.users
@@ -486,7 +486,9 @@ class Users
             }
         }
 
-        $user->photos = UsersPhotos::getUserPhotos($user_id, 1, null, $user->sex);
+        if ($area != 'only_user') {
+            $user->photos = UsersPhotos::getUserPhotos($user_id, 1, null, $user->sex);
+        }
 
         return $user;
     }

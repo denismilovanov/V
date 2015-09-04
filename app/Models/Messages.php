@@ -24,7 +24,7 @@ class Messages {
     }
 
     public static function addMessage($from_user_id, $to_user_id, $text) {
-        if  (! Users::findById($to_user_id) or
+        if  (! ($to_user = Users::findById($to_user_id, 'only_user')) or
             // нельзя послать сообщение тестовому, если ты обычный пользователь
             (! Users::isDeveloperOrTestUser($from_user_id) and Users::isTestUser($to_user_id))) {
             return [
@@ -44,10 +44,14 @@ class Messages {
                 "SELECT public.add_message(?, ?, ?, 'f');
             ", [$to_user_id, $from_user_id, $text])[0]->add_message;
 
-            // надо ли послать пуш второму?
+            // настройки второго
             $to_user_settings = Users::getMySettings($to_user_id);
 
-            if ($to_user_settings->is_notification and $to_user_settings->is_notification_messages) {
+            // надо ли послать пуш второму?
+            if (! $to_user->is_blocked and
+                $to_user_settings->is_notification and
+                $to_user_settings->is_notification_messages)
+            {
                 // отправляем пуш второму
                 \Queue::push('push_messages', [
                     'from_user_id' => $from_user_id,
@@ -65,34 +69,37 @@ class Messages {
                 ], 'echo_messages');
             }
 
-            // открыт ли сокет?
-            $socket_id = null;
-            try {
-                $socket_id = app('redis')->hget('users_ids_to_socket_ids', $to_user_id);
-            } catch (\Exception $e) {
-                ;
-            }
-
-            // надо забросить в сокет
-            if ($socket_id) {
-                $msg = self::packForSocketIo([[
-                    'type' => 2,
-                    'data' => ['message', [
-                        'message_id' => $message_id_pair,
-                        'user_id' => $from_user_id,
-                        'message' => $text,
-                    ]],
-                    'nsp' => '/',
-                ], [
-                   'rooms' => [$socket_id],
-                   'flags' => [],
-                ]]);
-
-
+            // надо ли написать в сокет второму?
+            if (! $to_user->is_blocked) {
+                // открыт ли сокет?
+                $socket_id = null;
                 try {
-                    app('redis')->publish('socket.io#emitter', $msg);
+                    $socket_id = app('redis')->hget('users_ids_to_socket_ids', $to_user_id);
                 } catch (\Exception $e) {
                     ;
+                }
+
+                // надо забросить в сокет
+                if ($socket_id) {
+                    $msg = self::packForSocketIo([[
+                        'type' => 2,
+                        'data' => ['message', [
+                            'message_id' => $message_id_pair,
+                            'user_id' => $from_user_id,
+                            'message' => $text,
+                        ]],
+                        'nsp' => '/',
+                    ], [
+                       'rooms' => [$socket_id],
+                       'flags' => [],
+                    ]]);
+
+
+                    try {
+                        app('redis')->publish('socket.io#emitter', $msg);
+                    } catch (\Exception $e) {
+                        ;
+                    }
                 }
             }
         }
