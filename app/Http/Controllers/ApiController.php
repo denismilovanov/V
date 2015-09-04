@@ -100,11 +100,11 @@ class ApiController extends BaseController {
             return self::json($data);
         }
 
-        // if (! VK::checkVKAccessToken($access_token, $vk_id)) {
-        //    $data['status'] = self::ERROR;
-        //    $data['error'] = 'access_token';
-        //    return self::json($data);
-        //}
+        if (! VK::checkVKAccessToken($access_token, $vk_id)) {
+            $data['status'] = self::ERROR;
+            $data['error'] = 'access_token';
+            return self::json($data);
+        }
 
         $user = Users::upsertByVkId($vk_id, $sex, $name, $bdate, $about, $avatar_url, $timezone, $access_token);
 

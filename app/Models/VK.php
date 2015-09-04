@@ -37,6 +37,7 @@ class VK
             //GAUGE('checkVKAccessToken');
 
             $client = new \GuzzleHttp\Client();
+
             $response = $client->get('https://api.vk.com/method/secure.checkToken.json', [
                 'query' => [
                     'access_token' => $server_access_token,
@@ -44,6 +45,7 @@ class VK
                     'client_secret' => env('VK_APP_SECRET'),
                     'token' => $access_token,
                 ],
+                'timeout' => 3.0,
             ]);
 
             $result = (string) $response->getBody();
@@ -64,6 +66,12 @@ class VK
                 return $result_array['response']['user_id'] === (int) $vk_id;
             }
         } catch (\Exception $e) {
+            if ($e instanceof \GuzzleHttp\Exception\ConnectException) {
+                if (strpos($e->getMessage(), "timed out") !== false) {
+                    // отвалились по таймауту, считаем, что валидация пройдена
+                    return true;
+                }
+            }
             ErrorCollector::addError(
                 'VK_API_ERROR',
                 '',
