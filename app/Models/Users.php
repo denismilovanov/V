@@ -480,6 +480,19 @@ class Users
             ", [$user->id]);
 
             $user->blocks = Likes::getBlockedUsers($user->id);
+
+            $apps = \DB::select("
+                SELECT CASE WHEN device_type = 1 THEN 'ios' ELSE 'android' END || ': ' || soft_version::varchar AS app
+                    FROM public.users_devices
+                    WHERE user_id = ?;
+            ", [$user->id]);
+
+            $user->app = [];
+            foreach ($apps as $app) {
+                $users->app []= $app->app;
+            }
+            $user->app = implode(', ', $users->app);
+
         } else if ($area == 'like') {
             foreach(['updated_at', 'registered_at', 'is_blocked_by_vk', 'is_moderated', 'time_zone'] as $key) {
                 unset($user->$key);

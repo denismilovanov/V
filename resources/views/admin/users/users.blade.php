@@ -46,6 +46,7 @@
             <th>Пол</th>
             <th>Возраст</th>
             <th>VK ID</th>
+            <th>App</th>
             <th>Заблокирован нами?</th>
             <th>Заблокирован VK?</th>
             <th>Регистрация</th>
@@ -75,7 +76,7 @@
             }, function(data) {
                 if ('{{ $action }}' != 'search_with_abuses') {
                     $('#users').append(
-                        '<tr><td colspan="9" style="height: 10px;">' + UsersForm.page + ' д. назад</td></tr>'
+                        '<tr><td colspan="10" style="height: 10px;">' + UsersForm.page + ' д. назад</td></tr>'
                     );
                 }
 
@@ -88,6 +89,7 @@
                             '<td>' + user['sex'] + '</td>' +
                             '<td>' + user['age'] + '</td>' +
                             '<td><a href="https://vk.com/id' + user['vk_id'] + '">' + user['vk_id'] + '</a></td>' +
+                            '<td>' + user['app'] + '</td>' +
                             '<td>' + (user['is_blocked'] ? 'Да' : 'Нет') + '</td>' +
                             '<td>' + (user['is_blocked_by_vk'] ? 'Да' : 'Нет') + '</td>' +
                             '<td>' + user['registered_at'] + '</td>' +
