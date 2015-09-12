@@ -489,9 +489,9 @@ class Users
 
             $user->app = [];
             foreach ($apps as $app) {
-                $users->app []= $app->app;
+                $user->app []= $app->app;
             }
-            $user->app = implode(', ', $users->app);
+            $user->app = implode(', ', $user->app);
 
         } else if ($area == 'like') {
             foreach(['updated_at', 'registered_at', 'is_blocked_by_vk', 'is_moderated', 'time_zone'] as $key) {
