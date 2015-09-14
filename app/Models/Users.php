@@ -503,6 +503,10 @@ class Users
             $user->photos = UsersPhotos::getUserPhotos($user_id, 1, null, $user->sex);
         }
 
+        if ($area == 'getUserProfile' and ! $user->age) {
+            $user->age = 0;
+        }
+
         return $user;
     }
 
