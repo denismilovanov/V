@@ -53,6 +53,8 @@ class VK
 
             $result_array = json_decode($result, 'assoc');
 
+            unset($client);
+
             if ($result_array === null) {
                 throw new \Exception('Не удалось декодировать: ' . $result);
             }
