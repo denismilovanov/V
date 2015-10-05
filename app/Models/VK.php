@@ -46,6 +46,7 @@ class VK
                     'token' => $access_token,
                 ],
                 'timeout' => 3.0,
+                'connect_timeout' => 3.0,
             ]);
 
             $result = (string) $response->getBody();
