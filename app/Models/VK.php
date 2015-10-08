@@ -241,6 +241,8 @@ class VK
             ]);
         }
 
+        $audio_ids = [];
+
         // теперь извлечем композии для текущего пользователя
         foreach ($result_array as $audio) {
             $audio_ids []= \DB::select("

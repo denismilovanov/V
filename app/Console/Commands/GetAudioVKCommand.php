@@ -40,7 +40,6 @@ class GetAudioVKCommand extends \LaravelSingleInstanceCommand\Command
 
         \Log::info('Завершили подписку ' . $tag);
 
-        Pusher::disconnect();
         Helper::closeDBConnections();
 
         return 0;
