@@ -37,6 +37,8 @@ $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function
     $app->post('setPhotosVK', ['uses' => 'ApiController@setPhotosVK']);
     $app->get('getPhotosVK', ['uses' => 'ApiController@getPhotosVK']);
 
+    $app->get('setBDate', ['uses' => 'ApiController@setBDate']);
+
     $app->get('setAbout', ['uses' => 'ApiController@setAbout']);
     $app->get('getAbout', ['uses' => 'ApiController@getAbout']);
 

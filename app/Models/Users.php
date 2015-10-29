@@ -249,6 +249,28 @@ class Users
         return true;
     }
 
+    public static function setBDate($user_id, $bdate) {
+        if (! preg_match("~^\d{4}-\d{2}-\d{2}$~uixs", $bdate)) {
+            $bdate = intval($bdate);
+            if ($bdate < 0 or $bdate > 100) {
+                return false;
+            }
+            $bdate = (date('Y') - $bdate) . '-' . date("m-d");
+        }
+
+        try {
+            \DB::select("
+                UPDATE public.users
+                    SET bdate = ?
+                    WHERE id = ?;
+            ", [$bdate, $user_id]);
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static function setDeviceToken($user_id, $key, $device_token, $device_type) {
         if (! $device_token or ! $device_type) {
             return false;

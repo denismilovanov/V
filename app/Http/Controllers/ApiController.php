@@ -345,6 +345,21 @@ class ApiController extends BaseController {
         ]);
     }
 
+    public function setBDate() {
+        if (! $this->beforeAction(__METHOD__)) {
+            $data['status'] = self::ERROR_KEY;
+            return self::json($data);
+        }
+
+        $bdate = strip_tags(\Request::get('bdate'));
+
+        $result = Users::setBDate(self::$user->id, $bdate);
+
+        return self::json([
+            'status' => $result ? self::SUCCESS : self::ERROR,
+        ]);
+    }
+
     public function setAbout() {
         if (! $this->beforeAction(__METHOD__)) {
             $data['status'] = self::ERROR_KEY;
