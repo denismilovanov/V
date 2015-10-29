@@ -28,7 +28,7 @@ class GetAudioVKCommand extends \LaravelSingleInstanceCommand\Command
                 $job->delete();
             } else {
                 \Log::info('Возвращаем на обработку');
-                $job->release(60);
+                $job->release(60 * 60 * 24 * 10);
             }
 
             Helper::closeDBConnections();
