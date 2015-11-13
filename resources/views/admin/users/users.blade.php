@@ -94,6 +94,13 @@
                             '<td>' + (user['is_blocked_by_vk'] ? 'Да' : 'Нет') + '</td>' +
                             '<td>' + user['registered_at'] + '</td>' +
                             '<td>' + user['abuses_count'] + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                            '<td colspan=10 style="border-top: none; padding-top: 0;">' +
+                                '<span style="color: silver; font-family: Courier;">' + user['geography'] + '</span> ' +
+                                user['city'] + ' ' +
+                                user['region'] + ' ' +
+                            '</td>' +
                         '</tr>'
                     );
                 }

@@ -472,6 +472,7 @@ class Users
                         public.format_date(registered_at) AS registered_at,
                         us.*,
                         public.format_date(i.last_activity_at) AS last_activity_at,
+                        i.city_id, i.region_id, i.geography,
                         (SELECT count(*) FROM public.abuses WHERE to_user_id = u.id) AS abuses_count
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i
@@ -514,6 +515,26 @@ class Users
                 $user->app []= $app->app;
             }
             $user->app = implode(', ', $user->app);
+
+            //
+            $city = \DB::connection('gis')->select("
+                SELECT name AS geo
+                    FROM planet_osm_polygon
+                    WHERE osm_id = ?;
+            ", [$user->city_id]);
+            $region = \DB::connection('gis')->select("
+                SELECT name AS geo
+                    FROM planet_osm_polygon
+                    WHERE osm_id = ?;
+            ", [$user->region_id]);
+
+            $user->city = $user->region = '';
+            if (isset($city[0])) {
+                $user->city = $city[0]->geo;
+            }
+            if (isset($region[0])) {
+                $user->region = $region[0]->geo;
+            }
 
         } else if ($area == 'like') {
             foreach(['updated_at', 'registered_at', 'is_blocked_by_vk', 'is_moderated', 'time_zone'] as $key) {
