@@ -101,7 +101,7 @@
                                 '<a style="color: silver; text-decoration: underline; font-family: Courier;" target="_blank" ' +
                                     'href="https://maps.yandex.ru/?ll=' + coords + '&pt=' + coords + '&spn=0.1,0.1">' +
                                     user['geography'] +
-                                '</a>' +
+                                '</a>&nbsp;' +
                                 user['city'] + ' ' +
                                 user['region'] + ' ' +
                             '</td>' +
