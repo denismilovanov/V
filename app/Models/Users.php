@@ -473,6 +473,8 @@ class Users
                         us.*,
                         public.format_date(i.last_activity_at) AS last_activity_at,
                         i.city_id, i.region_id, i.geography,
+                        st_x(i.geography::geometry) AS lon,
+                        st_y(i.geography::geometry) AS lat,
                         (SELECT count(*) FROM public.abuses WHERE to_user_id = u.id) AS abuses_count
                     FROM public.users AS u
                     INNER JOIN public.users_index AS i

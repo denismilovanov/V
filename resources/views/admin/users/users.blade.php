@@ -82,10 +82,11 @@
 
                 for (var k in data) {
                     var user = data[k];
+                    var coords = user['lon'] + ',' + user['lat'];
                     $('#users').append(
                         '<tr>' +
                             '<td><a href="{{ $base }}/users/' + user['id'] + '">' + user['id'] + '</a></td>' +
-                            '<td>' + user['name'] + '</td>' +
+                            '<td><b>' + user['name'] + '</b></td>' +
                             '<td>' + user['sex'] + '</td>' +
                             '<td>' + user['age'] + '</td>' +
                             '<td><a href="https://vk.com/id' + user['vk_id'] + '">' + user['vk_id'] + '</a></td>' +
@@ -97,7 +98,10 @@
                         '</tr>' +
                         '<tr>' +
                             '<td colspan=10 style="border-top: none; padding-top: 0;">' +
-                                '<span style="color: silver; font-family: Courier;">' + user['geography'] + '</span> ' +
+                                '<a style="color: silver; text-decoration: underline; font-family: Courier;" target="_blank" ' +
+                                    'href="https://maps.yandex.ru/?ll=' + coords + '&pt=' + coords + '&spn=0.1,0.1">' +
+                                    user['geography'] +
+                                '</a>' +
                                 user['city'] + ' ' +
                                 user['region'] + ' ' +
                             '</td>' +
