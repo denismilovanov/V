@@ -337,6 +337,9 @@ class UsersMatches
 
         // read top users
         $users_ids_at_levels = self::getConnection($user_id)->select("
+            WITH lock AS (
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
+            )
             SELECT * FROM public.get_matching_users_ids(:user_id, :limit) AS t(level_id integer, user_id integer);
         ", [
             'user_id' => $user_id,
