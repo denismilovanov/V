@@ -448,6 +448,7 @@ class Users
                         icount(ui.groups_vk_ids & array[" . $w->groups_vk_ids . "]::int[]) AS common_groups_vk,
                         icount(ui.friends_vk_ids & array[" . $w->friends_vk_ids . "]::int[]) AS common_friends_vk,
                         round(ST_Distance(ui.geography, :geography)::decimal / 1000) AS distance,
+                        :radius, :geography,
 
                         " . UsersMatches::weightFormula($w, '0', $my_settings->radius) . " AS weight_level
 
