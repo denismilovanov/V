@@ -111,7 +111,7 @@ class UsersMatches
     }
 
     // the heart of the system - the formula for ranging users
-    public static function weightFormula($w, $likes_users) {
+    public static function weightFormula($w, $likes_users, $radius) {
         return "
         (
             " . env('WEIGHT_GROUPS_VK') . " * icount(groups_vk_ids & array[" . $w->groups_vk_ids . "]::int[]) +
@@ -124,7 +124,11 @@ class UsersMatches
             " . env('WEIGHT_GAMES_VK') . " * icount(games_vk_ids & array[" . $w->games_vk_ids . "]::int[]) +
             " . env('WEIGHT_MOVIES_VK') . " * icount(movies_vk_ids & array[" . $w->movies_vk_ids . "]::int[]) +
             " . env('WEIGHT_MUSIC_VK') . " * icount(music_vk_ids & array[" . $w->music_vk_ids . "]::int[]) +
-            " . env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
+
+            " .
+                ($radius == 200 ? '' :
+                (env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius + ")) . "
+
             " . env('WEIGHT_POPULARITY') . " * popularity +
             " . env('WEIGHT_FRIENDLINESS') . " * friendliness +
             " . env('WEIGHT_LIKED_ME') . " * (ui.user_id IN ($likes_users))::integer
@@ -162,16 +166,26 @@ class UsersMatches
     }
 
     // have we detected region by coordinates?
-    private static function additionalRegionCondition($region_id) {
-        if ($region_id) {
+    private static function additionalRegionCondition($region_id, $radius) {
+        if ($region_id and $radius != 200) {
             // yes, it will help us to speed up the search
             $additional_region_condition = 'region_id = ' . intval($region_id) . ' AND ';
         } else {
             // no, we will relay on coordinates only
-            $additional_region_condition = '';
+            $additional_region_condition = 'TRUE AND ';
         }
 
         return $additional_region_condition;
+    }
+
+    // shall we use radius restriction?
+    private static function additionalRadiusCondition($radius) {
+        if ($radius == 200) {
+            // it means "200+", so there is no restriction
+            return 'TRUE AND ';
+        } else {
+            return 'ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND ';
+        }
     }
 
     // rebuilding algorithm (fill up fresh index and rotate)
@@ -190,7 +204,8 @@ class UsersMatches
         }
 
         $additional_gender_condition = self::additionalGenderCondition($user->sex);
-        $additional_region_condition = self::additionalRegionCondition($geography['region_id']);
+        $additional_region_condition = self::additionalRegionCondition($geography['region_id'], $settings->radius);
+        $additional_radius_condition = self::additionalRadiusCondition($settings->radius);
 
         START('fillMatches.main');
 
@@ -236,11 +251,12 @@ class UsersMatches
                 SET synchronous_commit TO off;
 
                 SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
+                SELECT :radius, :geography; -- we have to use all variables
 
                 WITH all_users AS (
                     SELECT  ui.user_id AS match_user_id,
 
-                            " . self::weightFormula($search_weights_params, $likes_users) . "
+                            " . self::weightFormula($search_weights_params, $likes_users, $settings->radius) . "
                             AS matching_level
 
                         FROM public.users_index AS ui
@@ -251,7 +267,8 @@ class UsersMatches
                                 age BETWEEN :age_from AND :age_to AND
                                 sex IN ($sex) AND
                                 $additional_gender_condition
-                                ST_DWithin(geography, (:geography)::geography, :radius * 1000)
+                                $additional_radius_condition
+                                TRUE
                 ),
                 levels AS (
                     SELECT  CASE WHEN matching_level < :weights_levels
@@ -358,7 +375,8 @@ class UsersMatches
             $sex = self::aggregateSexIds($settings);
 
             $additional_gender_condition = self::additionalGenderCondition($user->sex);
-            $additional_region_condition = self::additionalRegionCondition($geography['region_id']);
+            $additional_region_condition = self::additionalRegionCondition($geography['region_id'], $settings->radius);
+            $additional_radius_condition = self::additionalRadiusCondition($settings->radius);
 
             if ($sex) {
                 $search_weights_params = Users::getMySearchWeightParams($user_id);
@@ -371,17 +389,21 @@ class UsersMatches
                     // they will be simply matching by geo, age and sex
                     // or only by geo and sex at the second iteration
                     $users_ids_at_levels = \DB::select("
-                        WITH matches AS (
+                        WITH r AS (
+                            -- we have to use all variables
+                            SELECT :radius, :geography
+                        ),
+                        matches AS (
                             SELECT  ui.user_id AS user_id,
 
-                                    " . self::weightFormula($search_weights_params, $likes_users) . " AS level_id
+                                    " . self::weightFormula($search_weights_params, $likes_users, $settings->radius) . " AS level_id
 
                                 FROM public.users_index AS ui
                                 WHERE   $current_additional_region_condition
                                         age BETWEEN :age_from AND :age_to AND
                                         sex IN ($sex) AND
                                         $additional_gender_condition
-                                        ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND
+                                        $additional_radius_condition
                                         user_id NOT IN (" . $liked_users . ") AND
                                         user_id >= :min_user_id AND
                                         user_id != :user_id
