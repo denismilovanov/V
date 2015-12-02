@@ -112,28 +112,34 @@ class UsersMatches
 
     // the heart of the system - the formula for ranging users
     public static function weightFormula($w, $likes_users, $radius) {
-        return "
-        (
-            " . env('WEIGHT_GROUPS_VK') . " * icount(groups_vk_ids & array[" . $w->groups_vk_ids . "]::int[]) +
-            " . env('WEIGHT_FRIENDS_VK') . " * icount(friends_vk_ids & array[" . $w->friends_vk_ids . "]::int[]) +
-            " . env('WEIGHT_AUDIO_VK') . " * icount(audio_vk_ids & array[" . $w->audio_vk_ids . "]::int[]) +
-            " . env('WEIGHT_UNIVERSITIES_VK') . " * icount(universities_vk_ids & array[" . $w->universities_vk_ids . "]::int[]) +
-            " . env('WEIGHT_ACTIVITIES_VK') . " * icount(activities_vk_ids & array[" . $w->activities_vk_ids . "]::int[]) +
-            " . env('WEIGHT_INTERESTS_VK') . " * icount(interests_vk_ids & array[" . $w->interests_vk_ids . "]::int[]) +
-            " . env('WEIGHT_BOOKS_VK') . " * icount(books_vk_ids & array[" . $w->books_vk_ids . "]::int[]) +
-            " . env('WEIGHT_GAMES_VK') . " * icount(games_vk_ids & array[" . $w->games_vk_ids . "]::int[]) +
-            " . env('WEIGHT_MOVIES_VK') . " * icount(movies_vk_ids & array[" . $w->movies_vk_ids . "]::int[]) +
-            " . env('WEIGHT_MUSIC_VK') . " * icount(music_vk_ids & array[" . $w->music_vk_ids . "]::int[]) +
-
-            " .
-                ($radius == 200 ? '' :
-                (env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius + ")) . "
-
-            " . env('WEIGHT_POPULARITY') . " * popularity +
-            " . env('WEIGHT_FRIENDLINESS') . " * friendliness +
-            " . env('WEIGHT_LIKED_ME') . " * (ui.user_id IN ($likes_users))::integer
-        )
-        ::integer ";
+        if ($radius == 200) {
+            // more didtance => less weight
+            return "
+            (
+                10000 - st_distance(geography, (:geography)::geography)
+            )::integer
+            ";
+        } else {
+            // weighted formula
+            return "
+            (
+                " . env('WEIGHT_GROUPS_VK') . " * icount(groups_vk_ids & array[" . $w->groups_vk_ids . "]::int[]) +
+                " . env('WEIGHT_FRIENDS_VK') . " * icount(friends_vk_ids & array[" . $w->friends_vk_ids . "]::int[]) +
+                " . env('WEIGHT_AUDIO_VK') . " * icount(audio_vk_ids & array[" . $w->audio_vk_ids . "]::int[]) +
+                " . env('WEIGHT_UNIVERSITIES_VK') . " * icount(universities_vk_ids & array[" . $w->universities_vk_ids . "]::int[]) +
+                " . env('WEIGHT_ACTIVITIES_VK') . " * icount(activities_vk_ids & array[" . $w->activities_vk_ids . "]::int[]) +
+                " . env('WEIGHT_INTERESTS_VK') . " * icount(interests_vk_ids & array[" . $w->interests_vk_ids . "]::int[]) +
+                " . env('WEIGHT_BOOKS_VK') . " * icount(books_vk_ids & array[" . $w->books_vk_ids . "]::int[]) +
+                " . env('WEIGHT_GAMES_VK') . " * icount(games_vk_ids & array[" . $w->games_vk_ids . "]::int[]) +
+                " . env('WEIGHT_MOVIES_VK') . " * icount(movies_vk_ids & array[" . $w->movies_vk_ids . "]::int[]) +
+                " . env('WEIGHT_MUSIC_VK') . " * icount(music_vk_ids & array[" . $w->music_vk_ids . "]::int[]) +
+                " . env('WEIGHT_DISTANCE') . " * (:radius - st_distance(geography, (:geography)::geography)::decimal / 1000.0) / :radius +
+                " . env('WEIGHT_POPULARITY') . " * popularity +
+                " . env('WEIGHT_FRIENDLINESS') . " * friendliness +
+                " . env('WEIGHT_LIKED_ME') . " * (ui.user_id IN ($likes_users))::integer
+            )
+            ::integer ";
+        }
     }
 
     // helping function to take is_show_male/is_show_female settings and join them by comma
