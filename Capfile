@@ -1,2 +1,2 @@
 load 'deploy'
-load 'deploy_all'
+load 'deploy_all.rb'

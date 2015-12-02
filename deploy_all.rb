@@ -1,8 +1,9 @@
 # coding: utf-8
 
-test = 0
+test = ENV['env'] != 'prod'
+print test
 
-if test == 1
+if test
     set :app_dir, '/home/test-vmeste/vmeste-app/'
     set :user, 'test-vmeste'
     e = `cat ./.env.test`
@@ -18,7 +19,7 @@ set :deploy_to, "#{app_dir}"
 
 set :scm, :git
 set :git_enable_submodules, true
-set :repository,  "ssh://git@dev.legion.info/vmeste-app.git"
+set :repository,  "ssh://git@185.49.69.108/~/vmeste.git" # ssh://git@dev.legion.info/vmeste-app.git"
 set :branch, 'master'
 
 set :deploy_via, :copy
