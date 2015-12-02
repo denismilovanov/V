@@ -546,7 +546,7 @@ class Users
         }
 
         if ($area != 'only_user') {
-            $user->photos = UsersPhotos::getUserPhotos($user_id, 1, null, $user->sex);
+            $user->photos = UsersPhotos::getUserPhotos($user_id, null, null, $user->sex);
         }
 
         if ($area == 'getUserProfile' and ! $user->age) {
