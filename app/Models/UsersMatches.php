@@ -188,7 +188,7 @@ class UsersMatches
     private static function additionalRadiusCondition($radius) {
         if ($radius == 200) {
             // it means "200+", so there is no restriction
-            return 'TRUE AND ';
+            return 'geography IS NOT NULL AND ';
         } else {
             return 'ST_DWithin(geography, (:geography)::geography, :radius * 1000) AND ';
         }

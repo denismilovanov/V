@@ -633,6 +633,10 @@ class Users
                     UsersMatches::enqueueRemoveFromIndex($additional_data['for_user_id'], $user->id);
                     $user = null;
                 }
+                if (! $user->distance) {
+                    $user->distance = 200;
+                    UsersMatches::enqueueRemoveFromIndex($additional_data['for_user_id'], $user->id);
+                }
             }
 
             if ($user) {
