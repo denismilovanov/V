@@ -8,6 +8,13 @@
     </div>
     <div class="panel-body">
         <table class="table" id="geo">
+            <tr>
+                <th width="25%">Регион [region_id]</th>
+                <th width="25%">Город [city_id]</th>
+                <th width="16%">Всего</th>
+                <th width="16%">Мужчин</th>
+                <th width="16%">Женщин</th>
+            <tr>
         </table>
     </div>
 </div>
@@ -20,7 +27,6 @@
                 action: 'get_geo_data',
                 ajax: true
             }, function(data) {
-                $('#geo tbody').remove();
                 for (var k in data) {
                     var row = data[k];
                     $('#geo').append(
@@ -28,6 +34,8 @@
                             '<td>' + row['region'] + '[' + row['region_id'] + ']</td>' +
                             '<td>' + row['city'] + '[' + row['city_id'] + ']</td>' +
                             '<td>' + row['count'] + '</td>' +
+                            '<td>' + row['count_males'] + '</td>' +
+                            '<td>' + row['count_females'] + '</td>' +
                         '</tr>'
                     );
                 }
