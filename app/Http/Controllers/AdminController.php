@@ -61,6 +61,7 @@ class AdminController extends BaseController {
             $method = \Request::get('method');
 
             $result = Api::callApiMethod($user_id, $method, \Request::all());
+            $result = str_replace('\/', '/', $result);
         }
 
         return view('admin.tests.sendRequest', [
