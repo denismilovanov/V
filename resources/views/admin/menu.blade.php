@@ -19,7 +19,8 @@
             <span class="caret"></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-            <li><a href="{{ $base }}/stats/">Вся статистика</a></li>
+            <li><a href="{{ $base }}/stats/">Регистрации и лайки</a></li>
+            <li><a href="{{ $base }}/geo/">География</a></li>
         </ul>
     </li>
 </ul>
