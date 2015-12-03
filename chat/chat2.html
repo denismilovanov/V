@@ -13,26 +13,35 @@
     <button onclick="send();" value="Send">Send</button>
     <button onclick="start();" value="Send">Start</button>
     <button onclick="stop();" value="Send">Stop</button>
+    <button onclick="read();" value="Read">Read</button>
 
     <script>
-    var socket = io('http://localhost:5000');
+    var socket = io('http://192.168.33.100:5000');
 
-    socket.emit('authorize', {"key":"6f4ccad5d9295f873429fd8544159ec5ae33fd6d"});
+    socket.emit('authorize', {"key":"c4b8b0dc2cd9feb4942863f184b45fdc120ffab8"});
 
     function send() {
-      socket.emit('message', {"key":"6f4ccad5d9295f873429fd8544159ec5ae33fd6d", "user_id": 100000, "message": "hi?", "id": "321"});
+      socket.emit('message', {"key":"c4b8b0dc2cd9feb4942863f184b45fdc120ffab8", "user_id": 100000, "message": "hi?", "id": "321"});
     }
 
-   function start() {
-      socket.emit('start_writing', {"key":"6f4ccad5d9295f873429fd8544159ec5ae33fd6d", "user_id": 100000});
+    function start() {
+      socket.emit('start_writing', {"key":"c4b8b0dc2cd9feb4942863f184b45fdc120ffab8", "user_id": 100000});
     }
 
     function stop() {
-      socket.emit('stop_writing', {"key":"6f4ccad5d9295f873429fd8544159ec5ae33fd6d", "user_id": 100000});
+      socket.emit('stop_writing', {"key":"c4b8b0dc2cd9feb4942863f184b45fdc120ffab8", "user_id": 100000});
+    }
+
+    function read() {
+      socket.emit('read', {"key":"c4b8b0dc2cd9feb4942863f184b45fdc120ffab8", "user_id": 100000, "message_id": 888});
     }
 
     socket.on('message', function(data) {
       console.log('message',data);
+    });
+
+    socket.on('read', function(data) {
+      console.log('read',data);
     });
 
     socket.on('start_writing', function(data) {

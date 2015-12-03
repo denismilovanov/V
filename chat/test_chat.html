@@ -13,35 +13,26 @@
     <button onclick="send();" value="Send">Send</button>
     <button onclick="start();" value="Send">Start</button>
     <button onclick="stop();" value="Send">Stop</button>
-    <button onclick="read();" value="Read">Read</button>
 
     <script>
-    var socket = io('http://192.168.33.100:5000');
+    var socket = io('http://test.vmeste-app.ru:5000');
 
-    socket.emit('authorize', {"key":"db8f139a564b837bdb1d569f2b0923fb4a4d9823"});
+    socket.emit('authorize', {"key":"d552880eea1923f1016d483e944aaa4fc2e6861b"});
 
     function send() {
-        socket.emit('message', {"key":"db8f139a564b837bdb1d569f2b0923fb4a4d9823", "user_id": 200000, "message": "hi!", "id": "123"});
+      socket.emit('message', {"key":"d552880eea1923f1016d483e944aaa4fc2e6861b", "user_id": 100000, "message": "hi?", "id": "321"});
     }
 
-    function start() {
-      socket.emit('start_writing', {"key":"db8f139a564b837bdb1d569f2b0923fb4a4d9823", "user_id": 200000});
+   function start() {
+      socket.emit('start_writing', {"key":"d552880eea1923f1016d483e944aaa4fc2e6861b", "user_id": 100000});
     }
 
     function stop() {
-      socket.emit('stop_writing', {"key":"db8f139a564b837bdb1d569f2b0923fb4a4d9823", "user_id": 200000});
-    }
-
-    function read() {
-      socket.emit('read', {"key":"db8f139a564b837bdb1d569f2b0923fb4a4d9823", "user_id": 200000, "message_id": 777});
+      socket.emit('stop_writing', {"key":"d552880eea1923f1016d483e944aaa4fc2e6861b", "user_id": 100000});
     }
 
     socket.on('message', function(data) {
       console.log('message',data);
-    });
-
-    socket.on('read', function(data) {
-      console.log('read',data);
     });
 
     socket.on('start_writing', function(data) {
@@ -59,7 +50,7 @@
     socket.on('authorize', function(data) {
       console.log('auth',data);
     });
-    // 6f4ccad5d9295f873429fd8544159ec5ae33fd6d
+    //
 
 
 
