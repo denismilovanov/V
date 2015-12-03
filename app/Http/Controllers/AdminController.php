@@ -161,6 +161,20 @@ class AdminController extends BaseController {
         ]);
     }
 
+    public function geo() {
+        if (\Request::isMethod('get')) {
+            $action = \Request::get('action');
+
+            if ($action == 'get_geo_data') {
+                return response()->json(Stats::getGeoData());
+            }
+        }
+
+        return view('admin.stats.geo', [
+
+        ]);
+    }
+
     public function push() {
         $user_id = intval(\Request::get('user_id'));
         $action = \Request::get('action');

@@ -75,6 +75,7 @@ $app->group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers'], functi
     $app->post('users/{user_id}', ['uses' => 'AdminController@user']);
 
     $app->get('stats/', ['uses' => 'AdminController@stats']);
+    $app->get('geo/', ['uses' => 'AdminController@geo']);
 
     $app->get('tools/push', ['uses' => 'AdminController@push']);
     $app->get('tools/softVersions', ['uses' => 'AdminController@softVersions']);

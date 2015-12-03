@@ -40,6 +40,36 @@ class Stats {
         return $result;
     }
 
+    public static function getGeoData() {
+        $data = \DB::select("
+            SELECT region_id, city_id, sum(1) AS count
+                FROM public.users_index
+                WHERE user_id NOT BETWEEN 100000 AND 299999
+                GROUP BY region_id, city_id
+                HAVING sum(1) > 10
+                ORDER BY sum(1) DESC
+                LIMIT 100;
+        ");
+
+        foreach ($data as $row) {
+            $city = \DB::connection('gis')->select("
+                SELECT name AS geo
+                    FROM planet_osm_polygon
+                    WHERE osm_id = ?;
+            ", [$row->city_id]);
+            $row->city = isset($city[0]) ? $city[0]->geo : '';
+
+            $region = \DB::connection('gis')->select("
+                SELECT name AS geo
+                    FROM planet_osm_polygon
+                    WHERE osm_id = ?;
+            ", [$row->region_id]);
+            $row->region = isset($region[0]) ? $region[0]->geo : '';
+        }
+
+        return $data;
+    }
+
     public static function getActivityData() {
         $data = \DB::select("
             SELECT  date,
