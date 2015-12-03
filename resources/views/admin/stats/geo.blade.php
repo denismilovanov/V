@@ -25,8 +25,8 @@
                     var row = data[k];
                     $('#geo').append(
                         '<tr>' +
-                            '<td>' + row['region'] + '</td>' +
-                            '<td>' + row['city'] + '</td>' +
+                            '<td>' + row['region'] + '[' + row['region_id'] + ']</td>' +
+                            '<td>' + row['city'] + '[' + row['city_id'] + ']</td>' +
                             '<td>' + row['count'] + '</td>' +
                         '</tr>'
                     );
