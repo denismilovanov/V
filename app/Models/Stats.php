@@ -42,7 +42,10 @@ class Stats {
 
     public static function getGeoData() {
         $data = \DB::select("
-            SELECT region_id, city_id, sum(1) AS count
+            SELECT  region_id, city_id,
+                    sum(1) AS count,
+                    sum(CASE WHEN sex = 1 THEN 1 ELSE 0 END) AS count_females,
+                    sum(CASE WHEN sex = 2 THEN 1 ELSE 0 END) AS count_males
                 FROM public.users_index
                 WHERE user_id NOT BETWEEN 100000 AND 299999
                 GROUP BY region_id, city_id
