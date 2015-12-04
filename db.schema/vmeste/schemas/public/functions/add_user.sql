@@ -39,11 +39,16 @@ BEGIN
 
     RAISE NOTICE 'public.add_user: %', s_name;
 
-    INSERT INTO users
-        (id, updated_at, sex, name, bdate, about, time_zone, vk_id)
-        VALUES (
-            i_id, now(), i_sex, s_name, d_bdate, s_about, i_time_zone, s_vk_id::integer
-        );
+    BEGIN
+        INSERT INTO users
+            (id, updated_at, sex, name, bdate, about, time_zone, vk_id)
+            VALUES (
+                i_id, now(), i_sex, s_name, d_bdate, s_about, i_time_zone, s_vk_id::integer
+            );
+    EXCEPTION WHEN unique_violation THEN
+        -- есть ситуации, когда уникальность vk_id нарушается
+        RETURN i_id;
+    END;
 
     INSERT INTO users_settings
         (user_id, radius, age_from, age_to, is_show_male, is_show_female, is_notification)
