@@ -232,16 +232,23 @@ Chat = {
 
         var me_id = s['user_id']
 
-        Chat.get_socket_by_user_id(user_id, function(destination_socket) {
-            // save message to db
-            Chat.save_message(me_id, user_id, message, function(message_id, destination_message_id, status) {
-                // for push notification
-                Chat.send_push(me_id, user_id, message);
+        // save message to db
+        Chat.save_message(me_id, user_id, message, function(message_id, destination_message_id, status) {
+            // got error?
+            if (status == Chat.ERROR) {
+                Chat.logger.info('UNABLE TO SAVE MESSAGE:', me_id, user_id);
+                return;
+            }
 
+            // for push notification
+            Chat.send_push(me_id, user_id, message);
+
+            Chat.get_socket_by_user_id(user_id, function(destination_socket) {
                 // send ack and message in Chat.sockets_info
                 on_save_message(destination_socket, message_id, destination_message_id, me_id, status);
             });
         });
+
     },
 
     read: function(data, socket, on_read) {
@@ -313,6 +320,7 @@ Chat = {
     },
 
     disconnect: function(socket) {
+        Chat.logger.info('TRYING TO DISCONNECT SOCKET:', socket.id);
         var s = Chat.get_socket_info_by_socket_id(socket.id);
         if (s) {
             Chat.logger.info('DISCONNECT SOCKET:', socket.id, s.user_id);

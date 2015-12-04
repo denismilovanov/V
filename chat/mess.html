@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO</title>
+  <meta http-equiv="Access-Control-Allow-Origin" content="all">
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="socket.io.js"></script>
+
+    <input style="width:90%;" type="text" id="url" value="http://192.168.33.100:5010"/>url
+    <!--<input style="width:90%;" type="text" id="user_id" />user_id-->
+    <input style="width:90%;" type="text" id="key" />key
+    <input style="width:90%;" type="text" id="with_user_id" />with_user_id
+    <input style="width:90%;" type="text" id="message" value='777'/>message
+    <br /><br />
+    <button onclick="authorize();" value="Authorize">Authorize</button>
+    <br /><br />
+
+    <button onclick="send();" value="Send">Send</button>
+
+    <script>
+        var socket = null;
+
+        function authorize() {
+            var url = $('#url').val();
+            key = $('#key').val();
+
+            socket = io(url);
+
+            socket.emit('authorize', {"key": key});
+
+            socket.on('authorize', function(data) {
+                console.log('authorize', data);
+            });
+
+            socket.on('message', function(data) {
+                console.log('message',data);
+            });
+
+            socket.on('read', function(data) {
+                console.log('read',data);
+            });
+
+            socket.on('start_writing', function(data) {
+                console.log('start_writing',data);
+            });
+
+            socket.on('stop_writing', function(data) {
+                console.log('stop_writing',data);
+            });
+
+            socket.on('message_ack', function(data) {
+                console.log('ack', data);
+            });
+        }
+
+        function send() {
+            var with_user_id = $('#with_user_id').val();
+            var message = $('#message').val();
+            socket.emit('message', {
+                "key": key,
+                "user_id": with_user_id,
+                "message": message,
+                "id": "321"
+            });
+        }
+
+        function data_stream() {
+
+            socket.emit('data_stream', data);
+        }
+    </script>
+
+</body>
+</html>
