@@ -36,9 +36,8 @@ class UsersMatches
 
         if ($weight_level !== null) {
             $deleted_matching_levels = self::getConnection($user_id)->select("
-                WITH lock AS (
-                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
-                )
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
+
                 UPDATE public.matching_levels_$user_id
                     SET users_ids = users_ids - intset(:match_user_id)
                     WHERE level_id = :level_id AND
@@ -53,9 +52,8 @@ class UsersMatches
         if (! sizeof($deleted_matching_levels)) {
             // no hit, remove from all levels
             self::getConnection($user_id)->select("
-                WITH lock AS (
-                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
-                )
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
+
                 UPDATE public.matching_levels_$user_id
                     SET users_ids = users_ids - intset(:match_user_id);
             ", [
@@ -67,9 +65,8 @@ class UsersMatches
 
         if ($weight_level !== null) {
             $deleted_matching_levels = self::getConnection($user_id)->select("
-                WITH lock AS (
-                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
-                )
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
+
                 UPDATE public.matching_levels_fresh_$user_id
                     SET users_ids = users_ids - intset(:match_user_id)
                     WHERE level_id = :level_id AND
@@ -84,9 +81,8 @@ class UsersMatches
         if (! sizeof($deleted_matching_levels)) {
             // no hit, remove from all levels
             self::getConnection($user_id)->select("
-                WITH lock AS (
-                    SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
-                )
+                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
+
                 UPDATE public.matching_levels_fresh_$user_id
                     SET users_ids = users_ids - intset(:match_user_id);
             ", [
@@ -360,9 +356,7 @@ class UsersMatches
 
         // read top users
         $users_ids_at_levels = self::getConnection($user_id)->select("
-            WITH lock AS (
-                SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'))
-            )
+            SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
             SELECT * FROM public.get_matching_users_ids(:user_id, :limit) AS t(level_id integer, user_id integer);
         ", [
             'user_id' => $user_id,
