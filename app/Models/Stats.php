@@ -228,11 +228,26 @@ class Stats {
         } else if ($data['type'] == 'match') {
             $date = date("Y-m-d", strtotime($data['ts']));
 
+            // обновляем число мачтей в системе
             \DB::select("
                 UPDATE stats.daily
                     SET matches_count = matches_count + 1
                     WHERE date = ?
             ", [$date]);
+
+            // обновляем число матчей пользователю
+            \DB::select("
+                UPDATE stats.users_overall
+                    SET matches_count = matches_count + 1
+                    WHERE user_id = ?
+            ", [$data['from_user_id']]);
+
+            // обновляем число матчей пользователю
+            \DB::select("
+                UPDATE stats.users_overall
+                    SET matches_count = matches_count + 1
+                    WHERE user_id = ?
+            ", [$data['to_user_id']]);
 
         // событие - некоторая активность (нужна для статы по активности)
         } else if ($data['type'] == 'activity') {
