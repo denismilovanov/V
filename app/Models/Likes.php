@@ -45,7 +45,9 @@ class Likes {
                     FROM public.likes
                     WHERE   user1_id = ? AND
                             user2_id = ? AND
-                            NOT is_blocked;
+                            NOT is_blocked AND
+                            -- user1 has liked user2 before:
+                            is_liked;
             ", [$to_user_id, $from_user_id]);
 
             // проверка на взаимность
