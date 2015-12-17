@@ -54,6 +54,10 @@
                         <td>Сколько раз его/ее дизлайкнули</td>
                         <td>{{ $user->disliked_count }}</td>
                     </tr>
+                    <tr>
+                        <td>Число совпадений</td>
+                        <td>{{ $user->matches_count }}</td>
+                    </tr>
                 </table>
             </div>
         </div>
