@@ -147,11 +147,11 @@ class Stats {
 
     public static function getMatchesMonthsActivityData() {
         $data = \DB::select("
-            SELECT  date_trunc('month', date) AS date,
+            SELECT  date_trunc('month', date)::date AS date,
                     avg(matches_count) AS matches_count
                 FROM stats.daily
-                GROUP BY date_trunc('month', date)
-                ORDER BY date_trunc('month', date);
+                GROUP BY date_trunc('month', date)::date
+                ORDER BY date_trunc('month', date)::date;
         ");
 
         $result = [
@@ -159,7 +159,7 @@ class Stats {
         ];
 
         foreach ($data as $row) {
-            $row->date = date("m.Y", strtotime("+ 1 month", strtotime($row->date)));
+            $row->date = date("m.Y", strtotime($row->date));
             $result['matches_count'] []= [$row->date, (float)sprintf("%.2f", $row->matches_count)];
         }
 
