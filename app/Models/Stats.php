@@ -159,7 +159,7 @@ class Stats {
         ];
 
         foreach ($data as $row) {
-            $row->date = date("m.Y", strtotime($row->date));
+            $row->date = date("m.Y", strtotime("+ 1 month", strtotime($row->date)));
             $result['matches_count'] []= [$row->date, (float)sprintf("%.2f", $row->matches_count)];
         }
 
