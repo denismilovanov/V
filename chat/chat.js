@@ -116,6 +116,7 @@ Chat = {
 
     authorize: function(data, socket, on_authorize) {
         var key = data['key'];
+        Chat.logger.info('TRYING TO AUTHORIZE BY KEY:', key);
 
         Chat.pg_query('SELECT user_id FROM users_devices WHERE key = $1::varchar;', [key], function(result) {
             var user_id = null;
