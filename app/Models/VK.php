@@ -54,6 +54,7 @@ class VK
             $result_array = json_decode($result, 'assoc');
 
             unset($client);
+            gc_collect_cycles();
 
             if ($result_array === null) {
                 throw new \Exception('Не удалось декодировать: ' . $result);
