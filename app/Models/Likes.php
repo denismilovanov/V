@@ -48,10 +48,15 @@ class Likes {
                             NOT is_blocked;
             ", [$to_user_id, $from_user_id]);
 
+            // проверка на взаимность
             if (sizeof($mutual_row)) {
-
+                //
                 $mutual = 1;
 
+                // добавляем матч в отдельную таблицу
+                self::addMatch($from_user_id, $to_user_id);
+
+                // создаем диалог
                 Messages::createDialog($from_user_id, $to_user_id);
 
                 // надо ли послать пуш второму?
@@ -78,12 +83,22 @@ class Likes {
             }
         }
 
+        // удаление из индексов
         UsersMatches::deleteMatch($from_user_id, $to_user_id, $weight_level);
 
         return [
             'mutual' => $mutual,
             'user' => $user,
         ];
+    }
+
+    // добавление матчей в спецтаблицу
+    public static function addMatch($from_user_id, $to_user_id) {
+        \DB::select("
+            INSERT INTO public.matches
+                (user1_id, user2_id)
+                VALUES (?, ?), (?, ?);
+        ", [$from_user_id, $to_user_id, $to_user_id, $from_user_id]);
     }
 
     // список тех, кого я лайкнул или дизлайкнул, требуется для ограничения выдачи
@@ -191,12 +206,21 @@ class Likes {
     public static function deleteAllBetween($from_user_id, $to_user_id) {
         return \DB::select("
             DELETE FROM public.likes
-                WHERE   user1_id = ? AND
-                        user2_id = ?;
+                WHERE   user1_id = :user1_id AND
+                        user2_id = :user2_id;
             DELETE FROM public.likes
-                WHERE   user1_id = ? AND
-                        user2_id = ?;
-        ", [$from_user_id, $to_user_id, $to_user_id, $from_user_id]);
+                WHERE   user1_id = :user2_id AND
+                        user2_id = :user1_id;
+            DELETE FROM public.matches
+                WHERE   user1_id = :user1_id AND
+                        user2_id = :user2_id;
+            DELETE FROM public.matches
+                WHERE   user1_id = :user2_id AND
+                        user2_id = :user1_id;
+        ", [
+            'user1_id' => $from_user_id,
+            'user2_id' => $to_user_id,
+        ]);
     }
 
     public static function isMutual($from_user_id, $to_user_id) {
