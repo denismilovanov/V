@@ -29,6 +29,14 @@
     </div>
 </div>
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Совпадения
+    </div>
+    <div class="panel-body">
+        <div id="matches_chart"></div>
+    </div>
+</div>
 
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -321,6 +329,55 @@ Request.request('GET', '{{ $base }}/stats/', {
             'name': 'Женщины',
             'color': '#f00',
             'data': data.females_likes,
+            'dataLabels': {
+                'enabled': true
+            }
+        }]
+    });
+});
+
+Request.request('GET', '{{ $base }}/stats/', {
+    action: 'matches_activity_data'
+}, function(data) {
+    var highchartyw4 = new Highcharts.Chart({
+        'exporting': {
+            'enabled': true
+        },
+        'chart': {
+            'type': 'line',
+            'renderTo': 'matches_chart'
+        },
+        'title': {
+            'text': 'Динамика совпадений'
+        },
+        'xAxis': {
+            'type': 'category',
+            'labels': {
+                'rotation': -90,
+                'style': {
+                    'fontSize': '10px',
+                    'fontFamily': 'Verdana, sans - serif'
+                }
+            }
+        },
+        'yAxis': {
+            'min': 0,
+            'title': {
+                'text': 'Количество совпадений'
+            }
+        },
+        'legend': {
+            'layout': 'vertical',
+            'align': 'right',
+            'verticalAlign': 'middle',
+            'borderWidth': 0
+        },
+        'tooltip': {
+            'pointFormat': 'Совпадений: <b>{point.y}<\/b>'
+        },
+        'series': [{
+            'name': 'Все',
+            'data': data.matches_count,
             'dataLabels': {
                 'enabled': true
             }

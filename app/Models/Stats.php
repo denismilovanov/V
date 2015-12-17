@@ -125,6 +125,26 @@ class Stats {
         return $result;
     }
 
+    public static function getMatchesActivityData() {
+        $data = \DB::select("
+            SELECT  date,
+                    matches_count
+                FROM stats.daily
+                WHERE date > now() - interval '2 months'
+                ORDER BY date;
+        ");
+
+        $result = [
+            'matches_count' => [],
+        ];
+
+        foreach ($data as $row) {
+            $result['matches_count'] []= [$row->date, (int)$row->matches_count];
+        }
+
+        return $result;
+    }
+
     public static function whoLikesWhoData() {
         $data = \DB::select("
             SELECT  sum(male_likes_female_count) AS male_likes_female_count,

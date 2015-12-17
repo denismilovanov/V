@@ -153,6 +153,8 @@ class AdminController extends BaseController {
                 return response()->json(Stats::genderData());
             } else if ($action == 'likes_activity_data') {
                 return response()->json(Stats::getLikesActivityData());
+            } else if ($action == 'matches_activity_data') {
+                return response()->json(Stats::getMatchesActivityData());
             }
         }
 
