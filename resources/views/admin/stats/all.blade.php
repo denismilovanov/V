@@ -31,10 +31,19 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        Совпадения
+        Совпадения по дням
     </div>
     <div class="panel-body">
         <div id="matches_chart"></div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Совпадения по месяцам
+    </div>
+    <div class="panel-body">
+        <div id="matches_months_chart"></div>
     </div>
 </div>
 
@@ -348,7 +357,7 @@ Request.request('GET', '{{ $base }}/stats/', {
             'renderTo': 'matches_chart'
         },
         'title': {
-            'text': 'Динамика совпадений'
+            'text': 'Динамика совпадений по дням'
         },
         'xAxis': {
             'type': 'category',
@@ -363,7 +372,7 @@ Request.request('GET', '{{ $base }}/stats/', {
         'yAxis': {
             'min': 0,
             'title': {
-                'text': 'Количество совпадений'
+                'text': 'Количество совпадений в день'
             }
         },
         'legend': {
@@ -394,7 +403,7 @@ Request.request('GET', '{{ $base }}/stats/', {
         },
         'chart': {
             'type': 'line',
-            'renderTo': 'matches_chart'
+            'renderTo': 'matches_months_chart'
         },
         'title': {
             'text': 'Динамика совпадений по месяцам'
@@ -412,7 +421,7 @@ Request.request('GET', '{{ $base }}/stats/', {
         'yAxis': {
             'min': 0,
             'title': {
-                'text': 'Количество совпадений'
+                'text': 'Среднее количество совпадений в месяц'
             }
         },
         'legend': {
@@ -461,7 +470,7 @@ Request.request('GET', '{{ $base }}/stats/', {
         'yAxis': {
             'min': 0,
             'title': {
-                'text': 'Количество активных пользователей по месяцам'
+                'text': 'Количество активных пользователей по дням'
             }
         },
         'legend': {
