@@ -99,6 +99,14 @@ class Likes {
                 (user1_id, user2_id)
                 VALUES (?, ?), (?, ?);
         ", [$from_user_id, $to_user_id, $to_user_id, $from_user_id]);
+
+        // для заполнения статистики
+        \Queue::push('events_for_stats', [
+            'ts' => date("Y-m-d H:i:s"),
+            'type' => 'match',
+            'to_user_id' => $to_user_id,
+            'from_user_id' => $from_user_id,
+        ], 'events_for_stats');
     }
 
     // список тех, кого я лайкнул или дизлайкнул, требуется для ограничения выдачи

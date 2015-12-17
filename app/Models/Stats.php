@@ -152,6 +152,7 @@ class Stats {
     }
 
     public static function processEvent($data) {
+        // событие - лайк
         if ($data['type'] == 'like') {
             $from_user_sex = Users::findById($data['from_user_id'])->sex == 1 ? 'female' : 'male';
             $to_user_sex = Users::findById($data['to_user_id'])->sex == 1 ? 'female' : 'male';
@@ -182,6 +183,17 @@ class Stats {
                     WHERE user_id = ?
             ", [$data['to_user_id']]);
 
+        // событие - матч
+        } else if ($data['type'] == 'match') {
+            $date = date("Y-m-d", strtotime($data['ts']));
+
+            \DB::select("
+                UPDATE stats.daily
+                    SET matches_count = matches_count + 1
+                    WHERE date = ?
+            ", [$date]);
+
+        // событие - некоторая активность (нужна для статы по активности)
         } else if ($data['type'] == 'activity') {
             $user_sex = Users::findById($data['user_id'])->sex == 1 ? 'female' : 'male';
 
