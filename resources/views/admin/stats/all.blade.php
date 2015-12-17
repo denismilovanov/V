@@ -386,6 +386,55 @@ Request.request('GET', '{{ $base }}/stats/', {
 });
 
 Request.request('GET', '{{ $base }}/stats/', {
+    action: 'matches_months_activity_data'
+}, function(data) {
+    var highchartyw4 = new Highcharts.Chart({
+        'exporting': {
+            'enabled': true
+        },
+        'chart': {
+            'type': 'line',
+            'renderTo': 'matches_chart'
+        },
+        'title': {
+            'text': 'Динамика совпадений по месяцам'
+        },
+        'xAxis': {
+            'type': 'category',
+            'labels': {
+                'rotation': -90,
+                'style': {
+                    'fontSize': '10px',
+                    'fontFamily': 'Verdana, sans - serif'
+                }
+            }
+        },
+        'yAxis': {
+            'min': 0,
+            'title': {
+                'text': 'Количество совпадений'
+            }
+        },
+        'legend': {
+            'layout': 'vertical',
+            'align': 'right',
+            'verticalAlign': 'middle',
+            'borderWidth': 0
+        },
+        'tooltip': {
+            'pointFormat': 'Совпадений: <b>{point.y}<\/b>'
+        },
+        'series': [{
+            'name': 'Все',
+            'data': data.matches_count,
+            'dataLabels': {
+                'enabled': true
+            }
+        }]
+    });
+});
+
+Request.request('GET', '{{ $base }}/stats/', {
     action: 'get_activity_data'
 }, function(data) {
     var highchartyw5 = new Highcharts.Chart({

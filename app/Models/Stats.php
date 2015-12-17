@@ -145,6 +145,27 @@ class Stats {
         return $result;
     }
 
+    public static function getMatchesMonthsActivityData() {
+        $data = \DB::select("
+            SELECT  date_trunc('month', date) AS date,
+                    avg(matches_count) AS matches_count
+                FROM stats.daily
+                GROUP BY date_trunc('month', date)
+                ORDER BY date_trunc('month', date);
+        ");
+
+        $result = [
+            'matches_count' => [],
+        ];
+
+        foreach ($data as $row) {
+            $row->date = date("m.Y", strtotime($row->date));
+            $result['matches_count'] []= [$row->date, (float)sprintf("%.2f", $row->matches_count)];
+        }
+
+        return $result;
+    }
+
     public static function whoLikesWhoData() {
         $data = \DB::select("
             SELECT  sum(male_likes_female_count) AS male_likes_female_count,
