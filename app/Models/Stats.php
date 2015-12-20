@@ -265,8 +265,36 @@ class Stats {
         return true;
     }
 
-    public static function createTodayStatsRecord() {
+    public static function updateMatchesCounts() {
+        // 1 мэтч, 2-5 мэтчей, 5-10 мэтчей, более 10 мэтчей
         \DB::select("
+            UPDATE stats.daily
+                SET matches_group1_count = (
+                        SELECT count(1)
+                            FROM stats.users_overall
+                            WHERE matches_count = 1
+                    ),
+                    matches_group2_count = (
+                        SELECT count(1)
+                            FROM stats.users_overall
+                            WHERE matches_count BETWEEN 2 AND 5
+                    ),
+                    matches_group3_count = (
+                        SELECT count(1)
+                            FROM stats.users_overall
+                            WHERE matches_count BETWEEN 6 AND 10
+                    ),
+                    matches_group4_count = (
+                        SELECT count(1)
+                            FROM stats.users_overall
+                            WHERE matches_count > 10
+                    )
+                WHERE date = current_date;
+        ");
+    }
+
+    public static function createTodayStatsRecord() {
+        $data = \DB::select("
             INSERT INTO stats.daily
                 SELECT current_date
                     WHERE NOT EXISTS (
@@ -274,8 +302,14 @@ class Stats {
                             FROM stats.daily
                             WHERE date = current_date
                             LIMIT 1
-                    );
+                    )
+                RETURNING *;
         ");
+
+        if ($data) {
+            // первый раз за день
+            self::updateMatchesCounts();
+        }
     }
 
 }

@@ -15,6 +15,8 @@ class MaintenanceCommand extends \LaravelSingleInstanceCommand\Command
     {
         $this->checkInstance($input);
 
+        Stats::createTodayStatsRecord();
+
         GAUGE('fillMatches.enqueued', \Queue::getMessageCount('fill_matches'));
 
         $result = Users::removeOldKeys();
@@ -26,8 +28,6 @@ class MaintenanceCommand extends \LaravelSingleInstanceCommand\Command
         if ($result) {
             \Log::info('Обновили индекс пользователям ' . $result);
         }
-
-        Stats::createTodayStatsRecord();
 
         Helper::closeDBConnections();
     }
