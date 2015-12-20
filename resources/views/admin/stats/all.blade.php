@@ -40,6 +40,15 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
+        Группы по числу совпадений
+    </div>
+    <div class="panel-body">
+        <div id="matches_groups_chart"></div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
         Совпадения по месяцам
     </div>
     <div class="panel-body">
@@ -387,6 +396,73 @@ Request.request('GET', '{{ $base }}/stats/', {
         'series': [{
             'name': 'Все',
             'data': data.matches_count,
+            'dataLabels': {
+                'enabled': true
+            }
+        }]
+    });
+});
+
+Request.request('GET', '{{ $base }}/stats/', {
+    action: 'matches_groups_data'
+}, function(data) {
+    var highchartyw4 = new Highcharts.Chart({
+        'exporting': {
+            'enabled': true
+        },
+        'chart': {
+            'type': 'line',
+            'renderTo': 'matches_groups_chart'
+        },
+        'title': {
+            'text': 'Динамика численности групп'
+        },
+        'xAxis': {
+            'type': 'category',
+            'labels': {
+                'rotation': -90,
+                'style': {
+                    'fontSize': '10px',
+                    'fontFamily': 'Verdana, sans - serif'
+                }
+            }
+        },
+        'yAxis': {
+            'min': 0,
+            'title': {
+                'text': 'Количество людей в группе'
+            }
+        },
+        'legend': {
+            'layout': 'vertical',
+            'align': 'right',
+            'verticalAlign': 'middle',
+            'borderWidth': 0
+        },
+        'tooltip': {
+            'pointFormat': 'Количество: <b>{point.y}<\/b>'
+        },
+        'series': [{
+            'name': '= 1',
+            'data': data.matches_group1_count,
+            'dataLabels': {
+                'enabled': true
+            }
+        }, {
+            'name': '2 ... 5',
+            'data': data.matches_group2_count,
+            'dataLabels': {
+                'enabled': true
+            }
+        }, {
+            'name': '6 ... 10',
+            'data': data.matches_group3_count,
+            'dataLabels': {
+                'enabled': true
+            }
+        }, {
+            'name': '> 10',
+            'data': data.matches_group4_count,
             'dataLabels': {
                 'enabled': true
             }

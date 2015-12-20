@@ -157,6 +157,8 @@ class AdminController extends BaseController {
                 return response()->json(Stats::getMatchesActivityData());
             } else if ($action == 'matches_months_activity_data') {
                 return response()->json(Stats::getMatchesMonthsActivityData());
+            } else if ($action == 'matches_groups_data') {
+                return response()->json(Stats::getMatchesGroupsData());
             }
         }
 

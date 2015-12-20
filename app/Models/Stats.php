@@ -145,6 +145,34 @@ class Stats {
         return $result;
     }
 
+    public static function getMatchesGroupsData() {
+        $data = \DB::select("
+            SELECT  date,
+                    matches_group1_count, matches_group2_count, matches_group3_count, matches_group4_count
+                FROM stats.daily
+                WHERE date > now() - interval '2 months'
+                ORDER BY date;
+        ");
+
+        $result = [
+            'matches_group1_count' => [],
+            'matches_group2_count' => [],
+            'matches_group3_count' => [],
+            'matches_group4_count' => [],
+        ];
+
+        foreach ($data as $row) {
+            $result['matches_group1_count'] []= [$row->date, (int)$row->matches_group1_count];
+            $result['matches_group2_count'] []= [$row->date, (int)$row->matches_group2_count];
+            $result['matches_group3_count'] []= [$row->date, (int)$row->matches_group3_count];
+            $result['matches_group4_count'] []= [$row->date, (int)$row->matches_group4_count];
+        }
+
+        return $result;
+    }
+
+
+
     public static function getMatchesMonthsActivityData() {
         $data = \DB::select("
             SELECT  date_trunc('month', date)::date AS date,
