@@ -1,0 +1,70 @@
+DIR=/home/vmeste/vmeste-app/current
+LOGS=/home/vmeste/vmeste-app/logs
+
+
+# temp solution
+* * * * * cd /home/vmeste/chat && PORT=5999 ENV=prod DB_PORT=5436 DB_USER=vmeste DB_NAME=vmeste DB_PASS="2gZ&K1_#8lJ" nodejs chat.js 2>> err.log 1>> main.log
+* * * * * cd /home/vmeste/observers && PORT=10000 IPS="185.49.69.108,194.186.48.213,94.188.55.200,91.220.146.234" nodejs server.js
+
+# 2>> - так как artisan выводит в stderr
+
+#
+* * * * * cd $DIR; php artisan pids:remove 2>> $LOGS/remove_pids.log
+
+# vk
+* * * * * cd $DIR; php artisan update_profile_vk p=1 2>> $LOGS/update_profiles_vk_1.log
+* * * * * cd $DIR; php artisan get_audio_vk p=1 2>> $LOGS/get_audio_vk_1.log
+
+# echoes
+#* * * * * cd $DIR; php artisan echo_messages 2>> $LOGS/echo_messages.log
+#* * * * * cd $DIR; php artisan echo_likes 2>> $LOGS/echo_likes.log
+
+#
+* * * * * cd $DIR; php artisan push_system_messages p=1 2>> $LOGS/push_system_messages.log
+
+* * * * * cd $DIR; php artisan push_messages p=1 2>> $LOGS/push_messages_1.log
+* * * * * cd $DIR; php artisan push_messages p=2 2>> $LOGS/push_messages_2.log
+#* * * * * cd $DIR; php artisan push_messages p=3 2>> $LOGS/push_messages_3.log
+#* * * * * cd $DIR; php artisan push_messages p=4 2>> $LOGS/push_messages_4.log
+#* * * * * cd $DIR; php artisan push_messages p=5 2>> $LOGS/push_messages_5.log
+#* * * * * cd $DIR; php artisan push_messages p=6 2>> $LOGS/push_messages_6.log
+#* * * * * cd $DIR; php artisan push_messages p=7 2>> $LOGS/push_messages_7.log
+#* * * * * cd $DIR; php artisan push_messages p=8 2>> $LOGS/push_messages_8.log
+
+* * * * * cd $DIR; php artisan push_matches p=1 2>> $LOGS/push_matches_1.log
+* * * * * cd $DIR; php artisan push_matches p=2 2>> $LOGS/push_matches_2.log
+#* * * * * cd $DIR; php artisan push_matches p=3 2>> $LOGS/push_matches_3.log
+#* * * * * cd $DIR; php artisan push_matches p=4 2>> $LOGS/push_matches_4.log
+#* * * * * cd $DIR; php artisan push_matches p=5 2>> $LOGS/push_matches_5.log
+#* * * * * cd $DIR; php artisan push_matches p=6 2>> $LOGS/push_matches_6.log
+#* * * * * cd $DIR; php artisan push_matches p=7 2>> $LOGS/push_matches_7.log
+#* * * * * cd $DIR; php artisan push_matches p=8 2>> $LOGS/push_matches_8.log
+
+#
+* * * * * cd $DIR; php artisan fill_matches p=1 2>> $LOGS/fill_matches_1.log
+* * * * * cd $DIR; php artisan fill_matches p=2 2>> $LOGS/fill_matches_2.log
+* * * * * cd $DIR; php artisan fill_matches p=3 2>> $LOGS/fill_matches_3.log
+* * * * * cd $DIR; php artisan fill_matches p=4 2>> $LOGS/fill_matches_4.log
+#* * * * * cd $DIR; php artisan fill_matches p=5 2>> $LOGS/fill_matches_5.log
+#* * * * * cd $DIR; php artisan fill_matches p=6 2>> $LOGS/fill_matches_6.log
+#* * * * * cd $DIR; php artisan fill_matches p=7 2>> $LOGS/fill_matches_7.log
+#* * * * * cd $DIR; php artisan fill_matches p=8 2>> $LOGS/fill_matches_8.log
+
+#* * * * * cd $DIR; php artisan fill_matches p=9 2>> $LOGS/fill_matches_9.log
+#* * * * * cd $DIR; php artisan fill_matches p=10 2>> $LOGS/fill_matches_10.log
+#* * * * * cd $DIR; php artisan fill_matches p=11 2>> $LOGS/fill_matches_11.log
+#* * * * * cd $DIR; php artisan fill_matches p=12 2>> $LOGS/fill_matches_12.log
+#* * * * * cd $DIR; php artisan fill_matches p=13 2>> $LOGS/fill_matches_13.log
+#* * * * * cd $DIR; php artisan fill_matches p=14 2>> $LOGS/fill_matches_14.log
+#* * * * * cd $DIR; php artisan fill_matches p=15 2>> $LOGS/fill_matches_15.log
+#* * * * * cd $DIR; php artisan fill_matches p=16 2>> $LOGS/fill_matches_16.log
+
+#
+* * * * * cd $DIR; php artisan events_for_stats 2>> $LOGS/events_for_stats.log
+
+#
+* * * * * cd $DIR; php artisan send_errors 2>> $LOGS/send_errors.log
+* * * * * cd $DIR; php artisan maintenance 2>> $LOGS/maintenance.log
+
+#
+* * * * * cd $DIR; php artisan remove_from_index 2>> $LOGS/remove_from_index.log

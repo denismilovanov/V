@@ -1,0 +1,42 @@
+DIR=/home/test-vmeste/vmeste-app/current
+LOGS=/home/test-vmeste/vmeste-app/logs
+
+# temp solution
+* * * * * cd /home/test-vmeste/chat && ENV=test PORT=4999 DB_PORT=5433 DB_USER=vmeste_test DB_NAME=vmeste_test DB_PASS="1gH&61_#:lJ" nodejs chat.js 2>> err.log 1>> main.log
+
+# 2>> - так как artisan выводит в stderr
+
+#
+* * * * * cd $DIR; php artisan pids:remove 2>> $LOGS/remove_pids.log
+
+# vk
+* * * * * cd $DIR; php artisan update_profile_vk p=1 2>> $LOGS/update_profile_vk_1.log
+
+# echoes
+* * * * * cd $DIR; php artisan echo_messages 2>> $LOGS/echo_messages.log
+* * * * * cd $DIR; php artisan echo_likes 2>> $LOGS/echo_likes.log
+
+#
+* * * * * cd $DIR; php artisan push_system_messages p=1 2>> $LOGS/push_system_messages.log
+
+* * * * * cd $DIR; php artisan push_messages p=1 2>> $LOGS/push_messages_1.log
+* * * * * cd $DIR; php artisan push_messages p=2 2>> $LOGS/push_messages_2.log
+
+* * * * * cd $DIR; php artisan push_matches p=1 2>> $LOGS/push_matches_1.log
+* * * * * cd $DIR; php artisan push_matches p=2 2>> $LOGS/push_matches_2.log
+
+#
+* * * * * cd $DIR; php artisan fill_matches p=1 2>> $LOGS/fill_matches_1.log
+* * * * * cd $DIR; php artisan fill_matches p=2 2>> $LOGS/fill_matches_2.log
+* * * * * cd $DIR; php artisan fill_matches p=3 2>> $LOGS/fill_matches_3.log
+* * * * * cd $DIR; php artisan fill_matches p=4 2>> $LOGS/fill_matches_4.log
+
+#
+* * * * * cd $DIR; php artisan events_for_stats 2>> $LOGS/events_for_stats.log
+
+#
+* * * * * cd $DIR; php artisan send_errors 2>> $LOGS/send_errors.log
+* * * * * cd $DIR; php artisan maintenance 2>> $LOGS/maintenance.log
+
+#
+* * * * * cd $DIR; php artisan remove_from_index 2>> $LOGS/remove_from_index.log

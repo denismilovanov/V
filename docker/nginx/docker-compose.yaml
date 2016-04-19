@@ -6,7 +6,7 @@ nginx:
   volumes:
     - "/etc/ssl/:/etc/ssl/"
     - "/var/log/:/var/log/"
-    - "/root/docker/vmeste/nginx/:/etc/nginx/"
+    - "/root/docker/vmeste/confs/nginx/:/etc/nginx/"
     - "/home/vmeste/:/home/vmeste/"
     - "/home/test-vmeste/:/home/test-vmeste/"
   container_name: nginx
