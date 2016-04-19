@@ -8,7 +8,7 @@ apt-get -y install $BUILD_PACKAGES && \
 apt-get clean && \
 apt-get autoclean
 
-RUN apt-get install git
+RUN apt-get install -y git net-tools telnet curl wget
 
 ADD conf/supervisord.conf /etc/supervisord.conf
 ADD conf/php-fpm.conf /etc/php5/fpm/php-fpm.conf
