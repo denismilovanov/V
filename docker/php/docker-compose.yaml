@@ -1,0 +1,13 @@
+php:
+  build: "."
+  volumes:
+    - "./pool.d:/etc/php5/fpm/pool.d"
+    - "/var/log/:/var/log/"
+    - "/home/vmeste/:/home/vmeste/"
+    - "/home/test-vmeste/:/home/test-vmeste/"
+  ports:
+    - "9000:9000"
+    - "9001:9001"
+  container_name: php
+
+
