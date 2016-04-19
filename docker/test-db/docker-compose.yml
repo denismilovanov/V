@@ -5,4 +5,5 @@ test-db:
   volumes:
     - /var/lib/docker-postgres-data/test-db/:/var/lib/postgresql/data/
     - /var/log/:/var/log/
+    - /tmp/:/tmp/
   container_name: test-db
