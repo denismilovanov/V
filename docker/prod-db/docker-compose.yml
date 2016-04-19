@@ -1,0 +1,8 @@
+prod-db:
+  image: "postgres:9.4"
+  ports:
+    - "5436:5436"
+  volumes:
+    - /var/lib/docker-postgres-data/prod-db/:/var/lib/postgresql/data/
+    - /var/log/:/var/log/
+  container_name: prod-db
