@@ -154,8 +154,15 @@ class AdminController extends BaseController {
             }
 
         }
+
+        $user = Users::findById($user_id, 'admin');
+
+        if (! $user) {
+            \App::abort(404);
+        }
+
         return view('admin.users.user', [
-            'user' => Users::findById($user_id, 'admin'),
+            'user' => $user,
         ]);
     }
 
