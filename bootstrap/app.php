@@ -61,11 +61,12 @@ $app->middleware([
     'Illuminate\Session\Middleware\StartSession',
     'Illuminate\View\Middleware\ShareErrorsFromSession',
     //'Laravel\Lumen\Http\Middleware\VerifyCsrfToken',
+    'App\Http\Middleware\AuthMiddleware',
 ]);
 
-// $app->routeMiddleware([
-
-// ]);
+$app->routeMiddleware([
+    'authAdmin' => App\Http\Middleware\AuthMiddleware::class,
+]);
 
 /*
 |--------------------------------------------------------------------------

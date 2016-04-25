@@ -22,9 +22,6 @@ class AdminController extends BaseController {
     }
 
     public function index() {
-        if (! \Auth::check()) {
-            return redirect(env('ADMIN_RELATIVE_URL') . '/login');
-        }
         return view('admin.index', [
 
         ]);

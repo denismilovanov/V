@@ -61,7 +61,7 @@ $app->group(['prefix' => 'api', 'namespace' => 'App\Http\Controllers'], function
 
 $app->get('', ['uses' => '\App\Http\Controllers\SiteController@index']);
 
-$app->group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers'], function($app) {
+$app->group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers', 'middleware' => 'authAdmin'], function($app) {
     $app->get('', ['uses' => 'AdminController@index']);
     $app->get('login', ['uses' => 'AdminController@login']);
     $app->post('login', ['uses' => 'AdminController@login']);
