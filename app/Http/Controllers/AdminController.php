@@ -8,6 +8,8 @@ use App\Models\Stats;
 use App\Models\Queues;
 use App\Models\SoftVersions;
 use App\Models\Likes;
+use App\Models\Messages;
+
 
 
 class AdminController extends BaseController {
@@ -66,6 +68,29 @@ class AdminController extends BaseController {
 
         return view('admin.tests.sendRequest', [
             'result' => $result,
+        ]);
+    }
+
+    public function misc() {
+        $action = \Request::get('action');
+
+        if ($action == 'unlike_mutual') {
+            $user1_id = intval(\Request::get('user1_id', 0));
+            $user2_id = intval(\Request::get('user2_id', 0));
+
+            $status = 0;
+
+            if ($user1_id and $user2_id and Likes::isMutual($user1_id, $user2_id)) {
+                Likes::deleteAllBetween($user1_id, $user2_id);
+                Messages::deleteAllBetween($user1_id, $user2_id);
+                $status = 1;
+            }
+
+            return response()->json(['status' => $status]);
+        }
+
+        return view('admin.tests.misc', [
+
         ]);
     }
 

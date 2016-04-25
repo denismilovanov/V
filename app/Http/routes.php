@@ -69,6 +69,7 @@ $app->group(['prefix' => 'admin', 'namespace' => 'App\Http\Controllers'], functi
 
     $app->get('tests/sendRequest', ['uses' => 'AdminController@sendRequest']);
     $app->post('tests/sendRequest', ['uses' => 'AdminController@sendRequest']);
+    $app->get('tests/misc', ['uses' => 'AdminController@misc']);
 
     $app->get('users/', ['uses' => 'AdminController@users']);
     $app->get('users/{user_id}', ['uses' => 'AdminController@user']);

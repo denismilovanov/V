@@ -46,6 +46,7 @@
         </a>
         <ul class="dropdown-menu" role="menu">
             <li><a href="{{ $base }}/tests/sendRequest">Отправить запрос на апи</a></li>
+            <li><a href="{{ $base }}/tests/misc">Разное</a></li>
         </ul>
     </li>
 </ul>
