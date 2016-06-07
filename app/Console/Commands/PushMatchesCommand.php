@@ -38,7 +38,7 @@ class PushMatchesCommand extends \LaravelSingleInstanceCommand\Command
 
             Helper::closeDBConnections();
 
-            if (++ $jobs == 1000) {
+            if (++ $jobs == 100) {
                 \Queue::unsubscribe($tag);
             }
         });
