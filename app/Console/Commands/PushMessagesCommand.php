@@ -21,19 +21,24 @@ class PushMessagesCommand extends \LaravelSingleInstanceCommand\Command
 
             $data = json_decode($json, 'assoc')['data'];
 
-            \Log::info('Начали ' . $jobs);
-
-            if ($result = Pusher::push($data, 'MESSAGE')) {
-                \Log::info('Завершили задание');
+            if (isset($data['attempts']) and $data['attempts'] > 10) {
+                \Log::info('Выкидываем');
                 $job->delete();
             } else {
-                \Log::info('Возвращаем на обработку');
-                $job->release(10);
+                \Log::info('Начали ' . $jobs);
+
+                if ($result = Pusher::push($data, 'MESSAGE')) {
+                    \Log::info('Завершили задание');
+                    $job->delete();
+                } else {
+                    \Log::info('Возвращаем на обработку');
+                    $job->release(10);
+                }
             }
 
             Helper::closeDBConnections();
 
-            if (++ $jobs == 1000) {
+            if (++ $jobs == 100) {
                 \Queue::unsubscribe($tag);
             }
         });
