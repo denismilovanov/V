@@ -4,20 +4,24 @@ require_once 'bootstrap.php';
 
 use \App\Models\Pusher;
 
-class EmailTest extends TestCase {
+class PusherTest extends TestCase {
 
     public function test1() {
-        $message = \Swift_Message::newInstance()
-            ->setSubject('Привет от юнит-теста')
-            ->setFrom(array('postmaster@vmeste-app.ru' => 'Postmaster'))
-            ->setTo([env('DEVELOPER_EMAIL')])
-            ->setBody('Привет от юнит-теста');
+        $pusher = Pusher::getApplePusher();
 
-        $transport = \Swift_SendmailTransport::newInstance('/usr/sbin/sendmail -bs');
+        $deviceToken = '258e9cb8085bdf8b846ca554b83af4efbc8bd510506af51b35d047bcd70ed10d';
+        $text = 'Hello from a unit-test';
+        $badge = 1;
 
-        $mailer = \Swift_Mailer::newInstance($transport);
+        $message = new \ApnsPHP_Message($deviceToken);
 
-        $result = $mailer->send($message);
+        $message->setText($text);
+        $message->setBadge($badge);
+        $message->setSound();
+
+        $pusher->add($message);
+
+        $pusher->send();
     }
 
 }
