@@ -21,8 +21,7 @@ class UsersMatches
             CREATE UNLOGGED TABLE IF NOT EXISTS public.matching_levels_$user_id (LIKE public.matching_levels INCLUDING ALL);
 
             CREATE UNLOGGED TABLE IF NOT EXISTS public.matching_levels_fresh_$user_id
-                (LIKE public.matching_levels INCLUDING ALL)
-                WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
+                (LIKE public.matching_levels INCLUDING ALL);
         ");
     }
 
@@ -309,7 +308,8 @@ class UsersMatches
             SELECT pg_advisory_xact_lock(hashtext('matching_levels_$user_id'));
 
             DROP TABLE IF EXISTS public.matching_levels_$user_id;
-            CREATE UNLOGGED TABLE public.matching_levels_$user_id (LIKE public.matching_levels INCLUDING ALL);
+            CREATE UNLOGGED TABLE public.matching_levels_$user_id 
+                (LIKE public.matching_levels INCLUDING ALL);
 
             WITH levels AS (
                 SELECT level_id, sum(icount(users_ids)) OVER (ORDER BY level_id DESC) AS cumulative_sum
@@ -332,8 +332,7 @@ class UsersMatches
 
             DROP TABLE public.matching_levels_fresh_$user_id;
             CREATE UNLOGGED TABLE public.matching_levels_fresh_$user_id
-                (LIKE public.matching_levels INCLUDING ALL)
-                WITH (autovacuum_enabled = false, toast.autovacuum_enabled = false);
+                (LIKE public.matching_levels INCLUDING ALL);
         ", [
             'MAX_MAINTAINED_MATCHES_COUNT' => env('MAX_MAINTAINED_MATCHES_COUNT')
         ]);
