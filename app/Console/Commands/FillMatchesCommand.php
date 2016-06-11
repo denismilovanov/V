@@ -34,7 +34,7 @@ class FillMatchesCommand extends \LaravelSingleInstanceCommand\Command
 
             Helper::closeDBConnections();
 
-            if (++ $jobs == 1e6) {
+            if (++ $jobs == 100) {
                 \Queue::unsubscribe($tag);
             }
         });
